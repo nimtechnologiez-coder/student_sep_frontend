@@ -1,0 +1,117 @@
+/* Notifications CSS Module */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.headerCard {
+  background-color: #ffffff;
+  border: 1px solid #dce8f8;
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.headerCardDark {
+  background-color: #0b1429;
+  border-color: #1a2a4f;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #0a1b39;
+  margin: 0;
+}
+
+.headerCardDark .title {
+  color: #ffffff;
+}
+
+.notifList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notifCard {
+  background-color: #ffffff;
+  border: 1px solid #dce8f8;
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.notifCardDark {
+  background-color: #0b1429;
+  border-color: #1a2a4f;
+}
+
+.iconWrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.classIcon { background-color: rgba(0, 98, 235, 0.1); color: #0062eb; }
+.attendanceIcon { background-color: rgba(16, 185, 129, 0.1); color: #10b981; }
+.assessmentIcon { background-color: rgba(168, 85, 247, 0.1); color: #a855f7; }
+.generalIcon { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+
+.content {
+  flex: 1;
+}
+
+.notifHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.notifTitle {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0a1b39;
+  margin: 0;
+}
+
+.notifCardDark .notifTitle {
+  color: #ffffff;
+}
+
+.categoryTag {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  background-color: #f0f6ff;
+  color: #0062eb;
+}
+
+.notifMessage {
+  font-size: 12px;
+  color: #475569;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.notifCardDark .notifMessage {
+  color: #cbd5e1;
+}
+
+.notifTime {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 6px;
+}

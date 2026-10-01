@@ -1,0 +1,44 @@
+/* Parent Portal Layout Styles */
+.layoutContainer {
+  min-height: 100vh;
+  display: flex;
+  background-color: var(--bg-primary, #f4f7fb);
+  color: var(--text-primary, #0a1b39);
+  transition: background-color 0.2s ease, color 0.2s ease;
+  font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+}
+
+.layoutContainerDark {
+  background-color: #070d1d;
+  color: #f1f5f9;
+}
+
+.mainWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-left: 260px;
+  transition: padding-left 0.3s ease;
+}
+
+@media (max-width: 1024px) {
+  .mainWrapper {
+    padding-left: 0;
+  }
+}
+
+.mainContent {
+  flex: 1;
+  padding: 24px;
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .mainContent {
+    padding: 16px;
+  }
+}

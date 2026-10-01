@@ -1,0 +1,185 @@
+/* ==========================================================================
+   NIM AI STUDENT NOTIFICATIONS - MODERN RESPONSIVE THEME (DARK / LIGHT)
+   ========================================================================== */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* 1. Hero Banner */
+.heroCard {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  padding: 1.5rem 1.75rem;
+  border: 1px solid;
+  transition: all 0.25s ease;
+}
+
+:global(.dark) .heroCard {
+  background: linear-gradient(135deg, #071530 0%, #091c42 60%, #0b1a3d 100%);
+  border-color: #172c57;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+:global(.light) .heroCard {
+  background: linear-gradient(135deg, #eef5ff 0%, #f4f8fe 60%, #ebf3ff 100%);
+  border-color: #dce8f8;
+  box-shadow: 0 10px 25px -10px rgba(0, 98, 235, 0.08);
+}
+
+.glowOrb {
+  position: absolute;
+  top: -50px;
+  right: 15%;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+:global(.dark) .glowOrb {
+  background: radial-gradient(circle, rgba(0, 132, 255, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  filter: blur(40px);
+}
+
+:global(.light) .glowOrb {
+  background: radial-gradient(circle, rgba(0, 98, 235, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+  filter: blur(40px);
+}
+
+/* 2. Common Card */
+.card {
+  border-radius: 1.25rem;
+  border: 1px solid;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:global(.dark) .card {
+  background-color: #081024;
+  border-color: #15274d;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+}
+
+:global(.light) .card {
+  background-color: #ffffff;
+  border-color: #e2edf8;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+}
+
+.card:hover {
+  border-color: #93c5fd;
+}
+
+:global(.dark) .card:hover {
+  border-color: rgba(0, 98, 235, 0.5);
+}
+
+/* 3. Notification Item Card */
+.notifItem {
+  position: relative;
+  border-radius: 1rem;
+  border: 1px solid;
+  transition: all 0.2s ease;
+}
+
+:global(.dark) .notifItem {
+  background-color: #0b1429;
+  border-color: #172a52;
+}
+
+:global(.dark) .notifItem:hover {
+  background-color: #0f1c3a;
+  border-color: #244180;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+:global(.dark) .notifItemUnread {
+  background-color: #0d1b38;
+  border-color: #1e3a73;
+}
+
+:global(.light) .notifItem {
+  background-color: #ffffff;
+  border-color: #e2edf8;
+}
+
+:global(.light) .notifItem:hover {
+  background-color: #f8fbff;
+  border-color: #bfdbfe;
+  box-shadow: 0 4px 16px rgba(0, 98, 235, 0.06);
+}
+
+:global(.light) .notifItemUnread {
+  background-color: #f2f7ff;
+  border-color: #c7defa;
+}
+
+/* 4. Filter Tab Button */
+.filterTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+:global(.dark) .filterTabInactive {
+  background-color: #0e1730;
+  border: 1px solid #1a2c54;
+  color: #94a3b8;
+}
+
+:global(.dark) .filterTabInactive:hover {
+  background-color: #152347;
+  color: #ffffff;
+}
+
+:global(.light) .filterTabInactive {
+  background-color: #ffffff;
+  border: 1px solid #dce8f8;
+  color: #475569;
+}
+
+:global(.light) .filterTabInactive:hover {
+  background-color: #eff6ff;
+  color: #0062eb;
+  border-color: #bfdbfe;
+}
+
+.filterTabActive {
+  background-color: #0062eb;
+  border: 1px solid #0052cc;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 98, 235, 0.3);
+}
+
+/* 5. Switch Toggle */
+.switchTrack {
+  position: relative;
+  width: 2.75rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.switchThumb {
+  position: absolute;
+  top: 0.125rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+

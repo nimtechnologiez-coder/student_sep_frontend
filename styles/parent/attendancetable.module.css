@@ -1,0 +1,131 @@
+/* AttendanceTable CSS Module */
+.tableCard {
+  background-color: #ffffff;
+  border: 1px solid #dce8f8;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.tableCardDark {
+  background-color: #0b1429;
+  border-color: #1a2a4f;
+}
+
+.responsiveWrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.table th {
+  background-color: #f8fbff;
+  color: #475569;
+  font-weight: 800;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e2edf8;
+  white-space: nowrap;
+}
+
+.tableCardDark .table th {
+  background-color: #0d1933;
+  color: #94a3b8;
+  border-bottom-color: #1a2a4f;
+}
+
+.table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid #f0f5fc;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+.tableCardDark .table td {
+  border-bottom-color: #122247;
+  color: #cbd5e1;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background-color: #f8fbff;
+}
+
+.tableCardDark .table tr:hover td {
+  background-color: #0e1c3a;
+}
+
+.dateCell {
+  font-weight: 800;
+  color: #0a1b39;
+  white-space: nowrap;
+}
+
+.tableCardDark .dateCell {
+  color: #ffffff;
+}
+
+.timeCell {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.tableCardDark .timeCell {
+  color: #94a3b8;
+}
+
+.topicCell {
+  font-weight: 700;
+  color: #0a1b39;
+}
+
+.tableCardDark .topicCell {
+  color: #f1f5f9;
+}
+
+.moduleTag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0062eb;
+}
+
+.tableCardDark .moduleTag {
+  color: #38bdf8;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.statusPresent {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.statusAbsent {
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+.statusLate {
+  background-color: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}

@@ -1,0 +1,1127 @@
+/* ==========================================================================
+   NIM ACADEMY - STUDENT PORTAL AUTH (BALANCED 50/50 NO-SCROLL DESKTOP) STYLES
+   ========================================================================== */
+
+/* Main Split Screen Container: 50/50 balanced layout */
+.loginPageLayout {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  position: relative;
+  background-color: #ebf3f9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+@media (min-width: 1024px) {
+  .loginPageLayout {
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+/* ==========================================================================
+   LEFT HERO PANEL (CAMPUS BACKGROUND ON HALF SCREEN ONLY)
+   ========================================================================== */
+.leftHeroPanel {
+  flex: 1.15;
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
+  background: linear-gradient(
+    to right,
+    rgba(2, 38, 92, 0.98) 0%,
+    rgba(3, 48, 115, 0.93) 38%,
+    rgba(4, 68, 150, 0.60) 70%,
+    rgba(6, 85, 180, 0.20) 100%
+  ), url('/campus_bg.jpg') center right / cover no-repeat;
+  padding: 38px 46px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #ffffff;
+  z-index: 2;
+  scrollbar-width: none;
+}
+
+.leftHeroPanel::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 1440px) {
+  .leftHeroPanel {
+    padding: 46px 58px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .leftHeroPanel {
+    display: none;
+  }
+}
+
+/* Eyebrow Accent */
+.heroEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.cyanDash {
+  width: 28px;
+  height: 3px;
+  background-color: #38bdf8;
+  border-radius: 9999px;
+}
+
+.eyebrowText {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+/* Headline */
+.heroHeadline {
+  font-size: 2.85rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 1280px) {
+  .heroHeadline {
+    font-size: 2.35rem;
+  }
+}
+
+.highlightCyan {
+  color: #4da3ee;
+}
+
+.heroSubtitle {
+  color: rgba(224, 238, 255, 0.94);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  margin-bottom: 24px;
+  max-width: 440px;
+  font-weight: 400;
+}
+
+/* 2x2 Feature Grid */
+.featuresGrid2x2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  max-width: 520px;
+  margin-bottom: 24px;
+}
+
+.featureCard {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease-in-out;
+}
+
+.featureCard:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.26);
+  transform: translateY(-1.5px);
+}
+
+.featureIconBadge {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.13);
+  border: 1.5px solid rgba(255, 255, 255, 0.26);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.featureCard:hover .featureIconBadge {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.featureTitle {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.featureDesc {
+  font-size: 0.72rem;
+  color: rgba(219, 234, 254, 0.85);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+/* Quote */
+.quoteWrapper {
+  margin-bottom: 20px;
+}
+
+.quoteCyanLine {
+  width: 32px;
+  height: 2.5px;
+  background: #38bdf8;
+  margin-bottom: 8px;
+  border-radius: 2px;
+}
+
+.quoteText {
+  font-size: 0.90rem;
+  color: #f8fafc;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.quoteCyanLineSmall {
+  width: 24px;
+  height: 2.5px;
+  background: #38bdf8;
+  margin-top: 8px;
+  border-radius: 2px;
+}
+
+/* Bottom Stats Bar */
+.heroStatsRow {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.statValue {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.statLabel {
+  font-size: 0.72rem;
+  color: rgba(219, 234, 254, 0.85);
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.statDivider {
+  width: 1px;
+  height: 26px;
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+/* ==========================================================================
+   RIGHT CARD PANEL (CLEAN SOLID LIGHT SKY/SLATE BACKGROUND)
+   ========================================================================== */
+.rightCardPanel {
+  flex: 0.85;
+  height: 100%;
+  overflow-y: auto;
+  background-color: #ebf3f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 20px;
+  position: relative;
+  z-index: 3;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.rightCardPanel::-webkit-scrollbar {
+  width: 5px;
+}
+
+.rightCardPanel::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+@media (max-width: 1023px) {
+  .rightCardPanel {
+    height: auto;
+    min-height: 100vh;
+    width: 100%;
+    background-color: #ebf3f9;
+    padding: 24px 16px;
+    justify-content: flex-start;
+  }
+}
+
+/* ==========================================================================
+   COMPACT & BALANCED REGISTER CARD (FITS 100% IN DESKTOP VIEWPORT)
+   ========================================================================== */
+.exactRegisterCard {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px -12px rgba(15, 23, 42, 0.12),
+              0 8px 20px -6px rgba(15, 23, 42, 0.04),
+              0 0 0 1px rgba(226, 232, 240, 0.85);
+  width: 100%;
+  max-width: 580px;
+  padding: 20px 28px 18px 28px;
+  position: relative;
+  margin: auto 0;
+  transition: all 0.2s ease-in-out;
+}
+
+@media (max-width: 640px) {
+  .exactRegisterCard {
+    padding: 18px 16px 16px 16px;
+    border-radius: 20px;
+    margin: 8px 0;
+  }
+}
+
+/* Card Top Bar */
+.cardTopHeader {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.createAccountBtn {
+  border: 1.5px solid #bfdbfe;
+  background: #ffffff;
+  color: #0062eb;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 12px;
+  border-radius: 9999px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  letter-spacing: 0.01em;
+}
+
+.createAccountBtn:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #0050c2;
+}
+
+/* Center Brand Inside Card */
+.brandCenter {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.brandIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+  color: #0062eb;
+}
+
+.brandNameText {
+  font-size: 1.28rem;
+  font-weight: 800;
+  color: #0a2540;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.brandSloganText {
+  font-size: 0.68rem;
+  color: #64748b;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Heading inside Card */
+.cardHeading {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+  margin-top: 4px;
+  margin-bottom: 1px;
+  letter-spacing: -0.015em;
+}
+
+.cardSubtitle {
+  font-size: 0.74rem;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+/* ==========================================================================
+   4-STEP STEPPER BAR (COMPACT)
+   ========================================================================== */
+.stepperBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin: 8px 0 12px 0;
+  padding: 0 14px;
+}
+
+.stepperLine {
+  position: absolute;
+  top: 10px;
+  left: 28px;
+  right: 28px;
+  height: 2px;
+  background: #e2e8f0;
+  z-index: 1;
+}
+
+.stepperLineActive {
+  position: absolute;
+  top: 10px;
+  left: 28px;
+  height: 2px;
+  background: #0062eb;
+  z-index: 2;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stepperStepItem {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stepperCircle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  background-color: #ffffff;
+  border: 1.8px solid #cbd5e1;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.stepperCircle.active {
+  background-color: #0062eb;
+  border-color: #0062eb;
+  color: #ffffff;
+  box-shadow: 0 0 0 2.5px rgba(0, 98, 235, 0.18);
+}
+
+.stepperCircle.completed {
+  background-color: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+}
+
+.stepperStepLabel {
+  font-size: 0.64rem;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.stepperStepLabel.active {
+  color: #0062eb;
+  font-weight: 700;
+}
+
+.stepperStepLabel.completed {
+  color: #0f172a;
+}
+
+@media (max-width: 480px) {
+  .stepperBar {
+    padding: 0 6px;
+  }
+  .stepperLine {
+    left: 16px;
+    right: 16px;
+  }
+  .stepperStepLabel {
+    font-size: 0.58rem;
+  }
+}
+
+/* ==========================================================================
+   SECTION SUBHEADERS
+   ========================================================================== */
+.sectionSubheader {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.15;
+}
+
+.sectionSubtext {
+  font-size: 0.70rem;
+  color: #64748b;
+  margin-top: 1px;
+  margin-bottom: 8px;
+}
+
+/* ==========================================================================
+   COMPACT FORM FIELDS (36px HEIGHT FOR PERFECT FIT)
+   ========================================================================== */
+.fieldLabel {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 2px;
+}
+
+.requiredAsterisk {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.inputFieldWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputFieldIcon {
+  position: absolute;
+  left: 10px;
+  color: #94a3b8;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mockupInput {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px 0 34px;
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.15s ease-in-out;
+}
+
+.mockupInput::placeholder {
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+.mockupInput:hover {
+  border-color: #cbd5e1;
+}
+
+.mockupInput:focus {
+  border-color: #0062eb;
+  box-shadow: 0 0 0 2.5px rgba(0, 98, 235, 0.12);
+}
+
+.mockupInputHasError {
+  border-color: #ef4444 !important;
+  background-color: #fffbfb !important;
+}
+
+/* Address Single/Two Line Compact Field */
+.mockupAddressInput {
+  width: 100%;
+  height: 38px;
+  padding: 0 10px 0 34px;
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.15s ease-in-out;
+}
+
+.mockupAddressInput::placeholder {
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+.mockupAddressInput:hover {
+  border-color: #cbd5e1;
+}
+
+.mockupAddressInput:focus {
+  border-color: #0062eb;
+  box-shadow: 0 0 0 2.5px rgba(0, 98, 235, 0.12);
+}
+
+.eyeIconBtn {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 3px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.eyeIconBtn:hover {
+  color: #0062eb;
+}
+
+/* Primary CTA Button */
+.primaryCtaBtn {
+  width: 100%;
+  height: 40px;
+  background: #0062eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 98, 235, 0.25);
+  transition: all 0.15s ease-in-out;
+}
+
+.primaryCtaBtn:hover {
+  background: #0050c2;
+  box-shadow: 0 6px 16px rgba(0, 98, 235, 0.35);
+  transform: translateY(-0.5px);
+}
+
+.primaryCtaBtn:active {
+  transform: translateY(0.5px);
+}
+
+.primaryCtaBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.secondaryCtaBtn {
+  height: 38px;
+  background: #f8fafc;
+  color: #334155;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 0 14px;
+  transition: all 0.15s ease-in-out;
+}
+
+.secondaryCtaBtn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Compact 11–12px Error Message */
+.errorMessage {
+  font-size: 11px;
+  color: #dc2626;
+  margin-top: 1px;
+  margin-bottom: 0px;
+  line-height: 1.15;
+  font-weight: 500;
+  display: block;
+}
+
+/* Card Outer Footer */
+.cardOuterFooter {
+  width: 100%;
+  max-width: 580px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.68rem;
+  color: #64748b;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .cardOuterFooter {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+}
+
+/* ==========================================================================
+   LOGIN CARD & FIELD STYLES (MATCHES REFERENCE WITH PROPER SPACING & ALIGNMENT)
+   ========================================================================== */
+/* ==========================================================================
+   LOGIN RIGHT PANEL & FLOATING CARD
+   ========================================================================== */
+.rightCardPanel {
+  flex: 0.88;
+  height: 100%;
+  overflow-y: auto;
+  background-color: #f0f4f9;
+  background-image: 
+    radial-gradient(circle at 100% 100%, rgba(191, 219, 254, 0.45) 0%, rgba(240, 244, 249, 0) 55%),
+    radial-gradient(circle at 0% 0%, rgba(224, 242, 254, 0.3) 0%, rgba(240, 244, 249, 0) 45%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px 18px 32px;
+  position: relative;
+  z-index: 3;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.rightCardPanel::-webkit-scrollbar {
+  width: 5px;
+}
+
+.rightCardPanel::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+@media (max-width: 1023px) {
+  .rightCardPanel {
+    height: auto;
+    min-height: 100vh;
+    width: 100%;
+    padding: 28px 16px 20px 16px;
+    justify-content: flex-start;
+  }
+}
+
+/* Top Right Action: "New to NIM Academy? Create an Account" */
+.loginTopNav {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: auto;
+}
+
+.loginTopPrompt {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.createAccountPillBtn {
+  border: 1.5px solid #0062eb;
+  background: #ffffff;
+  color: #0062eb;
+  font-size: 0.80rem;
+  font-weight: 600;
+  padding: 5px 16px;
+  border-radius: 9999px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  letter-spacing: 0.01em;
+}
+
+.createAccountPillBtn:hover {
+  background: #eff6ff;
+  border-color: #0050c2;
+  color: #0050c2;
+}
+
+/* Floating White Card */
+.exactCard {
+  background: #ffffff;
+  border-radius: 28px;
+  box-shadow: 0 20px 50px -12px rgba(12, 38, 75, 0.10),
+              0 0 0 1px rgba(220, 230, 242, 0.85);
+  width: 100%;
+  max-width: 480px;
+  padding: 28px 34px 22px 34px;
+  position: relative;
+  margin: 14px 0;
+  transition: all 0.2s ease-in-out;
+}
+
+@media (max-width: 640px) {
+  .exactCard {
+    padding: 24px 20px 20px 20px;
+    border-radius: 22px;
+    margin: 12px 0;
+  }
+}
+
+/* Brand Center Inside Card */
+.loginBrandCenter {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.loginBrandIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+  color: #0062eb;
+}
+
+.loginBrandNameText {
+  font-size: 1.42rem;
+  font-weight: 800;
+  color: #0a2540;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.loginBrandSloganText {
+  font-size: 0.70rem;
+  color: #64748b;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+  margin-bottom: 14px;
+}
+
+.loginCardHeading {
+  font-size: 1.30rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+  margin-bottom: 2px;
+  letter-spacing: -0.015em;
+}
+
+.loginCardSubtitle {
+  font-size: 0.78rem;
+  color: #64748b;
+  text-align: center;
+}
+
+/* Input Fields */
+.loginInputGroup {
+  margin-bottom: 14px;
+  width: 100%;
+}
+
+.loginFieldWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.loginFieldIcon {
+  position: absolute;
+  left: 14px;
+  color: #94a3b8;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loginInput {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px 0 42px;
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.15s ease-in-out;
+}
+
+.loginInput::placeholder {
+  color: #94a3b8;
+  font-size: 0.86rem;
+}
+
+.loginInput:hover {
+  border-color: #cbd5e1;
+}
+
+.loginInput:focus {
+  border-color: #0062eb;
+  box-shadow: 0 0 0 3px rgba(0, 98, 235, 0.12);
+}
+
+.loginInputHasError {
+  border-color: #ef4444 !important;
+  background-color: #fffbfb !important;
+}
+
+.loginEyeBtn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+}
+
+.loginEyeBtn:hover {
+  color: #0062eb;
+}
+
+.loginErrorMessage {
+  font-size: 11px;
+  color: #dc2626;
+  margin-top: 3px;
+  margin-bottom: 0px;
+  line-height: 1.2;
+  font-weight: 500;
+  display: block;
+}
+
+.optionsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+  margin-bottom: 16px;
+  font-size: 0.82rem;
+}
+
+.loginSubmitBtn {
+  width: 100%;
+  height: 48px;
+  background: #0062eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 98, 235, 0.28);
+  transition: all 0.15s ease-in-out;
+}
+
+.loginSubmitBtn:hover {
+  background: #0050c2;
+  box-shadow: 0 6px 18px rgba(0, 98, 235, 0.38);
+  transform: translateY(-0.5px);
+}
+
+.loginSubmitBtn:active {
+  transform: translateY(0.5px);
+}
+
+.loginSubmitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.orDividerLine {
+  display: flex;
+  align-items: center;
+  margin: 16px 0;
+  text-align: center;
+}
+
+.orDividerLine::before,
+.orDividerLine::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.orText {
+  padding: 0 14px;
+  font-size: 0.70rem;
+  color: #94a3b8;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.googleLoginBtn {
+  width: 100%;
+  height: 48px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.googleLoginBtn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+/* 2 Role Selector Bar (Student & Parent) */
+.roleSelectorBar {
+  background: #f1f5f9;
+  border-radius: 16px;
+  padding: 5px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.roleTab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 9px 4px;
+  min-height: 64px;
+  border-radius: 12px;
+  cursor: pointer;
+  background: transparent;
+  border: 1.5px solid transparent;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.roleTab:hover {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.roleTab.active {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+.roleTabIcon {
+  color: #0062eb;
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+}
+
+.roleTabTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.roleTabSubtitle {
+  font-size: 0.65rem;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+/* Outer Footer */
+.loginOuterFooter {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  font-size: 0.68rem;
+  color: #64748b;
+  padding: 4px 4px 0 4px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .loginOuterFooter {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+    margin-top: 10px;
+  }
+}
+
+/* Modal Helpers */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 50;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.modalContent {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+  max-width: 420px;
+  width: 100%;
+  padding: 24px;
+  position: relative;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

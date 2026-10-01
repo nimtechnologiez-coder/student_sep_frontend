@@ -1,0 +1,284 @@
+/* ==========================================================================
+   NIM AI STUDENT ASSIGNMENTS - MODERN EDUCATION SAAS STYLING (DARK / LIGHT)
+   Zero decorative graphics, high contrast, clean typography & layout.
+   Light mode is the robust default; .dark explicitly overrides.
+   ========================================================================== */
+
+/* Main Container */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* 1. Header Card */
+.headerCard {
+  border-radius: 1.25rem;
+  padding: 1.5rem 1.75rem;
+  border-width: 1px;
+  border-style: solid;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+  border-color: #e2edf8;
+  box-shadow: 0 2px 12px rgba(0, 98, 235, 0.04);
+}
+
+:global(.dark) .headerCard {
+  background-color: #081024;
+  border-color: #15274d;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+}
+
+/* 2. Base Modern Card */
+.card {
+  border-radius: 1.25rem;
+  border-width: 1px;
+  border-style: solid;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: #ffffff;
+  border-color: #e2edf8;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.card:hover {
+  border-color: #bfdbfe;
+  box-shadow: 0 6px 20px rgba(0, 98, 235, 0.06);
+}
+
+:global(.dark) .card {
+  background-color: #081024;
+  border-color: #15274d;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+}
+
+:global(.dark) .card:hover {
+  border-color: rgba(0, 98, 235, 0.4);
+}
+
+/* 3. Stat Overview Card */
+.statCard {
+  border-radius: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  border-width: 1px;
+  border-style: solid;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: #ffffff;
+  border-color: #e2edf8;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.statCard:hover {
+  border-color: #bfdbfe;
+  box-shadow: 0 4px 16px rgba(0, 98, 235, 0.06);
+  transform: translateY(-1px);
+}
+
+:global(.dark) .statCard {
+  background-color: #081024;
+  border-color: #15274d;
+  box-shadow: none;
+}
+
+:global(.dark) .statCard:hover {
+  background-color: #0b152d;
+  border-color: #1e3a73;
+}
+
+/* 4. Attention / Urgent Hero Section */
+.urgentCard {
+  border-radius: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  border-width: 1px;
+  border-style: solid;
+  transition: all 0.2s ease;
+  background-color: #fff9f9;
+  border-color: #fecdd3;
+  box-shadow: 0 2px 10px rgba(225, 29, 72, 0.04);
+}
+
+:global(.dark) .urgentCard {
+  background: linear-gradient(135deg, #1f0b12 0%, #150914 100%);
+  border-color: rgba(244, 63, 94, 0.35);
+  box-shadow: 0 4px 20px -2px rgba(244, 63, 94, 0.15);
+}
+
+/* 5. Filter Pill Tabs */
+.filterPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  border-width: 1px;
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+.filterPill:not(.active):hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0a1b39;
+}
+
+.filterPill.active {
+  background-color: #0062eb;
+  border-color: #0062eb;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 98, 235, 0.3);
+}
+
+:global(.dark) .filterPill:not(.active) {
+  background-color: #091328;
+  border-color: #15254a;
+  color: #94a3b8;
+}
+
+:global(.dark) .filterPill:not(.active):hover {
+  background-color: #0e1c3d;
+  color: #ffffff;
+  border-color: #1e3a73;
+}
+
+/* 6. Assignment Row Card */
+.assignmentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 1.125rem;
+  border-width: 1px;
+  border-style: solid;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: #ffffff;
+  border-color: #e2edf8;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+.assignmentRow:hover {
+  background-color: #fcfdfe;
+  border-color: #bfdbfe;
+  box-shadow: 0 4px 16px rgba(0, 98, 235, 0.06);
+  transform: translateY(-1px);
+}
+
+:global(.dark) .assignmentRow {
+  background-color: #081024;
+  border-color: #15274d;
+  box-shadow: none;
+}
+
+:global(.dark) .assignmentRow:hover {
+  background-color: #0b152d;
+  border-color: #1e3a73;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .assignmentRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* 7. Date Box / Calendar Tile */
+.dateBox {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid;
+  transition: all 0.2s ease;
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+:global(.dark) .dateBox {
+  background-color: #0f1c3d;
+  border-color: #1e356c;
+}
+
+.dateBoxOverdue {
+  background-color: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+}
+
+:global(.dark) .dateBoxOverdue {
+  background-color: #2b0b14 !important;
+  border-color: #5c1428 !important;
+}
+
+/* 8. Recent Evaluation Card */
+.evalCard {
+  border-radius: 1.125rem;
+  padding: 1.25rem 1.5rem;
+  border-width: 1px;
+  border-style: solid;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: #ffffff;
+  border-color: #e2edf8;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+.evalCard:hover {
+  border-color: #bbf7d0;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.08);
+  transform: translateY(-1px);
+}
+
+:global(.dark) .evalCard {
+  background-color: #081024;
+  border-color: #15274d;
+  box-shadow: none;
+}
+
+:global(.dark) .evalCard:hover {
+  background-color: #0b152d;
+  border-color: #1b3e34;
+}
+
+/* 9. Modal Overlay & Dialog */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modalDialog {
+  width: 100%;
+  max-width: 780px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 1.5rem;
+  border-width: 1px;
+  border-style: solid;
+  background-color: #ffffff;
+  border-color: #dce8f8;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
+}
+
+:global(.dark) .modalDialog {
+  background-color: #091328;
+  border-color: #182b52;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+}

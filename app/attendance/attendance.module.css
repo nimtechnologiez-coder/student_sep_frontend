@@ -1,0 +1,370 @@
+/* ==========================================================================
+   NIM ACADEMY STUDENT ATTENDANCE - EXACT REFERENCE DESIGN
+   Clean blue-and-white student portal aesthetic, rounded cards,
+   subtle shadows, compact calendar, and balanced typography.
+   ========================================================================== */
+
+/* Main Container */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+/* 1. Base Clean White Card */
+.card {
+  border-radius: 1rem;
+  border: 1px solid #e8edf5;
+  background-color: #ffffff;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+  transition: all 0.2s ease;
+}
+
+:global(.dark) .card {
+  background-color: #0b152d;
+  border-color: #15274d;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* 2. Top Metric Stat Card */
+.statCard {
+  border-radius: 1rem;
+  border: 1px solid #e8edf5;
+  background-color: #ffffff;
+  padding: 1rem 1.125rem;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0, 98, 235, 0.05);
+}
+
+:global(.dark) .statCard {
+  background-color: #0b152d;
+  border-color: #15274d;
+}
+
+/* Icon Containers in Stat Cards */
+.iconBoxBlue {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  background-color: #eff6ff;
+  color: #0062eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+:global(.dark) .iconBoxBlue {
+  background-color: rgba(0, 98, 235, 0.15);
+  color: #60a5fa;
+}
+
+.iconBoxGreen {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  background-color: #ecfdf5;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+:global(.dark) .iconBoxGreen {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.iconBoxRed {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  background-color: #fff1f2;
+  color: #f43f5e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+:global(.dark) .iconBoxRed {
+  background-color: rgba(244, 63, 94, 0.15);
+  color: #fb7185;
+}
+
+.iconBoxAmber {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  background-color: #fffbeb;
+  color: #f59e0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+:global(.dark) .iconBoxAmber {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+/* 3. Compact Calendar Grid */
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem 0.2rem;
+}
+
+.calendarCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  height: 2rem;
+  width: 2rem;
+  margin: 0 auto;
+  border-radius: 0.5rem;
+  user-select: none;
+  transition: all 0.12s ease;
+  color: #334155;
+}
+
+:global(.dark) .calendarCell {
+  color: #cbd5e1;
+}
+
+/* Specific Day State Chips */
+.dayPresent {
+  background-color: #dcfce7;
+  color: #15803d;
+  font-weight: 700;
+}
+
+:global(.dark) .dayPresent {
+  background-color: rgba(16, 185, 129, 0.25);
+  color: #4ade80;
+}
+
+.dayAbsent {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+:global(.dark) .dayAbsent {
+  background-color: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+}
+
+.dayLate {
+  background-color: #fef3c7;
+  color: #b45309;
+  font-weight: 700;
+}
+
+:global(.dark) .dayLate {
+  background-color: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+}
+
+.dayScheduledSolid {
+  background-color: #0066fe;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 102, 254, 0.3);
+}
+
+:global(.dark) .dayScheduledSolid {
+  background-color: #0066fe;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 102, 254, 0.4);
+}
+
+.dayScheduledSoft {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+:global(.dark) .dayScheduledSoft {
+  background-color: rgba(37, 99, 235, 0.25);
+  color: #93c5fd;
+}
+
+.dayMuted {
+  color: #cbd5e1;
+}
+
+:global(.dark) .dayMuted {
+  color: #475569;
+}
+
+/* 4. Table Wrapper */
+.tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tableRow {
+  transition: background-color 0.12s ease;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tableRow:hover {
+  background-color: #f8fafc;
+}
+
+:global(.dark) .tableRow {
+  border-bottom-color: #15254a;
+}
+
+:global(.dark) .tableRow:hover {
+  background-color: #0f1c3d;
+}
+
+/* 5. Custom Select / Filter */
+.filterSelect {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.625rem;
+  padding: 0.375rem 1.75rem 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #334155;
+  background-color: #ffffff;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 0.85rem;
+}
+
+:global(.dark) .filterSelect {
+  background-color: #0b152d;
+  border-color: #15254a;
+  color: #cbd5e1;
+}
+
+/* 6. Status Pills */
+.statusPillPresent {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  background-color: #ecfdf5;
+  color: #059669;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: 1px solid #a7f3d0;
+}
+
+:global(.dark) .statusPillPresent {
+  background-color: rgba(5, 150, 105, 0.15);
+  border-color: rgba(5, 150, 105, 0.3);
+  color: #34d399;
+}
+
+.statusPillAbsent {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  background-color: #fff1f2;
+  color: #e11d48;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: 1px solid #fecdd3;
+}
+
+:global(.dark) .statusPillAbsent {
+  background-color: rgba(225, 29, 72, 0.15);
+  border-color: rgba(225, 29, 72, 0.3);
+  color: #fb7185;
+}
+
+.statusPillScheduled {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: 1px solid #bfdbfe;
+}
+
+:global(.dark) .statusPillScheduled {
+  background-color: rgba(37, 99, 235, 0.15);
+  border-color: rgba(37, 99, 235, 0.3);
+  color: #60a5fa;
+}
+
+/* 7. Pagination Buttons */
+.paginationBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.875rem;
+  height: 1.875rem;
+  padding: 0 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0062eb;
+}
+
+.paginationBtn.active {
+  background-color: #0062eb;
+  border-color: #0062eb;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 98, 235, 0.25);
+}
+
+.paginationBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+:global(.dark) .paginationBtn {
+  background-color: #0b152d;
+  border-color: #15254a;
+  color: #94a3b8;
+}
+
+:global(.dark) .paginationBtn:hover:not(:disabled) {
+  background-color: #15274d;
+  color: #ffffff;
+}
+
+:global(.dark) .paginationBtn.active {
+  background-color: #0062eb;
+  border-color: #0062eb;
+  color: #ffffff;
+}

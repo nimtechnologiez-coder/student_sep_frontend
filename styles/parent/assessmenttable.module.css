@@ -1,0 +1,127 @@
+/* AssessmentTable CSS Module */
+.tableCard {
+  background-color: #ffffff;
+  border: 1px solid #dce8f8;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.tableCardDark {
+  background-color: #0b1429;
+  border-color: #1a2a4f;
+}
+
+.responsiveWrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.table th {
+  background-color: #f8fbff;
+  color: #475569;
+  font-weight: 800;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e2edf8;
+  white-space: nowrap;
+}
+
+.tableCardDark .table th {
+  background-color: #0d1933;
+  color: #94a3b8;
+  border-bottom-color: #1a2a4f;
+}
+
+.table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid #f0f5fc;
+  color: #1e293b;
+  vertical-align: top;
+}
+
+.tableCardDark .table td {
+  border-bottom-color: #122247;
+  color: #cbd5e1;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background-color: #f8fbff;
+}
+
+.tableCardDark .table tr:hover td {
+  background-color: #0e1c3a;
+}
+
+.assessmentName {
+  font-weight: 800;
+  color: #0a1b39;
+  margin: 0 0 2px 0;
+}
+
+.tableCardDark .assessmentName {
+  color: #ffffff;
+}
+
+.moduleText {
+  font-size: 11px;
+  color: #0062eb;
+  font-weight: 700;
+}
+
+.tableCardDark .moduleText {
+  color: #38bdf8;
+}
+
+.scorePill {
+  font-size: 14px;
+  font-weight: 900;
+  color: #10b981;
+}
+
+.statusPill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.statusPassed {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.statusPending {
+  background-color: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.feedbackBox {
+  font-size: 12px;
+  color: #475569;
+  background-color: #f8fafc;
+  border-left: 3px solid #0062eb;
+  padding: 8px 12px;
+  border-radius: 0 8px 8px 0;
+  line-height: 1.4;
+}
+
+.tableCardDark .feedbackBox {
+  background-color: #111c38;
+  color: #cbd5e1;
+  border-left-color: #38bdf8;
+}

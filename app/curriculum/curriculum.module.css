@@ -1,0 +1,169 @@
+/* ==========================================================================
+   NIM AI STUDENT CURRICULUM - MODERN EDUCATION SAAS STYLING (DARK / LIGHT)
+   Clean, professional student-learning interface with no decorative graphics.
+   ========================================================================== */
+
+/* Main Container */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* 1. Clean Academic Header Card (No Images / Banners) */
+.headerCard {
+  border-radius: 1.25rem;
+  padding: 1.5rem 1.75rem;
+  border-width: 1px;
+  border-style: solid;
+  transition: all 0.2s ease;
+}
+
+:global(.dark) .headerCard {
+  background-color: #081024;
+  border-color: #15274d;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+}
+
+:global(.light) .headerCard {
+  background-color: #ffffff;
+  border-color: #e2edf8;
+  box-shadow: 0 2px 12px rgba(0, 98, 235, 0.04);
+}
+
+/* 2. Base Modern Card */
+.card {
+  border-radius: 1.25rem;
+  border-width: 1px;
+  border-style: solid;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:global(.dark) .card {
+  background-color: #081024;
+  border-color: #15274d;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+}
+
+:global(.dark) .card:hover {
+  border-color: rgba(0, 98, 235, 0.45);
+}
+
+:global(.light) .card {
+  background-color: #ffffff;
+  border-color: #e2edf8;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+:global(.light) .card:hover {
+  border-color: #bfdbfe;
+  box-shadow: 0 6px 20px rgba(0, 98, 235, 0.06);
+}
+
+/* 3. Horizontal Month Nav Item */
+.monthTab {
+  display: flex;
+  flex-direction: column;
+  padding: 0.875rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-align: left;
+}
+
+:global(.dark) .monthTab {
+  background-color: #081024;
+  border-color: #15274d;
+}
+
+:global(.dark) .monthTab:hover {
+  background-color: #0d1a38;
+  border-color: #1e3a73;
+}
+
+:global(.light) .monthTab {
+  background-color: #ffffff;
+  border-color: #e2edf8;
+}
+
+:global(.light) .monthTab:hover {
+  background-color: #f8fbff;
+  border-color: #cbdcf2;
+}
+
+/* Active Month Tab */
+:global(.dark) .monthTabActive {
+  background-color: #0d1e44 !important;
+  border-color: #0062eb !important;
+  box-shadow: 0 0 16px rgba(0, 98, 235, 0.25);
+}
+
+:global(.light) .monthTabActive {
+  background-color: #eff6ff !important;
+  border-color: #0062eb !important;
+  box-shadow: 0 4px 14px rgba(0, 98, 235, 0.1);
+}
+
+/* 4. Progress Track */
+.progressTrack {
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+:global(.dark) .progressTrack {
+  background-color: #132247;
+}
+
+:global(.light) .progressTrack {
+  background-color: #e2edf8;
+}
+
+/* 5. Topic Item Tile */
+.topicTile {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0.75rem 0.875rem;
+  border-radius: 0.875rem;
+  border: 1px solid;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+:global(.dark) .topicTile {
+  background-color: #091328;
+  border-color: #15254a;
+}
+
+:global(.dark) .topicTile:hover {
+  background-color: #0e1c3d;
+  border-color: #1e3a73;
+}
+
+:global(.light) .topicTile {
+  background-color: #fbfdff;
+  border-color: #e2edf8;
+}
+
+:global(.light) .topicTile:hover {
+  background-color: #f0f7ff;
+  border-color: #bfdbfe;
+  box-shadow: 0 2px 8px rgba(0, 98, 235, 0.05);
+}
+
+:global(.dark) .topicTileActive {
+  background-color: rgba(0, 98, 235, 0.12) !important;
+  border-color: #0062eb !important;
+  box-shadow: 0 0 12px rgba(0, 98, 235, 0.2);
+}
+
+:global(.light) .topicTileActive {
+  background-color: #f0f6fe !important;
+  border-color: #60a5fa !important;
+  box-shadow: 0 2px 10px rgba(0, 98, 235, 0.08);
+}
+

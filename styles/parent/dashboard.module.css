@@ -1,0 +1,213 @@
+/* Parent Dashboard CSS Module */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.welcomeCard {
+  background: linear-gradient(135deg, #0a1b39 0%, #0d2b5c 50%, #0052cc 100%);
+  border-radius: 20px;
+  padding: 28px;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 98, 235, 0.15);
+}
+
+.welcomeGlow {
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
+  pointer-events: none;
+}
+
+.welcomeGrid {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.badgePill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 8px;
+}
+
+.welcomeTitle {
+  font-size: 26px;
+  font-weight: 900;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.welcomeSubtitle {
+  font-size: 13px;
+  color: #93c5fd;
+  margin: 6px 0 0 0;
+  font-weight: 600;
+}
+
+.metaRow {
+  display: flex;
+  gap: 16px;
+  margin-top: 14px;
+  font-size: 12px;
+  color: #cbd5e1;
+  flex-wrap: wrap;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sectionGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .sectionGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background-color: #ffffff;
+  border: 1px solid #dce8f8;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.cardDark {
+  background-color: #0b1429;
+  border-color: #1a2a4f;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0a1b39;
+  margin: 0;
+}
+
+.cardDark .sectionTitle {
+  color: #ffffff;
+}
+
+.viewAllLink {
+  font-size: 12px;
+  font-weight: 800;
+  color: #0062eb;
+  text-decoration: none;
+}
+
+.viewAllLink:hover {
+  text-decoration: underline;
+}
+
+.notificationsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notifItem {
+  padding: 12px;
+  border-radius: 12px;
+  background-color: #f8fafc;
+  border: 1px solid #e2edf8;
+  display: flex;
+  gap: 12px;
+}
+
+.cardDark .notifItem {
+  background-color: #0e1933;
+  border-color: #1a2a4f;
+}
+
+.notifIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background-color: rgba(0, 98, 235, 0.1);
+  color: #0062eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notifContent {
+  flex: 1;
+}
+
+.notifTitle {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0a1b39;
+  margin: 0;
+}
+
+.cardDark .notifTitle {
+  color: #ffffff;
+}
+
+.notifDesc {
+  font-size: 11px;
+  color: #64748b;
+  margin: 2px 0 0 0;
+}
+
+.cardDark .notifDesc {
+  color: #94a3b8;
+}
+
+.notifDate {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 4px;
+}

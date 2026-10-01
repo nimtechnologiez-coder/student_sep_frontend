@@ -1,0 +1,105 @@
+/* CSS Module for Evaluations Page */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* 1. Hero Banner */
+.heroCard {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  padding: 1.5rem 1.75rem;
+  border: 1px solid;
+  transition: all 0.25s ease;
+}
+
+:global(.dark) .heroCard {
+  background: linear-gradient(135deg, #071530 0%, #091c42 60%, #0b1a3d 100%);
+  border-color: #172c57;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+:global(.light) .heroCard {
+  background: linear-gradient(135deg, #eef5ff 0%, #f4f8fe 60%, #ebf3ff 100%);
+  border-color: #dce8f8;
+  box-shadow: 0 10px 25px -10px rgba(0, 98, 235, 0.08);
+}
+
+.glowOrb {
+  position: absolute;
+  top: -50px;
+  right: 15%;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+:global(.dark) .glowOrb {
+  background: radial-gradient(circle, rgba(0, 132, 255, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  filter: blur(40px);
+}
+
+:global(.light) .glowOrb {
+  background: radial-gradient(circle, rgba(0, 98, 235, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+  filter: blur(40px);
+}
+
+/* 2. Common Card */
+.card {
+  border-radius: 1.25rem;
+  border: 1px solid;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:global(.dark) .card {
+  background-color: #081024;
+  border-color: #15274d;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+}
+
+:global(.light) .card {
+  background-color: #ffffff;
+  border-color: #e2edf8;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+}
+
+:global(.dark) .card:hover {
+  border-color: #1e3a75;
+  box-shadow: 0 8px 25px -5px rgba(0, 98, 235, 0.2);
+}
+
+:global(.light) .card:hover {
+  border-color: #b9d5fb;
+  box-shadow: 0 8px 25px -5px rgba(0, 98, 235, 0.08);
+}
+
+/* 3. Table Wrapper */
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tableWrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tableWrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:global(.dark) .tableWrapper::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 3px;
+}
+
+:global(.light) .tableWrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}

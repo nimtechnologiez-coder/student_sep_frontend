@@ -1,0 +1,780 @@
+/* ==========================================================================
+   NIM ACADEMY - STUDENT REGISTRATION CSS MODULE (Clean Timing Cards)
+   ========================================================================== */
+
+/* Main Container */
+.mainContainer {
+  min-height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background-color: #ebf3f9;
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  box-sizing: border-box;
+}
+
+@media (min-width: 1024px) {
+  .mainContainer {
+    flex-direction: row;
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+/* Left Hero Section (Desktop 50% Width) */
+.leftHeroSection {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .leftHeroSection {
+    display: flex;
+    width: 50%;
+    height: 100vh;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2.5rem 3rem;
+    color: #ffffff;
+    overflow-y: auto;
+    position: relative;
+    background: linear-gradient(to right, rgba(2, 38, 92, 0.98) 0%, rgba(3, 48, 115, 0.93) 38%, rgba(4, 68, 150, 0.60) 70%, rgba(6, 85, 180, 0.20) 100%), url('/campus_bg.jpg') center right / cover no-repeat;
+  }
+}
+
+.heroBrand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.heroBrandTitle {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.heroBrandSub {
+  font-size: 0.75rem;
+  color: rgba(191, 219, 254, 0.9);
+  font-weight: 500;
+  margin-top: 0.15rem;
+}
+
+.heroCenter {
+  margin-top: auto;
+  margin-bottom: auto;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  max-width: 36rem;
+}
+
+.heroEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.cyanLine {
+  width: 1.5rem;
+  height: 2px;
+  background-color: #38bdf8;
+  border-radius: 9999px;
+  display: inline-block;
+}
+
+.eyebrowText {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.125em;
+  color: #38bdf8;
+}
+
+.heroHeadline {
+  font-size: 2.75rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.highlightText {
+  color: #38bdf8;
+}
+
+.heroDesc {
+  font-size: 0.875rem;
+  color: rgba(219, 234, 254, 0.9);
+  margin-top: 0.85rem;
+  margin-bottom: 1.75rem;
+  line-height: 1.5;
+}
+
+.heroCardsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.featureCard {
+  background: rgba(11, 51, 109, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.2s ease;
+}
+
+.featureCard:hover {
+  background: rgba(11, 51, 109, 0.6);
+}
+
+.featureIconWrap {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: #0062eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 98, 235, 0.3);
+}
+
+.featureTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.featureSub {
+  font-size: 0.7rem;
+  color: rgba(219, 234, 254, 0.8);
+  margin: 0;
+}
+
+.statsBar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.statVal {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.statLbl {
+  font-size: 0.7rem;
+  color: #bfdbfe;
+  margin-top: 0.2rem;
+}
+
+.statDivider {
+  width: 1px;
+  height: 2rem;
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Right Panel Form Container */
+.rightFormSection {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+@media (min-width: 1024px) {
+  .rightFormSection {
+    width: 50%;
+    height: 100vh;
+    padding: 1.5rem 2.25rem;
+  }
+}
+
+.topLoginHeader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  width: 100%;
+  max-width: 620px;
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+}
+
+.alreadyText {
+  font-size: 0.8rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.loginBtn {
+  padding: 0.35rem 1.25rem;
+  border-radius: 9999px;
+  border: 1px solid #0066fe;
+  color: #0066fe;
+  font-size: 0.775rem;
+  font-weight: 700;
+  background: #ffffff;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.loginBtn:hover {
+  background: #eff6ff;
+  transform: translateY(-1px);
+}
+
+/* Central Registration Card */
+.registerCard {
+  width: 100%;
+  max-width: 620px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 1.5rem;
+  padding: 1.75rem 2.25rem;
+  box-shadow: 0 20px 30px -10px rgba(15, 23, 42, 0.06), 0 8px 12px -6px rgba(15, 23, 42, 0.03);
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+  margin-bottom: auto;
+  box-sizing: border-box;
+}
+
+.brandHeader {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.brandIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0066fe;
+  margin-bottom: 0.25rem;
+}
+
+.cardMainTitle {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+.cardSubtitle {
+  font-size: 0.775rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+/* 4-Step Progress Indicator Bar */
+.progressWrap {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto 1.5rem auto;
+  padding: 0 0.5rem;
+}
+
+.progressFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.progressLineBg {
+  position: absolute;
+  top: 1rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  height: 2px;
+  background-color: #e2e8f0;
+  z-index: 0;
+}
+
+.progressLineActive {
+  position: absolute;
+  top: 1rem;
+  left: 1.5rem;
+  height: 2px;
+  background-color: #0066fe;
+  transition: width 0.3s ease;
+  z-index: 0;
+}
+
+.stepNode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+
+.stepCircle {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.775rem;
+  font-weight: 800;
+  transition: all 0.2s ease;
+}
+
+.stepActive {
+  background-color: #0066fe;
+  color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(0, 102, 254, 0.18);
+}
+
+.stepComplete {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+.stepInactive {
+  background-color: #f8fafc;
+  color: #94a3b8;
+  border: 1px solid #cbd5e1;
+}
+
+.stepLabel {
+  font-size: 0.675rem;
+  font-weight: 700;
+  margin-top: 0.35rem;
+  white-space: nowrap;
+}
+
+/* Error Banner */
+.errorBanner {
+  margin-bottom: 1rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.75rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  font-size: 0.775rem;
+  font-weight: 600;
+}
+
+/* Section Header Titles */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.sectionTitle {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.sectionSub {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* Step 1: Personal Details Grid */
+.personalGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  width: 100%;
+}
+
+.fullCol {
+  grid-column: 1 / -1;
+}
+
+.fieldLabel {
+  font-size: 0.775rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.35rem;
+  display: block;
+}
+
+.reqStar {
+  color: #ef4444;
+  margin-left: 0.15rem;
+}
+
+.inputWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 0.75rem;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  padding: 0.4rem 0.75rem;
+  height: 2.65rem;
+  transition: all 0.2s ease;
+}
+
+.inputWrap:focus-within {
+  border-color: #0066fe;
+  box-shadow: 0 0 0 3px rgba(0, 102, 254, 0.12);
+}
+
+.inputIcon {
+  width: 1rem;
+  height: 1rem;
+  color: #94a3b8;
+  flex-shrink: 0;
+  margin-right: 0.6rem;
+}
+
+.textInput {
+  width: 100%;
+  font-size: 0.8rem;
+  color: #0f172a;
+  outline: none;
+  background: transparent;
+  border: none;
+  font-weight: 500;
+}
+
+.textInput::placeholder {
+  color: #94a3b8;
+}
+
+/* Preferred Batch Timing 3-Card Grid (Morning, Afternoon, Evening ONLY - No time range) */
+.timingGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.timingCard {
+  padding: 0.85rem 0.5rem;
+  border-radius: 0.85rem;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  user-select: none;
+  outline: none;
+}
+
+.timingCard:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.timingCardSelected {
+  border-color: #0066fe;
+  background: #f0f7ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 254, 0.15);
+}
+
+.timingTitle {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.timingCardSelected .timingTitle {
+  color: #0066fe;
+}
+
+/* Step 2: Plan Selection Grid */
+.planGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  width: 100%;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.planCard {
+  padding: 0.85rem 1rem;
+  border-radius: 0.85rem;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  user-select: none;
+  outline: none;
+}
+
+.planCard:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.planCardSelected {
+  border-color: #0066fe;
+  background: #f0f7ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 254, 0.15);
+}
+
+.planRadioTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.radioCircle {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 1.5px solid #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.radioDot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: #0066fe;
+}
+
+.planCardSelected .radioCircle {
+  border-color: #0066fe;
+  background: #0066fe;
+}
+
+.planCardSelected .radioDot {
+  background: #ffffff;
+}
+
+.planTitle {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.planPrice {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #0066fe;
+}
+
+/* Summary Banner */
+.summaryBanner {
+  padding: 0.75rem 1rem;
+  border-radius: 0.85rem;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.85rem;
+}
+
+.summaryLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+  display: block;
+}
+
+.summaryVal {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.summaryPrice {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #0066fe;
+}
+
+/* Checkbox */
+.checkboxWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.checkboxInput {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #0066fe;
+  cursor: pointer;
+  border-radius: 0.25rem;
+}
+
+.checkboxLabel {
+  font-size: 0.75rem;
+  color: #475569;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.blueBold {
+  color: #0066fe;
+  font-weight: 700;
+}
+
+/* Action Buttons */
+.btnGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  width: 100%;
+}
+
+.backBtn {
+  width: 30%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  border-radius: 0.85rem;
+  background: #0066fe;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  box-shadow: 0 6px 16px rgba(0, 102, 254, 0.25);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.submitBtnGroup {
+  width: 70%;
+  padding: 0.85rem 1.25rem;
+  border-radius: 0.85rem;
+  background: #0066fe;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 6px 16px rgba(0, 102, 254, 0.25);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.submitBtn:hover,
+.submitBtnGroup:hover {
+  background: #0052cc;
+  transform: translateY(-1px);
+}
+
+/* Footer Text */
+.footerText {
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.725rem;
+  color: #94a3b8;
+  padding-top: 0.85rem;
+  padding-bottom: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES (Mobile Breakpoint)
+   ========================================================================== */
+@media (max-width: 640px) {
+  .personalGrid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .timingGrid {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .planGrid {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .progressWrap {
+    max-width: 100%;
+  }
+
+  .stepLabel {
+    display: none;
+  }
+
+  .registerCard {
+    padding: 1.25rem 1.25rem;
+  }
+
+  .rightFormSection {
+    padding: 1rem 1rem;
+  }
+}
