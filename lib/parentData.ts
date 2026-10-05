@@ -1,5 +1,5 @@
 // Parent Portal Data Service & API Integration Layer
-// Returns linked student data for logged-in parent
+// Returns real linked student data for logged-in parent from Django Backend
 
 export interface LinkedStudent {
   id: string;
@@ -109,454 +109,203 @@ export interface CurriculumData {
   modules: CurriculumModule[];
 }
 
-// Database store for linked parent-student relationships
-const mockDatabase = {
-  parents: [
-    {
-      id: "PAR001",
-      name: "Ramesh Kumar",
-      email: "ramesh.kumar@example.com",
-      phone: "+91 98123 45678",
-      relation: "Father",
-      linkedStudentId: "STU001",
-    },
-  ] as ParentProfile[],
+const BASE_URL = "http://127.0.0.1:8000";
 
-  students: {
-    STU001: {
-      id: "STU001",
-      name: "Arjun Kumar",
-      photoUrl: "/avatar.jpg",
-      email: "arjun.kumar@nim.academy",
-      phone: "+91 98765 43210",
-      course: "Generative AI & LLMs",
-      batch: "AI Cohort 2026 - Morning Batch",
-      mentor: "Priya Sharma",
-      mentorRole: "Lead AI Mentor",
-      enrollmentStatus: "Active & Enrolled",
-      joiningDate: "15 May 2026",
-      expectedGraduation: "November 2026",
-      attendancePercentage: 92,
-    } as LinkedStudent,
-  },
+async function fetchDjangoApi(endpoint: string, studentId?: string) {
+  let sid = studentId && studentId !== "STU001" && studentId !== "PAR001" ? studentId : "";
+  const url = sid 
+    ? `${BASE_URL}/api/student/${endpoint}/data/${sid}/`
+    : `${BASE_URL}/api/student/${endpoint}/data/`;
 
-  attendance: {
-    STU001: [
-      {
-        id: "att-101",
-        date: "28 Sep 2026",
-        time: "10:00 AM – 1:00 PM",
-        topic: "Scaled Dot-Product Attention & Multi-Head Projections",
-        module: "Module 2: NLP & Transformers",
-        mentor: "Priya Sharma",
-        status: "Present",
-      },
-      {
-        id: "att-102",
-        date: "25 Sep 2026",
-        time: "10:00 AM – 1:00 PM",
-        topic: "Transformer Encoder & Decoder Architecture Deep Dive",
-        module: "Module 2: NLP & Transformers",
-        mentor: "Priya Sharma",
-        status: "Present",
-      },
-      {
-        id: "att-103",
-        date: "23 Sep 2026",
-        time: "10:00 AM – 1:00 PM",
-        topic: "Positional Encodings & Matrix Mathematics in PyTorch",
-        module: "Module 2: NLP & Transformers",
-        mentor: "Priya Sharma",
-        status: "Present",
-      },
-      {
-        id: "att-104",
-        date: "20 Sep 2026",
-        time: "10:00 AM – 1:00 PM",
-        topic: "Recurrent Neural Networks (RNN) to LSTMs",
-        module: "Module 2: NLP & Transformers",
-        mentor: "Priya Sharma",
-        status: "Present",
-      },
-      {
-        id: "att-105",
-        date: "18 Sep 2026",
-        time: "10:00 AM – 1:00 PM",
-        topic: "Word Embeddings: Word2Vec, GloVe & FastText",
-        module: "Module 2: NLP & Transformers",
-        mentor: "Priya Sharma",
-        status: "Absent",
-      },
-      {
-        id: "att-106",
-        date: "15 Sep 2026",
-        time: "10:00 AM – 1:00 PM",
-        topic: "Convolutional Neural Networks for Image Classification",
-        module: "Module 1: Deep Learning Foundations",
-        mentor: "Priya Sharma",
-        status: "Present",
-      },
-      {
-        id: "att-107",
-        date: "12 Sep 2026",
-        time: "10:00 AM – 1:00 PM",
-        topic: "Backpropagation & Gradient Descent Algorithms",
-        module: "Module 1: Deep Learning Foundations",
-        mentor: "Priya Sharma",
-        status: "Present",
-      },
-      {
-        id: "att-108",
-        date: "10 Sep 2026",
-        time: "10:00 AM – 1:00 PM",
-        topic: "Neural Network Architecture & Activation Functions",
-        module: "Module 1: Deep Learning Foundations",
-        mentor: "Priya Sharma",
-        status: "Late",
-      },
-      {
-        id: "att-109",
-        date: "08 Sep 2026",
-        time: "10:00 AM – 1:00 PM",
-        topic: "Supervised Learning Models: SVMs & Decision Trees",
-        module: "Module 1: Deep Learning Foundations",
-        mentor: "Priya Sharma",
-        status: "Present",
-      },
-      {
-        id: "att-110",
-        date: "05 Sep 2026",
-        time: "10:00 AM – 1:00 PM",
-        topic: "Exploratory Data Analysis & Feature Engineering",
-        module: "Module 1: Deep Learning Foundations",
-        mentor: "Priya Sharma",
-        status: "Present",
-      },
-    ] as AttendanceRecord[],
-  },
-
-  classes: {
-    STU001: [
-      {
-        id: "cls-201",
-        topic: "Prompt Engineering & In-Context Learning Techniques",
-        module: "Module 3: Generative AI & Large Language Models",
-        date: "02 Oct 2026",
-        time: "10:00 AM – 12:00 PM IST",
-        mentor: "Priya Sharma",
-        meetingLink: "https://meet.google.com/nim-genai-live",
-        status: "Upcoming",
-      },
-      {
-        id: "cls-202",
-        topic: "Building Vector Search with FAISS & ChromaDB",
-        module: "Module 4: Retrieval-Augmented Generation (RAG)",
-        date: "05 Oct 2026",
-        time: "10:00 AM – 12:00 PM IST",
-        mentor: "Priya Sharma",
-        meetingLink: "https://meet.google.com/nim-genai-live",
-        status: "Upcoming",
-      },
-      {
-        id: "cls-203",
-        topic: "Fine-Tuning LLMs using QLoRA and PEFT",
-        module: "Module 3: Generative AI & Large Language Models",
-        date: "08 Oct 2026",
-        time: "10:00 AM – 12:30 PM IST",
-        mentor: "Priya Sharma",
-        meetingLink: "https://meet.google.com/nim-genai-live",
-        status: "Upcoming",
-      },
-      {
-        id: "cls-204",
-        topic: "LangChain Agents & Custom Tool Integration",
-        module: "Module 5: Autonomous AI Agents",
-        date: "12 Oct 2026",
-        time: "10:00 AM – 12:00 PM IST",
-        mentor: "Priya Sharma",
-        meetingLink: "https://meet.google.com/nim-genai-live",
-        status: "Upcoming",
-      },
-    ] as ClassSession[],
-  },
-
-  assessments: {
-    STU001: [
-      {
-        id: "ass-301",
-        name: "Evaluation 1: Deep Learning & Matrix Math Gateway",
-        module: "Module 1: Deep Learning Foundations",
-        date: "15 Sep 2026",
-        score: "88 / 100 (88%)",
-        status: "Passed",
-        feedback: "Outstanding score! Arjun demonstrated clear mastery of tensor reshaping, loss functions, and PyTorch autograd.",
-      },
-      {
-        id: "ass-302",
-        name: "Lab Assignment 3: Multi-Head Attention Implementation",
-        module: "Module 2: NLP & Transformers",
-        date: "22 Sep 2026",
-        score: "92 / 100 (92%)",
-        status: "Passed",
-        feedback: "Excellent code clean-up and PyTorch matrix multiplication logic. High attention to detail on scaled dot-product scaling.",
-      },
-      {
-        id: "ass-303",
-        name: "Quiz #4: Word Embeddings & Vector Spaces",
-        module: "Module 2: NLP & Transformers",
-        date: "25 Sep 2026",
-        score: "85 / 100 (85%)",
-        status: "Passed",
-        feedback: "Good grasp of semantic vector distances and cosine similarity concepts.",
-      },
-      {
-        id: "ass-304",
-        name: "Mid-Term Project: End-to-End Sentiment Classifier",
-        module: "Module 2: NLP & Transformers",
-        date: "29 Sep 2026",
-        score: "90 / 100 (90%)",
-        status: "Passed",
-        feedback: "Well-structured repository, clean dataset pipeline, and robust evaluation metrics logging.",
-      },
-      {
-        id: "ass-305",
-        name: "Evaluation 2: LLM Fine-Tuning & RAG Capstone Project",
-        module: "Module 4: Retrieval-Augmented Generation (RAG)",
-        date: "15 Oct 2026",
-        score: "Pending Submission",
-        status: "Pending",
-        feedback: "Scheduled for submission on 15 Oct 2026. Guidelines available in Curriculum portal.",
-      },
-    ] as AssessmentRecord[],
-  },
-
-  notifications: {
-    STU001: [
-      {
-        id: "notif-401",
-        title: "Live Class Scheduled: Prompt Engineering & In-Context Learning",
-        message: "Next live session is set for 02 Oct 2026 at 10:00 AM IST with Lead Mentor Priya Sharma.",
-        category: "Class",
-        date: "30 Sep 2026, 09:30 AM",
-        read: false,
-      },
-      {
-        id: "notif-402",
-        title: "Attendance Record Updated",
-        message: "Attendance marked: Present for 'Scaled Dot-Product Attention' session on 28 Sep 2026.",
-        category: "Attendance",
-        date: "28 Sep 2026, 01:15 PM",
-        read: false,
-      },
-      {
-        id: "notif-403",
-        title: "Assessment Result Published: Lab Assignment 3",
-        message: "Arjun scored 92% in Multi-Head Attention Implementation. Mentor feedback: 'Excellent matrix multiplication logic.'",
-        category: "Assessment",
-        date: "24 Sep 2026, 04:45 PM",
-        read: false,
-      },
-      {
-        id: "notif-404",
-        title: "Fee Payment Due Reminder",
-        message: "Installment 3 (₹20,000) is due by 15 Oct 2026. Online payment receipts available under Fees portal.",
-        category: "General",
-        date: "20 Sep 2026, 10:00 AM",
-        read: true,
-      },
-      {
-        id: "notif-405",
-        title: "Guest Masterclass: Production RAG with Vector Databases",
-        message: "Join us for an exclusive technical workshop with Google Cloud AI engineers on 10 Oct 2026.",
-        category: "Class",
-        date: "18 Sep 2026, 02:00 PM",
-        read: true,
-      },
-    ] as NotificationItem[],
-  },
-
-  fees: {
-    STU001: {
-      totalFee: 120000,
-      paidAmount: 100000,
-      pendingAmount: 20000,
-      dueDate: "15 Oct 2026",
-      nextInstallmentAmount: 20000,
-      paymentHistory: [
-        {
-          id: "pay-001",
-          description: "Installment 1: Admission & Course Enrollment Fee",
-          date: "15 May 2026",
-          amount: 50000,
-          paymentMode: "Razorpay / UPI",
-          status: "Paid",
-          receiptNumber: "INV-NIM-2026-041",
-        },
-        {
-          id: "pay-002",
-          description: "Installment 2: Mid-Term Tuition & Lab Access Fee",
-          date: "15 Jul 2026",
-          amount: 50000,
-          paymentMode: "Net Banking",
-          status: "Paid",
-          receiptNumber: "INV-NIM-2026-118",
-        },
-        {
-          id: "pay-003",
-          description: "Installment 3: Final Capstone & Certification Fee",
-          date: "15 Oct 2026",
-          amount: 20000,
-          paymentMode: "Pending Online Payment",
-          status: "Due Soon",
-          receiptNumber: "INV-NIM-2026-DUE",
-        },
-      ],
-    } as FeeRecord,
-  },
-
-  curriculum: {
-    courseName: "Generative AI & LLMs",
-    programCode: "GENAI-2026-PRO",
-    totalDuration: "6 Months • 24 Weeks",
-    modules: [
-      {
-        id: "mod-1",
-        code: "MOD 01",
-        title: "Deep Learning Foundations & PyTorch",
-        description: "Math for AI, matrix operations, backpropagation, and PyTorch tensor neural network building blocks.",
-        duration: "4 Weeks (Weeks 1-4)",
-        status: "Completed",
-        progressPercentage: 100,
-        topics: [
-          { id: "t-101", title: "Linear Algebra & Calculus for Deep Learning", type: "Online Class", duration: "3 hrs", status: "Completed" },
-          { id: "t-102", title: "PyTorch Tensors, Autograd & Loss Functions", type: "Hands-on Lab", duration: "4 hrs", status: "Completed" },
-          { id: "t-103", title: "CNN Architectures & Computer Vision", type: "Online Class", duration: "3 hrs", status: "Completed" },
-          { id: "t-104", title: "Gateway Evaluation #1", type: "Assessment", duration: "2 hrs", status: "Completed" },
-        ],
-      },
-      {
-        id: "mod-2",
-        code: "MOD 02",
-        title: "Natural Language Processing & Transformers",
-        description: "Sequence models, tokenization, self-attention, scaled dot-product, and Multi-Head Transformer architectures.",
-        duration: "4 Weeks (Weeks 5-8)",
-        status: "Completed",
-        progressPercentage: 100,
-        topics: [
-          { id: "t-201", title: "Word Embeddings & Vector Space Mathematics", type: "Online Class", duration: "3 hrs", status: "Completed" },
-          { id: "t-202", title: "RNNs, LSTMs & Seq2Seq Models", type: "Online Class", duration: "3 hrs", status: "Completed" },
-          { id: "t-203", title: "Multi-Head Self-Attention Mechanisms", type: "Hands-on Lab", duration: "4 hrs", status: "Completed" },
-          { id: "t-204", title: "BERT & GPT Encoder-Decoder Pre-training", type: "Reading", duration: "2 hrs", status: "Completed" },
-        ],
-      },
-      {
-        id: "mod-3",
-        code: "MOD 03",
-        title: "Generative AI & Large Language Models (LLMs)",
-        description: "State-of-the-art LLMs (Llama 3, Claude, Gemini, GPT-4), prompt engineering, and parameter-efficient fine-tuning (PEFT/QLoRA).",
-        duration: "4 Weeks (Weeks 9-12)",
-        status: "In Progress",
-        progressPercentage: 75,
-        topics: [
-          { id: "t-301", title: "Prompt Engineering & Few-Shot Learning", type: "Online Class", duration: "3 hrs", status: "Completed" },
-          { id: "t-302", title: "Fine-Tuning Llama 3 with QLoRA & Unsloth", type: "Hands-on Lab", duration: "4 hrs", status: "In Progress" },
-          { id: "t-303", title: "RLHF & Direct Preference Optimization (DPO)", type: "Online Class", duration: "3 hrs", status: "Upcoming" },
-          { id: "t-304", title: "LLM Evaluation Benchmarks & Safety", type: "Reading", duration: "2 hrs", status: "Upcoming" },
-        ],
-      },
-      {
-        id: "mod-4",
-        code: "MOD 04",
-        title: "Retrieval-Augmented Generation (RAG) & Vector DBs",
-        description: "Connecting LLMs to proprietary datasets using vector indexing, embeddings, FAISS, Pinecone, and hybrid search.",
-        duration: "4 Weeks (Weeks 13-16)",
-        status: "Upcoming",
-        progressPercentage: 0,
-        topics: [
-          { id: "t-401", title: "Vector Databases: FAISS, ChromaDB & Pinecone", type: "Online Class", duration: "3 hrs", status: "Upcoming" },
-          { id: "t-402", title: "Document Chunking & Embedding Pipelines", type: "Hands-on Lab", duration: "4 hrs", status: "Upcoming" },
-          { id: "t-403", title: "Reranking & HyDE Retrieval Optimization", type: "Online Class", duration: "3 hrs", status: "Upcoming" },
-          { id: "t-404", title: "RAG Evaluation Framework (Ragas)", type: "Assessment", duration: "2 hrs", status: "Upcoming" },
-        ],
-      },
-      {
-        id: "mod-5",
-        code: "MOD 05",
-        title: "Autonomous AI Agents & LangChain / LlamaIndex",
-        description: "Multi-agent systems, tool calling, memory management, and agentic workflows using LangChain and CrewAI.",
-        duration: "4 Weeks (Weeks 17-20)",
-        status: "Upcoming",
-        progressPercentage: 0,
-        topics: [
-          { id: "t-501", title: "LangChain Framework & Custom Chains", type: "Online Class", duration: "3 hrs", status: "Upcoming" },
-          { id: "t-502", title: "Agentic Tool Calling & Function Binding", type: "Hands-on Lab", duration: "4 hrs", status: "Upcoming" },
-          { id: "t-503", title: "Multi-Agent Systems with CrewAI", type: "Online Class", duration: "3 hrs", status: "Upcoming" },
-        ],
-      },
-      {
-        id: "mod-6",
-        code: "MOD 06",
-        title: "Production Deployment & Capstone Project",
-        description: "Serving LLMs with vLLM, Docker containerization, cloud deployment, and industry capstone project defense.",
-        duration: "4 Weeks (Weeks 21-24)",
-        status: "Upcoming",
-        progressPercentage: 0,
-        topics: [
-          { id: "t-601", title: "High-Throughput LLM Serving with vLLM", type: "Online Class", duration: "3 hrs", status: "Upcoming" },
-          { id: "t-602", title: "Production Monitoring & Latency Optimization", type: "Hands-on Lab", duration: "4 hrs", status: "Upcoming" },
-          { id: "t-603", title: "Capstone Project Defense & Presentation", type: "Assessment", duration: "4 hrs", status: "Upcoming" },
-        ],
-      },
-    ],
-  } as CurriculumData,
-};
-
-// API Service functions
-export async function getParentLinkedStudent(parentId: string = "PAR001"): Promise<LinkedStudent> {
-  const parent = mockDatabase.parents.find((p) => p.id === parentId) || mockDatabase.parents[0];
-  const student = mockDatabase.students[parent.linkedStudentId as keyof typeof mockDatabase.students];
-  return student;
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.warn(`Error fetching ${endpoint} from Django API:`, err);
+    return null;
+  }
 }
 
-export async function getParentProfile(parentId: string = "PAR001"): Promise<ParentProfile> {
-  return mockDatabase.parents.find((p) => p.id === parentId) || mockDatabase.parents[0];
+// API Service functions using Real Backend API Data
+export async function getParentLinkedStudent(studentId?: string): Promise<LinkedStudent> {
+  let profileRes = await fetchDjangoApi("profile", studentId);
+  let p = profileRes?.profile || profileRes?.student;
+  if (!p || !p.name) {
+    const dashRes = await fetchDjangoApi("dashboard", studentId);
+    p = dashRes?.student || dashRes?.profile || p || {};
+  }
+  const attendanceRes = await fetchDjangoApi("attendance", studentId);
+  
+  return {
+    id: p.student_id || studentId || "N/A",
+    name: p.name || "Student",
+    photoUrl: p.avatar_url || "",
+    email: p.email || "N/A",
+    phone: p.phone || "N/A",
+    course: p.course || "Generative AI & LLMs",
+    batch: p.batch || "Assigned Batch",
+    mentor: p.mentor || p.mentor_name || "Assigned Mentor",
+    mentorRole: (p.mentor || p.mentor_name) ? "Lead Mentor" : "Mentor",
+    enrollmentStatus: p.status || "Active",
+    joiningDate: p.join_date || "N/A",
+    expectedGraduation: "N/A",
+    attendancePercentage: attendanceRes?.overall_percentage || 0,
+  };
 }
 
-export async function getStudentAttendance(studentId: string = "STU001"): Promise<AttendanceRecord[]> {
-  return mockDatabase.attendance[studentId as keyof typeof mockDatabase.attendance] || [];
+export async function getParentProfile(studentId?: string): Promise<ParentProfile> {
+  let profileRes = await fetchDjangoApi("profile", studentId);
+  let p = profileRes?.profile || profileRes?.student;
+  if (!p || !p.name) {
+    const dashRes = await fetchDjangoApi("dashboard", studentId);
+    p = dashRes?.student || dashRes?.profile || p || {};
+  }
+
+  const rawParentName = p.parent_name || p.parent_guardian_name || p.guardian_name || p.parentName;
+  let parentName = "";
+  if (rawParentName && typeof rawParentName === "string" && !rawParentName.startsWith("P_") && rawParentName !== p.parent_username) {
+    parentName = rawParentName;
+  } else if (p.name) {
+    parentName = `Parent of ${p.name}`;
+  } else {
+    parentName = "Parent / Guardian";
+  }
+
+  return {
+    id: p.parent_username || "N/A",
+    name: parentName,
+    email: p.email || "N/A",
+    phone: p.phone || "N/A",
+    relation: "Parent / Guardian",
+    linkedStudentId: p.student_id || studentId || "N/A",
+  };
 }
 
-export async function getStudentClasses(studentId: string = "STU001"): Promise<ClassSession[]> {
-  return mockDatabase.classes[studentId as keyof typeof mockDatabase.classes] || [];
+export async function getStudentAttendance(studentId?: string): Promise<AttendanceRecord[]> {
+  const res = await fetchDjangoApi("attendance", studentId);
+  if (!res || !Array.isArray(res.history)) return [];
+  return res.history.map((item: any, idx: number) => ({
+    id: item.id || `att-${idx}`,
+    date: item.date || "N/A",
+    time: item.time || "N/A",
+    topic: item.topic || "Class Session",
+    module: item.module || "Curriculum Module",
+    mentor: item.mentor || "Mentor",
+    status: item.status || "Present",
+  }));
 }
 
-export async function getStudentAssessments(studentId: string = "STU001"): Promise<AssessmentRecord[]> {
-  return mockDatabase.assessments[studentId as keyof typeof mockDatabase.assessments] || [];
+export async function getStudentClasses(studentId?: string): Promise<ClassSession[]> {
+  const res = await fetchDjangoApi("classes", studentId);
+  if (!res || !Array.isArray(res.classes)) return [];
+  return res.classes.map((cls: any, idx: number) => ({
+    id: cls.id || `cls-${idx}`,
+    topic: cls.topic || cls.name || "Live Class",
+    module: cls.module || cls.subject || "Module",
+    date: cls.date || "Scheduled",
+    time: cls.time || "TBD",
+    mentor: cls.mentor || cls.trainer || "Mentor",
+    meetingLink: cls.meeting_link || cls.meetingLink || "https://meet.google.com",
+    status: cls.status || "Upcoming",
+  }));
 }
 
-export async function getStudentNotifications(studentId: string = "STU001"): Promise<NotificationItem[]> {
-  return mockDatabase.notifications[studentId as keyof typeof mockDatabase.notifications] || [];
+export async function getStudentAssessments(studentId?: string): Promise<AssessmentRecord[]> {
+  const res = await fetchDjangoApi("tasks", studentId);
+  if (!res || !Array.isArray(res.tasks)) return [];
+  return res.tasks.map((t: any, idx: number) => ({
+    id: t.id || `ass-${idx}`,
+    name: t.title || t.name || "Assignment",
+    module: t.module || "Course Module",
+    date: t.due_date || t.date || "N/A",
+    score: t.score ? `${t.score}%` : (t.status === "Evaluated" ? "Evaluated" : "Pending"),
+    status: t.status === "Evaluated" || t.status === "Passed" ? "Passed" : "Pending",
+    feedback: t.feedback || t.comments || "No feedback recorded",
+  }));
 }
 
-export async function getStudentFees(studentId: string = "STU001"): Promise<FeeRecord> {
-  return mockDatabase.fees[studentId as keyof typeof mockDatabase.fees];
+export async function getStudentNotifications(studentId?: string): Promise<NotificationItem[]> {
+  const res = await fetchDjangoApi("notifications", studentId);
+  if (!res || !Array.isArray(res.notifications)) return [];
+  return res.notifications.map((n: any, idx: number) => ({
+    id: n.id || `notif-${idx}`,
+    title: n.title || "Notification",
+    message: n.message || "",
+    category: n.category || "General",
+    date: n.timestamp || n.date || "N/A",
+    read: !!n.is_read,
+  }));
 }
 
-export async function getStudentCurriculum(): Promise<CurriculumData> {
-  return mockDatabase.curriculum;
+export async function getStudentFees(studentId?: string): Promise<FeeRecord> {
+  const res = await fetchDjangoApi("fees", studentId);
+  const kpi = res?.kpi || {};
+  const payments = Array.isArray(res?.payments) ? res.payments : [];
+
+  const totalPaid = kpi.total_paid || 0;
+  const totalDue = kpi.total_due || 0;
+  const totalFee = totalPaid + totalDue;
+
+  return {
+    totalFee,
+    paidAmount: totalPaid,
+    pendingAmount: totalDue,
+    dueDate: kpi.next_due_date || "N/A",
+    nextInstallmentAmount: totalDue,
+    paymentHistory: payments.map((p: any, idx: number) => ({
+      id: p.id || `pay-${idx}`,
+      description: p.description || p.remarks || `Fee Payment #${idx + 1}`,
+      date: p.payment_date || p.date || "N/A",
+      amount: p.amount || 0,
+      paymentMode: p.payment_method || "Online",
+      status: p.status || "Paid",
+      receiptNumber: p.transaction_id || p.receipt_number || `INV-${p.id}`,
+    })),
+  };
 }
 
-export async function getParentDashboardData(parentId: string = "PAR001") {
-  const parent = await getParentProfile(parentId);
-  const student = await getParentLinkedStudent(parentId);
+export async function getStudentCurriculum(studentId?: string): Promise<CurriculumData> {
+  const res = await fetchDjangoApi("curriculum", studentId);
+  const months = Array.isArray(res?.months) ? res.months : [];
+  const profileRes = await fetchDjangoApi("profile", studentId);
+  const courseName = profileRes?.profile?.course || "Course Curriculum";
+
+  const modules: CurriculumModule[] = months.map((m: any, idx: number) => ({
+    id: `mod-${m.number || idx + 1}`,
+    code: `MOD 0${m.number || idx + 1}`,
+    title: m.title || `Module ${m.number || idx + 1}`,
+    description: m.description || "",
+    duration: "4 Weeks",
+    status: m.status || "Upcoming",
+    progressPercentage: m.status === "Completed" ? 100 : (m.status === "In Progress" ? 50 : 0),
+    topics: Array.isArray(m.modules) ? m.modules.map((t: any, tIdx: number) => ({
+      id: `t-${tIdx}`,
+      title: t.title || t.name || `Topic ${tIdx + 1}`,
+      type: "Online Class",
+      duration: "3 hrs",
+      status: t.status || "Upcoming",
+    })) : [],
+  }));
+
+  return {
+    courseName,
+    programCode: "NIM-PRO",
+    totalDuration: `${modules.length * 4} Weeks`,
+    modules,
+  };
+}
+
+export async function getParentDashboardData(studentId?: string) {
+  const parent = await getParentProfile(studentId);
+  const student = await getParentLinkedStudent(studentId);
   const attendance = await getStudentAttendance(student.id);
   const classes = await getStudentClasses(student.id);
   const assessments = await getStudentAssessments(student.id);
   const notifications = await getStudentNotifications(student.id);
   const fees = await getStudentFees(student.id);
 
-  // Summary counts
-  const totalClasses = attendance.length + 14; // Past + total cohort classes
+  const totalClasses = attendance.length;
   const presentCount = attendance.filter((a) => a.status === "Present").length;
   const absentCount = attendance.filter((a) => a.status === "Absent").length;
 

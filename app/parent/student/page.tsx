@@ -4,15 +4,12 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useTheme } from "@/components/ThemeProvider";
 import styles from "@/styles/parent/student.module.css";
+import { getLoggedInStudentId } from "@/lib/studentApi";
 import {
-  User,
   Mail,
-  Phone,
   BookOpen,
   Users,
   ShieldCheck,
-  Calendar,
-  Award,
 } from "lucide-react";
 
 export default function StudentProfilePage() {
@@ -24,7 +21,10 @@ export default function StudentProfilePage() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    fetch("/api/parent/student")
+    const studentId = getLoggedInStudentId();
+    const url = studentId ? `/api/parent/student?studentId=${studentId}` : "/api/parent/student";
+
+    fetch(url)
       .then((res) => res.json())
       .then((json) => {
         if (json.success) {
@@ -46,6 +46,13 @@ export default function StudentProfilePage() {
     );
   }
 
+  const rawPName = parent?.name || student?.parent_name || student?.parent_guardian_name || student?.guardian_name;
+  const parentName = (rawPName && typeof rawPName === "string" && !rawPName.startsWith("P_") && rawPName !== student?.parent_username)
+    ? rawPName
+    : (student?.name ? `Parent of ${student.name}` : "N/A");
+  const parentEmail = (parent?.email && parent.email !== "N/A") ? parent.email : (student?.email || "N/A");
+  const parentPhone = (parent?.phone && parent.phone !== "N/A") ? parent.phone : (student?.phone || "N/A");
+
   return (
     <div className={styles.container}>
       {/* Student Hero Banner */}
@@ -55,23 +62,25 @@ export default function StudentProfilePage() {
         }`}
       >
         <div className={styles.photoWrapper}>
-          <Image
-            src={student.photoUrl}
-            alt={student.name}
-            width={110}
-            height={110}
-            className={styles.studentPhoto}
-          />
+          {student.photoUrl && (
+            <Image
+              src={student.photoUrl}
+              alt={student.name || "Student"}
+              width={110}
+              height={110}
+              className={styles.studentPhoto}
+            />
+          )}
           <span className={styles.statusDot} title="Enrolled &amp; Active" />
         </div>
 
         <div className={styles.heroDetails}>
-          <h1 className={styles.heroName}>{student.name}</h1>
-          <p className={styles.heroCourse}>{student.course}</p>
+          <h1 className={styles.heroName}>{student.name || "Student"}</h1>
+          <p className={styles.heroCourse}>{student.course || "Enrolled Course"}</p>
           <div className={styles.badgeRow}>
             <span className={styles.pill}>ID: {student.id}</span>
-            <span className={styles.pill}>{student.batch}</span>
-            <span className={styles.pill}>Status: {student.enrollmentStatus}</span>
+            <span className={styles.pill}>{student.batch || "Batch"}</span>
+            <span className={styles.pill}>Status: {student.enrollmentStatus || "Active"}</span>
           </div>
         </div>
       </section>
@@ -89,19 +98,19 @@ export default function StudentProfilePage() {
           <div className={styles.detailList}>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Course Enrolled</span>
-              <span className={styles.detailValue}>{student.course}</span>
+              <span className={styles.detailValue}>{student.course || "N/A"}</span>
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Batch Name</span>
-              <span className={styles.detailValue}>{student.batch}</span>
+              <span className={styles.detailValue}>{student.batch || "N/A"}</span>
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Assigned Mentor</span>
-              <span className={styles.detailValue}>{student.mentor}</span>
+              <span className={styles.detailValue}>{student.mentor || "Unassigned"}</span>
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Mentor Designation</span>
-              <span className={styles.detailValue}>{student.mentorRole}</span>
+              <span className={styles.detailValue}>{student.mentorRole || "Mentor"}</span>
             </div>
           </div>
         </div>
@@ -117,19 +126,19 @@ export default function StudentProfilePage() {
           <div className={styles.detailList}>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Student Email</span>
-              <span className={styles.detailValue}>{student.email}</span>
+              <span className={styles.detailValue}>{student.email || "N/A"}</span>
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Phone Number</span>
-              <span className={styles.detailValue}>{student.phone}</span>
+              <span className={styles.detailValue}>{student.phone || "N/A"}</span>
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Joining Date</span>
-              <span className={styles.detailValue}>{student.joiningDate}</span>
+              <span className={styles.detailValue}>{student.joiningDate || "N/A"}</span>
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Expected Completion</span>
-              <span className={styles.detailValue}>{student.expectedGraduation}</span>
+              <span className={styles.detailValue}>{student.expectedGraduation || "N/A"}</span>
             </div>
           </div>
         </div>
@@ -145,19 +154,19 @@ export default function StudentProfilePage() {
           <div className={styles.detailList}>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Parent Name</span>
-              <span className={styles.detailValue}>{parent?.name || "Ramesh Kumar"}</span>
+              <span className={styles.detailValue}>{parentName}</span>
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Relationship</span>
-              <span className={styles.detailValue}>{parent?.relation || "Father"}</span>
+              <span className={styles.detailValue}>{parent?.relation || "Parent / Guardian"}</span>
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Parent Email</span>
-              <span className={styles.detailValue}>{parent?.email || "ramesh.kumar@example.com"}</span>
+              <span className={styles.detailValue}>{parentEmail}</span>
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Emergency Contact</span>
-              <span className={styles.detailValue}>{parent?.phone || "+91 98123 45678"}</span>
+              <span className={styles.detailValue}>{parentPhone}</span>
             </div>
           </div>
         </div>
@@ -173,11 +182,11 @@ export default function StudentProfilePage() {
           <div className={styles.detailList}>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Enrollment Status</span>
-              <span className={styles.detailValue}>{student.enrollmentStatus}</span>
+              <span className={styles.detailValue}>{student.enrollmentStatus || "Active"}</span>
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Attendance Standing</span>
-              <span className={styles.detailValue}>{student.attendancePercentage}% (Excellent)</span>
+              <span className={styles.detailValue}>{student.attendancePercentage || 0}%</span>
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Portal Access</span>

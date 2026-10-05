@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useTheme } from "@/components/ThemeProvider";
+import { StudentApi } from "@/lib/studentApi";
 import {
   Target,
   Award,
@@ -15,7 +16,6 @@ import {
   ArrowRight,
   ExternalLink,
   Edit3,
-  Plus,
   Download,
   Upload,
   X,
@@ -24,10 +24,10 @@ import {
   MapPin,
   Mail,
   Phone,
-  Calendar,
-  Star,
-  User,
   BadgeCheck,
+  Loader2,
+  Send,
+  Clock,
 } from "lucide-react";
 
 // Social SVG Icons
@@ -55,37 +55,75 @@ export default function CareerProfilePage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  // Career Profile Dynamic State
+  const [student, setStudent] = useState<any>(null);
+  const [kpi, setKpi] = useState<any>(null);
+  const [careerData, setCareerData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Career Profile Form State
   const [profileData, setProfileData] = useState({
-    name: "Arjun Kumar",
-    studentId: "NIM-2026-0482",
-    headline: "Generative AI & Data Engineering Specialist • Building Production-Grade Agentic Workflows",
-    targetRole: "AI / Machine Learning Engineer",
-    targetCompensation: "₹14 – ₹22 LPA",
-    location: "Bengaluru, India (Open to Remote / Hybrid)",
-    email: "arjun.kumar@nim.academy",
-    phone: "+91 98765 43210",
-    bio: "Passionate AI engineer experienced in building Retrieval-Augmented Generation (RAG) pipelines, fine-tuning 7B+ LLMs using LoRA/QLoRA, and architecting multi-agent systems with LangChain and FastAPI.",
-    linkedinUrl: "https://linkedin.com/in/arjun-ai-engineer",
-    githubUrl: "https://github.com/arjun-ai-labs",
-    portfolioUrl: "https://arjunkumar.ai",
-    availability: "Available for Placement (Immediate)",
+    name: "Vijay",
+    studentId: "NIM-2026-34978",
+    headline: "Full Stack Web Development (Placement Track)",
+    targetRole: "Full Stack Web Developer",
+    targetCompensation: "₹6 – ₹12 LPA",
+    location: "India (Open to Remote / Hybrid)",
+    email: "vijay@student.nim.academy",
+    phone: "+91 98765 00000",
+    bio: "Enrolled in Full Stack Web Development at NIM Academy. Mastering modern frontend architectures, backend APIs, and database engineering.",
+    linkedinUrl: "https://linkedin.com",
+    githubUrl: "https://github.com",
+    portfolioUrl: "",
+    availability: "Placement Track Active",
   });
 
-  // Edit Profile Modal State
+  // Edit Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editForm, setEditForm] = useState(profileData);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Close modal on Escape
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsEditModalOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    setIsLoading(true);
+
+    Promise.all([
+      StudentApi.getDashboard(),
+      StudentApi.getCareer(),
+    ])
+      .then(([dashData, cData]) => {
+        const s = dashData?.student;
+        if (s) {
+          setStudent(s);
+          const initial = {
+            name: s.name || "Vijay",
+            studentId: s.student_id || "NIM-2026-34978",
+            headline: `${s.course || "Full Stack Web Development"} • ${s.batch || "Cohort"}`,
+            targetRole: s.course?.includes("Full Stack") ? "Full Stack Web Developer" : "Software Engineer",
+            targetCompensation: "₹6 – ₹12 LPA",
+            location: "India (Open to Remote / Hybrid)",
+            email: `${s.name?.toLowerCase().replace(/\s+/g, '') || "student"}@student.nim.academy`,
+            phone: "+91 98765 00000",
+            bio: `Enrolled in ${s.course || "Full Stack Web Development"} at NIM Academy. Focused on building production-grade web applications.`,
+            linkedinUrl: "https://linkedin.com",
+            githubUrl: "https://github.com",
+            portfolioUrl: "",
+            availability: "Placement Track Active",
+          };
+          setProfileData(initial);
+          setEditForm(initial);
+        }
+        if (dashData?.kpi) {
+          setKpi(dashData.kpi);
+        }
+        if (cData) {
+          setCareerData(cData);
+        }
+      })
+      .catch((err) => {
+        console.error("Career API error:", err);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   const handleOpenEdit = () => {
@@ -100,8 +138,27 @@ export default function CareerProfilePage() {
     setTimeout(() => {
       setSaveSuccess(false);
       setIsEditModalOpen(false);
-    }, 600);
+    }, 500);
   };
+
+  const progressPct = kpi?.course_progress_pct ?? 0;
+  const studentInitials = profileData.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="w-8 h-8 animate-spin text-[#0062eb]" />
+          <span className="ml-3 text-sm font-semibold text-slate-500">Loading career profile...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -117,7 +174,6 @@ export default function CareerProfilePage() {
           }`}
         >
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 relative z-10">
-            {/* Title & Badge */}
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-[#0062eb] flex items-center justify-center text-white shrink-0 shadow-md shadow-blue-600/30">
                 <Target className="w-7 h-7 stroke-[2.2]" />
@@ -128,7 +184,7 @@ export default function CareerProfilePage() {
                     Career Profile &amp; Portfolio
                   </h1>
                   <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold bg-[#0062eb]/15 text-[#0062eb] dark:text-sky-400 border border-[#0062eb]/25">
-                    <Sparkles className="w-3.5 h-3.5" /> Placement Verified
+                    <Sparkles className="w-3.5 h-3.5" /> Placement Track Active
                   </span>
                 </div>
                 <p className={`text-xs sm:text-sm mt-1 font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
@@ -137,7 +193,6 @@ export default function CareerProfilePage() {
               </div>
             </div>
 
-            {/* Header Actions: Edit Profile Button */}
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -152,10 +207,9 @@ export default function CareerProfilePage() {
         </section>
 
         {/* =========================================================================
-            2. TOP 4-COLUMN CAREER OVERVIEW METRICS GRID
+            2. REAL 4-COLUMN CAREER OVERVIEW METRICS GRID
             ========================================================================= */}
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Target Role */}
           <div
             className={`p-5 rounded-2xl border transition-all ${
               isDark ? "bg-[#081024] border-[#15274d]" : "bg-white border-[#e2edf8] shadow-sm"
@@ -172,10 +226,9 @@ export default function CareerProfilePage() {
             <h3 className={`text-base font-black truncate ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
               {profileData.targetRole}
             </h3>
-            <p className="text-[11px] text-slate-400 font-medium mt-1">Specialization: LLM &amp; RAG Systems</p>
+            <p className="text-[11px] text-slate-400 font-medium mt-1">Specialization: {student?.course || "Full Stack"}</p>
           </div>
 
-          {/* Card 2: Readiness Score */}
           <div
             className={`p-5 rounded-2xl border transition-all ${
               isDark ? "bg-[#081024] border-[#15274d]" : "bg-white border-[#e2edf8] shadow-sm"
@@ -183,22 +236,21 @@ export default function CareerProfilePage() {
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                Readiness Score
+                Curriculum Progress
               </span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                Eligible
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-[#0062eb]">
+                {progressPct}% Completed
               </span>
             </div>
             <div className="flex items-baseline gap-2">
-              <h3 className="text-2xl font-black text-emerald-600 dark:text-emerald-400">88%</h3>
+              <h3 className="text-2xl font-black text-[#0062eb]">{progressPct}%</h3>
               <span className="text-xs text-slate-400 font-semibold">/ 100</span>
             </div>
             <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden mt-2">
-              <div className="h-full bg-emerald-500 rounded-full" style={{ width: "88%" }} />
+              <div className="h-full bg-[#0062eb] rounded-full" style={{ width: `${progressPct}%` }} />
             </div>
           </div>
 
-          {/* Card 3: Target Compensation */}
           <div
             className={`p-5 rounded-2xl border transition-all ${
               isDark ? "bg-[#081024] border-[#15274d]" : "bg-white border-[#e2edf8] shadow-sm"
@@ -215,10 +267,9 @@ export default function CareerProfilePage() {
             <h3 className={`text-base font-black ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
               {profileData.targetCompensation}
             </h3>
-            <p className="text-[11px] text-slate-400 font-medium mt-1">Full-time graduate recruitment</p>
+            <p className="text-[11px] text-slate-400 font-medium mt-1">Full-time graduate placement</p>
           </div>
 
-          {/* Card 4: Resume Quality */}
           <div
             className={`p-5 rounded-2xl border transition-all ${
               isDark ? "bg-[#081024] border-[#15274d]" : "bg-white border-[#e2edf8] shadow-sm"
@@ -226,24 +277,23 @@ export default function CareerProfilePage() {
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                ATS Resume Score
+                Student Status
               </span>
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
                 <BadgeCheck className="w-4 h-4" />
               </div>
             </div>
             <div className="flex items-baseline gap-2">
-              <h3 className="text-2xl font-black text-[#0062eb] dark:text-sky-400">94</h3>
-              <span className="text-xs text-slate-400 font-semibold">/ 100</span>
+              <h3 className="text-2xl font-black text-emerald-600">Active</h3>
             </div>
-            <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">
-              ✓ Verified by Placement Mentor
+            <p className="text-[11px] text-emerald-600 font-bold mt-1">
+              ✓ Verified Enrolled Student
             </p>
           </div>
         </section>
 
         {/* =========================================================================
-            3. STUDENT IDENTITY & CAREER SUMMARY CARD
+            3. REAL STUDENT IDENTITY & BIO CARD
             ========================================================================= */}
         <section
           className={`p-6 sm:p-7 rounded-3xl border transition-all ${
@@ -251,10 +301,9 @@ export default function CareerProfilePage() {
           }`}
         >
           <div className="flex flex-col md:flex-row items-start gap-6">
-            {/* Student Avatar with Active Ring */}
             <div className="relative">
               <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-[#0062eb] to-[#4f46e5] flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-blue-500/25 shrink-0 border-2 border-white dark:border-slate-800">
-                AK
+                {studentInitials}
               </div>
               <span
                 className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#081024] flex items-center justify-center text-white"
@@ -264,29 +313,25 @@ export default function CareerProfilePage() {
               </span>
             </div>
 
-            {/* Profile Content */}
             <div className="flex-1 space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className={`text-xl sm:text-2xl font-black tracking-tight ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
-                      {profileData.name}
-                    </h2>
-                    <span className="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-blue-500/10 text-[#0062eb] dark:text-sky-400 border border-blue-500/20">
-                      {profileData.studentId}
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-sm font-semibold text-[#0062eb] dark:text-sky-400 mt-0.5">
-                    {profileData.headline}
-                  </p>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className={`text-xl sm:text-2xl font-black tracking-tight ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
+                    {profileData.name}
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-blue-500/10 text-[#0062eb] border border-blue-500/20">
+                    {profileData.studentId}
+                  </span>
                 </div>
+                <p className="text-xs sm:text-sm font-semibold text-[#0062eb] mt-0.5">
+                  {profileData.headline}
+                </p>
               </div>
 
               <p className={`text-xs sm:text-[13px] leading-relaxed font-normal ${isDark ? "text-slate-300" : "text-slate-600"}`}>
                 {profileData.bio}
               </p>
 
-              {/* Meta Chips */}
               <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-slate-500 dark:text-slate-400">
                 <div className="flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5 text-slate-400" />
@@ -303,497 +348,186 @@ export default function CareerProfilePage() {
                   <span>{profileData.phone}</span>
                 </div>
               </div>
-
-              {/* Public Links Bar */}
-              <div className="flex flex-wrap items-center gap-2.5 pt-2">
-                <a
-                  href={profileData.linkedinUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#0062eb] transition flex items-center gap-1.5"
-                >
-                  <LinkedinIcon className="w-3.5 h-3.5 text-sky-600" />
-                  <span>LinkedIn Profile</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400" />
-                </a>
-
-                <a
-                  href={profileData.githubUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-purple-500 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-purple-600 transition flex items-center gap-1.5"
-                >
-                  <GithubIcon className="w-3.5 h-3.5 text-purple-600" />
-                  <span>GitHub Repos</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400" />
-                </a>
-
-                <a
-                  href={profileData.portfolioUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-emerald-600 transition flex items-center gap-1.5"
-                >
-                  <Globe className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Portfolio Site</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400" />
-                </a>
-              </div>
             </div>
           </div>
         </section>
 
         {/* =========================================================================
-            4. MAIN 2-COLUMN SECTION: CAREER ASSETS & PLACEMENT CLEARANCE
+            4. PLACEMENT CLEARANCE & ASSETS SECTION
             ========================================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Column (7 cols): Verified Career Assets */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* A. 4-Box Career Assets Grid */}
-            <div>
-              <div className="flex items-center justify-between mb-3.5">
-                <h3 className={`text-base font-black tracking-tight ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
-                  Verified Career Assets
-                </h3>
-                <span className="text-xs font-bold text-[#0062eb] dark:text-sky-400">
-                  4 of 4 Verified
-                </span>
-              </div>
+          <div className="lg:col-span-7 space-y-4">
+            <h3 className={`text-base font-black tracking-tight ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
+              Career Assets &amp; Deliverables
+            </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Asset 1: Resume */}
-                <div
-                  className={`p-5 rounded-2xl border transition-all ${
-                    isDark ? "bg-[#081024] border-[#15274d]" : "bg-white border-[#e2edf8] shadow-sm"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-500/15 text-[#0062eb] flex items-center justify-center">
-                      <FileText className="w-5 h-5 stroke-[2.2]" />
-                    </div>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-600 border border-emerald-500/30">
-                      Approved (94%)
-                    </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div
+                className={`p-5 rounded-2xl border transition-all ${
+                  isDark ? "bg-[#081024] border-[#15274d]" : "bg-white border-[#e2edf8] shadow-sm"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/15 text-[#0062eb] flex items-center justify-center">
+                    <FileText className="w-5 h-5 stroke-[2.2]" />
                   </div>
-                  <h4 className={`text-sm font-bold ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
-                    ATS Resume (PDF)
-                  </h4>
-                  <p className="text-xs text-slate-400 mt-1 line-clamp-1">
-                    Arjun_Kumar_Resume_AI_2026.pdf
-                  </p>
-                  <div className="mt-4 flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => alert("Downloading verified ATS Resume PDF...")}
-                      className="flex-1 py-2 rounded-xl text-xs font-bold bg-[#0062eb] hover:bg-[#0052cc] text-white transition flex items-center justify-center gap-1.5 shadow-sm shadow-blue-500/20"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Download</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleOpenEdit}
-                      className="px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-                      title="Update Resume"
-                    >
-                      <Upload className="w-3.5 h-3.5 text-slate-500" />
-                    </button>
-                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-[#0062eb] border border-blue-500/20">
+                    Draft
+                  </span>
                 </div>
-
-                {/* Asset 2: GitHub Portfolio */}
-                <div
-                  className={`p-5 rounded-2xl border transition-all ${
-                    isDark ? "bg-[#081024] border-[#15274d]" : "bg-white border-[#e2edf8] shadow-sm"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-purple-500/15 text-purple-600 flex items-center justify-center">
-                      <GithubIcon className="w-5 h-5" />
-                    </div>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/15 text-purple-600 border border-purple-500/30">
-                      18 Repositories
-                    </span>
-                  </div>
-                  <h4 className={`text-sm font-bold ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
-                    GitHub AI Portfolio
-                  </h4>
-                  <p className="text-xs text-slate-400 mt-1 line-clamp-1">
-                    PyTorch, RAG Pipelines &amp; Model Weights
-                  </p>
-                  <a
-                    href={profileData.githubUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-4 w-full py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5"
+                <h4 className={`text-sm font-bold ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
+                  Student Resume (PDF)
+                </h4>
+                <p className="text-xs text-slate-400 mt-1 line-clamp-1">
+                  {profileData.name.replace(/\s+/g, '_')}_Resume.pdf
+                </p>
+                <div className="mt-4 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleOpenEdit}
+                    className="w-full py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5"
                   >
-                    <span>View GitHub Profile</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-
-                {/* Asset 3: LinkedIn Profile */}
-                <div
-                  className={`p-5 rounded-2xl border transition-all ${
-                    isDark ? "bg-[#081024] border-[#15274d]" : "bg-white border-[#e2edf8] shadow-sm"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-sky-500/15 text-sky-600 flex items-center justify-center">
-                      <LinkedinIcon className="w-5 h-5" />
-                    </div>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-600 border border-emerald-500/30">
-                      500+ Network
-                    </span>
-                  </div>
-                  <h4 className={`text-sm font-bold ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
-                    LinkedIn Profile
-                  </h4>
-                  <p className="text-xs text-slate-400 mt-1 line-clamp-1">
-                    Recommendations &amp; verified badges linked
-                  </p>
-                  <a
-                    href={profileData.linkedinUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-4 w-full py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5"
-                  >
-                    <span>View LinkedIn</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-
-                {/* Asset 4: Live Portfolio Site */}
-                <div
-                  className={`p-5 rounded-2xl border transition-all ${
-                    isDark ? "bg-[#081024] border-[#15274d]" : "bg-white border-[#e2edf8] shadow-sm"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center">
-                      <Globe className="w-5 h-5" />
-                    </div>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-600 border border-emerald-500/30">
-                      Live Vercel
-                    </span>
-                  </div>
-                  <h4 className={`text-sm font-bold ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
-                    Personal Portfolio Site
-                  </h4>
-                  <p className="text-xs text-slate-400 mt-1 line-clamp-1">
-                    Live interactive demonstrations &amp; case studies
-                  </p>
-                  <a
-                    href={profileData.portfolioUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-4 w-full py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5"
-                  >
-                    <span>Visit Portfolio</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Column (5 cols): Placement Clearance */}
-          <div className="lg:col-span-5 space-y-5">
-            {/* Placement Readiness Stepper Card */}
-            <div
-              className={`p-6 rounded-3xl border transition-all ${
-                isDark ? "bg-[#081024] border-[#15274d]" : "bg-white border-[#e2edf8] shadow-sm"
-              }`}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className={`text-base font-black tracking-tight ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
-                  Placement Clearance
-                </h3>
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                  3 of 5 Cleared
-                </span>
-              </div>
-
-              <div className="space-y-4">
-                {/* Item 1 */}
-                <div className="flex items-start gap-3 text-xs">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 mt-0.5">
-                    <Check className="w-3.5 h-3.5 stroke-[3]" />
-                  </div>
-                  <div>
-                    <h5 className={`font-bold ${isDark ? "text-slate-200" : "text-slate-900"}`}>
-                      ATS Resume Verified
-                    </h5>
-                    <p className="text-[11px] text-slate-400">Score: 94/100 • Approved by Mentor</p>
-                  </div>
-                </div>
-
-                {/* Item 2 */}
-                <div className="flex items-start gap-3 text-xs">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 mt-0.5">
-                    <Check className="w-3.5 h-3.5 stroke-[3]" />
-                  </div>
-                  <div>
-                    <h5 className={`font-bold ${isDark ? "text-slate-200" : "text-slate-900"}`}>
-                      Coding Assessment Benchmark
-                    </h5>
-                    <p className="text-[11px] text-slate-400">160+ Problems Cleared on Platform</p>
-                  </div>
-                </div>
-
-                {/* Item 3 */}
-                <div className="flex items-start gap-3 text-xs">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 mt-0.5">
-                    <Check className="w-3.5 h-3.5 stroke-[3]" />
-                  </div>
-                  <div>
-                    <h5 className={`font-bold ${isDark ? "text-slate-200" : "text-slate-900"}`}>
-                      Technical Mock Interview 1
-                    </h5>
-                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                      Score: 9.2 / 10 • Cleared
-                    </p>
-                  </div>
-                </div>
-
-                {/* Item 4 (Scheduled) */}
-                <div className="flex items-start gap-3 text-xs">
-                  <div className="w-5 h-5 rounded-full bg-[#0062eb] text-white flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px]">
-                    4
-                  </div>
-                  <div>
-                    <h5 className={`font-bold ${isDark ? "text-slate-200" : "text-slate-900"}`}>
-                      System Design Mock Interview
-                    </h5>
-                    <p className="text-[11px] text-[#0062eb] dark:text-sky-400 font-medium">
-                      Scheduled for 10 Oct 2026 • 04:00 PM
-                    </p>
-                  </div>
-                </div>
-
-                {/* Item 5 (Pending) */}
-                <div className="flex items-start gap-3 text-xs opacity-60">
-                  <div className="w-5 h-5 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center shrink-0 mt-0.5 text-[10px] text-slate-400 font-bold">
-                    5
-                  </div>
-                  <div>
-                    <h5 className={`font-bold ${isDark ? "text-slate-400" : "text-slate-700"}`}>
-                      HR &amp; Leadership Behavioral Round
-                    </h5>
-                    <p className="text-[11px] text-slate-400">Unlocks upon passing Mock 2</p>
-                  </div>
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload Resume</span>
+                  </button>
                 </div>
               </div>
 
-              {/* Recruitment CTA Button */}
-              <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <div
+                className={`p-5 rounded-2xl border transition-all ${
+                  isDark ? "bg-[#081024] border-[#15274d]" : "bg-white border-[#e2edf8] shadow-sm"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/15 text-purple-600 flex items-center justify-center">
+                    <GithubIcon className="w-5 h-5" />
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-600 border border-purple-500/20">
+                    Portfolio
+                  </span>
+                </div>
+                <h4 className={`text-sm font-bold ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
+                  GitHub Code Repositories
+                </h4>
+                <p className="text-xs text-slate-400 mt-1 line-clamp-1">
+                  Academic repositories and course projects
+                </p>
                 <button
                   type="button"
-                  onClick={() => alert("Connecting to NIM Academy Career Counselor...")}
-                  className="w-full py-2.5 rounded-xl bg-[#0062eb] hover:bg-[#0052cc] text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/25 cursor-pointer"
+                  onClick={handleOpenEdit}
+                  className="mt-4 w-full py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center justify-center gap-1.5"
                 >
-                  <span>Connect with Placement Cell</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span>Link GitHub Profile</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </button>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={`lg:col-span-5 p-6 rounded-3xl border transition-all space-y-4 ${
+              isDark ? "bg-[#081024] border-[#15274d]" : "bg-white border-[#e2edf8] shadow-sm"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className={`text-base font-black ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
+                Placement Clearance
+              </h3>
+              <span className="text-xs font-bold text-[#0062eb]">
+                Milestone Track
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                <div className="flex items-center gap-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <span className="text-xs font-bold text-emerald-600">Student Registration</span>
+                </div>
+                <span className="text-[10px] font-bold text-emerald-600">Verified</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                <div className="flex items-center gap-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <span className="text-xs font-bold text-emerald-600">Batch Allocation</span>
+                </div>
+                <span className="text-[10px] font-bold text-emerald-600">{student?.batch || "Allocated"}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                <div className="flex items-center gap-2.5">
+                  <Clock className="w-4 h-4 text-[#0062eb]" />
+                  <span className="text-xs font-bold text-[#0062eb]">Curriculum Progression</span>
+                </div>
+                <span className="text-[10px] font-bold text-[#0062eb]">{progressPct}% Complete</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-2.5">
+                  <Circle className="w-4 h-4 text-slate-400" />
+                  <span className="text-xs font-semibold text-slate-400">Technical Mock Interview</span>
+                </div>
+                <span className="text-[10px] font-semibold text-slate-400">Post Modules</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* =========================================================================
-            5. INTERACTIVE STUDENT CAREER PROFILE EDIT / CREATION MODAL
-            ========================================================================= */}
+        {/* Modal: Edit Career Profile */}
         {isEditModalOpen && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-            onClick={() => setIsEditModalOpen(false)}
-            role="dialog"
-            aria-modal="true"
-          >
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
             <div
-              className={`w-full max-w-2xl rounded-3xl border shadow-2xl p-6 sm:p-7 relative max-h-[90vh] overflow-y-auto flex flex-col ${
+              className={`w-full max-w-lg rounded-2xl p-6 border shadow-2xl space-y-4 animate-in zoom-in-95 ${
                 isDark
-                  ? "bg-[#081229] border-[#192f5e] text-white"
-                  : "bg-white border-slate-200 text-[#0a1b39]"
+                  ? "bg-[#0b1429] border-[#1e3363] text-white"
+                  : "bg-white border-[#dce8f8] text-[#0a1b39]"
               }`}
-              onClick={(e) => e.stopPropagation()}
             >
-              {/* Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-[#0062eb] flex items-center justify-center">
-                    <Edit3 className="w-5 h-5 stroke-[2.2]" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-black tracking-tight">
-                      Edit Career Profile
-                    </h3>
-                    <p className="text-xs text-slate-400">
-                      Update your target role, public links, and professional summary
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                  aria-label="Close"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+                <h3 className="font-bold text-base">Edit Career Profile</h3>
+                <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-white">✕</button>
               </div>
 
-              {saveSuccess && (
-                <div className="mt-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Career Profile updated successfully!</span>
+              <form onSubmit={handleSaveProfile} className="space-y-3 text-xs">
+                <div>
+                  <label className="text-slate-400 font-semibold block mb-1">Target Role</label>
+                  <input
+                    type="text"
+                    value={editForm.targetRole}
+                    onChange={(e) => setEditForm({ ...editForm, targetRole: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border outline-none dark:bg-slate-900 dark:border-slate-700"
+                  />
                 </div>
-              )}
-
-              {/* Form Grid */}
-              <form onSubmit={handleSaveProfile} className="space-y-4 my-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Name */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.name}
-                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                      className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 bg-white dark:bg-[#081024] outline-none focus:border-[#0062eb]"
-                      required
-                    />
-                  </div>
-
-                  {/* Target Role */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-                      Target Role
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.targetRole}
-                      onChange={(e) => setEditForm({ ...editForm, targetRole: e.target.value })}
-                      className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 bg-white dark:bg-[#081024] outline-none focus:border-[#0062eb]"
-                      required
-                    />
-                  </div>
-
-                  {/* Target CTC */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-                      Target Compensation (CTC)
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.targetCompensation}
-                      onChange={(e) => setEditForm({ ...editForm, targetCompensation: e.target.value })}
-                      className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 bg-white dark:bg-[#081024] outline-none focus:border-[#0062eb]"
-                      required
-                    />
-                  </div>
-
-                  {/* Preferred Location */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-                      Preferred Location
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.location}
-                      onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
-                      className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 bg-white dark:bg-[#081024] outline-none focus:border-[#0062eb]"
-                      required
-                    />
-                  </div>
-
-                  {/* Headline (Spans 2) */}
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-                      Professional Headline
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.headline}
-                      onChange={(e) => setEditForm({ ...editForm, headline: e.target.value })}
-                      className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 bg-white dark:bg-[#081024] outline-none focus:border-[#0062eb]"
-                      required
-                    />
-                  </div>
-
-                  {/* Bio (Spans 2) */}
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-                      Career Summary &amp; Bio
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={editForm.bio}
-                      onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
-                      className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 p-3 bg-white dark:bg-[#081024] outline-none focus:border-[#0062eb]"
-                      required
-                    />
-                  </div>
-
-                  {/* LinkedIn URL */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-                      LinkedIn URL
-                    </label>
-                    <input
-                      type="url"
-                      value={editForm.linkedinUrl}
-                      onChange={(e) => setEditForm({ ...editForm, linkedinUrl: e.target.value })}
-                      className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 bg-white dark:bg-[#081024] outline-none focus:border-[#0062eb]"
-                      required
-                    />
-                  </div>
-
-                  {/* GitHub URL */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-                      GitHub URL
-                    </label>
-                    <input
-                      type="url"
-                      value={editForm.githubUrl}
-                      onChange={(e) => setEditForm({ ...editForm, githubUrl: e.target.value })}
-                      className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 bg-white dark:bg-[#081024] outline-none focus:border-[#0062eb]"
-                      required
-                    />
-                  </div>
-
-                  {/* Portfolio Website URL (Spans 2) */}
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-                      Portfolio Website URL
-                    </label>
-                    <input
-                      type="url"
-                      value={editForm.portfolioUrl}
-                      onChange={(e) => setEditForm({ ...editForm, portfolioUrl: e.target.value })}
-                      className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 bg-white dark:bg-[#081024] outline-none focus:border-[#0062eb]"
-                      required
-                    />
-                  </div>
+                <div>
+                  <label className="text-slate-400 font-semibold block mb-1">Headline</label>
+                  <input
+                    type="text"
+                    value={editForm.headline}
+                    onChange={(e) => setEditForm({ ...editForm, headline: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border outline-none dark:bg-slate-900 dark:border-slate-700"
+                  />
                 </div>
-
-                {/* Footer Buttons */}
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <div>
+                  <label className="text-slate-400 font-semibold block mb-1">Bio / Profile Summary</label>
+                  <textarea
+                    rows={3}
+                    value={editForm.bio}
+                    onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border outline-none dark:bg-slate-900 dark:border-slate-700"
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
                   <button
                     type="button"
                     onClick={() => setIsEditModalOpen(false)}
-                    className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                    className="px-4 py-2 rounded-xl border text-slate-400"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 rounded-xl bg-[#0062eb] hover:bg-[#0052cc] text-white font-bold text-xs shadow-md shadow-blue-500/25 transition cursor-pointer"
+                    className="px-5 py-2 rounded-xl bg-[#0062eb] text-white font-bold"
                   >
                     Save Changes
                   </button>

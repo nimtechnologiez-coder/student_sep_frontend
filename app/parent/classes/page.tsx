@@ -5,6 +5,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import ClassCard from "@/components/parent/ClassCard";
 import styles from "@/styles/parent/classes.module.css";
 import { ClassSession } from "@/lib/parentData";
+import { getLoggedInStudentId, StudentApi } from "@/lib/studentApi";
 import { CalendarCheck } from "lucide-react";
 
 export default function ParentClassesPage() {
@@ -16,16 +17,33 @@ export default function ParentClassesPage() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    fetch("/api/parent/classes")
+    const studentId = getLoggedInStudentId();
+    const url = studentId ? `/api/parent/classes?studentId=${studentId}` : "/api/parent/classes";
+
+    fetch(url)
       .then((res) => res.json())
       .then((json) => {
         if (json.success) {
-          setClasses(json.classes);
-          setStudent(json.student);
+          setClasses(json.classes || []);
+          if (json.student && json.student.name !== "Student") {
+            setStudent(json.student);
+          }
         }
       })
       .catch((err) => console.error("Error fetching parent classes API:", err))
       .finally(() => setLoading(false));
+
+    StudentApi.getProfile(studentId).then((res) => {
+      if (res && (res.status === "success" || res.success)) {
+        const p = res.profile || res.student;
+        if (p && p.name) {
+          setStudent({
+            name: p.name,
+            batch: p.batch || "Assigned Batch",
+          });
+        }
+      }
+    });
   }, []);
 
   if (loading) {
@@ -37,6 +55,9 @@ export default function ParentClassesPage() {
       </div>
     );
   }
+
+  const studentName = student?.name || "Student";
+  const batchName = student?.batch || "Assigned Batch";
 
   return (
     <div className={styles.container}>
@@ -50,25 +71,53 @@ export default function ParentClassesPage() {
           <h1 className={styles.title}>Live Class Schedule</h1>
           <p className={styles.subtitle}>
             Upcoming live sessions &amp; interactive workshops scheduled for{" "}
-            <strong>{student?.name || "Arjun Kumar"}</strong> ({student?.batch || "AI Cohort 2026"})
+            <strong>{studentName}</strong> ({batchName})
           </p>
         </div>
       </section>
 
-      {/* Grid of Class Cards */}
-      <div className={styles.classesGrid}>
-        {classes.map((cls) => (
-          <ClassCard
-            key={cls.id}
-            topic={cls.topic}
-            module={cls.module}
-            date={cls.date}
-            time={cls.time}
-            mentor={cls.mentor}
-            meetingLink={cls.meetingLink}
-          />
-        ))}
-      </div>
+      {/* Grid of Class Cards or Empty State Card */}
+      {!classes || classes.length === 0 ? (
+        <div
+          className={`${styles.headerCard} ${isDark ? styles.headerCardDark : ""}`}
+          style={{
+            width: "100%",
+            justifyContent: "center",
+            marginTop: "16px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              width: "100%",
+              padding: "48px 16px",
+            }}
+          >
+            <CalendarCheck size={36} opacity={0.6} style={{ marginBottom: "8px" }} />
+            <span style={{ fontSize: "15px", fontWeight: 500, color: "var(--text-muted, #94a3b8)", textAlign: "center" }}>
+              No classes available
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div className={styles.classesGrid}>
+          {classes.map((cls) => (
+            <ClassCard
+              key={cls.id}
+              topic={cls.topic}
+              module={cls.module}
+              date={cls.date}
+              time={cls.time}
+              mentor={cls.mentor}
+              meetingLink={cls.meetingLink}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

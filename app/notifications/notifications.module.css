@@ -84,7 +84,9 @@
   position: relative;
   border-radius: 1rem;
   border: 1px solid;
+  padding: 1rem 1.125rem;
   transition: all 0.2s ease;
+  overflow: hidden;
 }
 
 :global(.dark) .notifItem {
@@ -101,6 +103,7 @@
 :global(.dark) .notifItemUnread {
   background-color: #0d1b38;
   border-color: #1e3a73;
+  border-left: 3px solid #0062eb;
 }
 
 :global(.light) .notifItem {
@@ -117,6 +120,7 @@
 :global(.light) .notifItemUnread {
   background-color: #f2f7ff;
   border-color: #c7defa;
+  border-left: 3px solid #0062eb;
 }
 
 /* 4. Filter Tab Button */

@@ -3,7 +3,7 @@
 import React from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import styles from "@/styles/parent/classcard.module.css";
-import { Calendar, Clock, User, Video } from "lucide-react";
+import { Calendar, Clock, Video } from "lucide-react";
 
 interface ClassCardProps {
   topic: string;
@@ -21,7 +21,7 @@ export default function ClassCard({
   date,
   time,
   mentor,
-  meetingLink = "https://meet.google.com/nim-genai-live",
+  meetingLink = "#",
   onJoin,
 }: ClassCardProps) {
   const { theme } = useTheme();

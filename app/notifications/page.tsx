@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useTheme } from "@/components/ThemeProvider";
+import { StudentApi, getLoggedInStudentId } from "@/lib/studentApi";
 import styles from "./notifications.module.css";
 import {
   Bell,
@@ -213,6 +214,9 @@ export default function NotificationsPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [onlyStarred, setOnlyStarred] = useState<boolean>(false);
 
+  // Ref to prevent card onClick from firing when delete button is pressed
+  const deletingRef = React.useRef(false);
+
   // Modal State for Notification Detail
   const [selectedNotif, setSelectedNotif] = useState<NotificationItem | null>(null);
 
@@ -244,21 +248,36 @@ export default function NotificationsPage() {
       .then(r => r.json())
       .then(data => {
         if (data.notifications && data.notifications.length > 0) {
-          const mapped = data.notifications.map((n: any) => ({
-            id: n.id.toString(),
+          const mapped = data.notifications.map((n: any): NotificationItem => ({
+            // Prefix with "api-" so API IDs never clash with dummy "notif-N" IDs
+            id: `api-${n.id}`,
             title: n.title,
             message: n.message,
-            category: n.category.toLowerCase().includes('system') ? 'announcement' : 'assignment',
-            time: n.timestamp,
+            category: (
+              n.category?.toLowerCase().includes('academic') ? 'announcements'
+              : n.category?.toLowerCase().includes('class') ? 'classes'
+              : n.category?.toLowerCase().includes('assign') ? 'assignments'
+              : n.category?.toLowerCase().includes('eval') ? 'evaluations'
+              : 'system'
+            ) as NotificationItem['category'],
+            priority: 'normal' as NotificationItem['priority'],
+            timestamp: n.timestamp || 'Just now',
+            dateGroup: 'Today' as NotificationItem['dateGroup'],
             isRead: n.is_read,
-            isImportant: n.category === 'Support Reply',
-            actionUrl: null,
-            actionLabel: null,
+            isStarred: false,
+            subject: n.category || 'General',
+            actionUrl: undefined,
+            actionLabel: undefined,
             details: n.message,
-            sender: n.category,
+            sender: n.category || 'NIM AI Portal',
           }));
-          // Append to existing dummy data so UI doesn't look empty
-          setNotifications(prev => [...mapped, ...prev]);
+
+          // Deduplicate: skip items whose IDs already exist in state (guards against StrictMode double-fire)
+          setNotifications(prev => {
+            const existingIds = new Set(prev.map(p => p.id));
+            const newItems = mapped.filter((m: NotificationItem) => !existingIds.has(m.id));
+            return newItems.length > 0 ? [...newItems, ...prev] : prev;
+          });
         }
       })
       .catch(err => console.error(err));
@@ -320,8 +339,15 @@ export default function NotificationsPage() {
 
   const deleteNotification = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
+    // Set the deleting flag so the card's onClick guard skips opening the modal
+    deletingRef.current = true;
     setNotifications((prev) => prev.filter((item) => item.id !== id));
+    // If the deleted item was open in the modal, close the modal
+    setSelectedNotif((prev) => (prev && prev.id === id ? null : prev));
     showToast("Notification deleted");
+    // Reset the flag after the event bubble completes
+    setTimeout(() => { deletingRef.current = false; }, 0);
   };
 
   const markAllAsRead = () => {
@@ -883,10 +909,12 @@ export default function NotificationsPage() {
                             <div
                               key={item.id}
                               onClick={() => {
+                                // Guard: skip if a delete action is in progress
+                                if (deletingRef.current) return;
                                 markAsRead(item.id);
                                 setSelectedNotif(item);
                               }}
-                              className={`p-4 cursor-pointer transition-all duration-200 ${
+                              className={`cursor-pointer transition-all duration-200 ${
                                 styles.notifItem
                               } ${!item.isRead ? styles.notifItemUnread : ""}`}
                             >
@@ -974,61 +1002,61 @@ export default function NotificationsPage() {
                                     {item.message}
                                   </p>
 
-                                  {/* Bottom Actions & Controls */}
-                                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/60">
-                                    {/* Action link */}
+                                  {/* Bottom Action Bar */}
+                                  <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-200/70 dark:border-slate-700/50">
+                                    {/* Left: CTA link or hint */}
                                     {item.actionUrl && item.actionLabel ? (
                                       <Link
                                         href={item.actionUrl}
                                         onClick={(e) => e.stopPropagation()}
-                                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0062eb] hover:text-[#0052cc] group"
+                                        className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#0062eb] hover:text-[#0041c4] group"
                                       >
                                         <span>{item.actionLabel}</span>
-                                        <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                                        <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
                                       </Link>
                                     ) : (
-                                      <span className="text-[11px] text-slate-400">
-                                        Click to view full details
+                                      <span className="text-[11px] font-medium text-slate-400">
+                                        Tap to view details
                                       </span>
                                     )}
 
-                                    {/* Right item buttons */}
+                                    {/* Right: action icon pills */}
                                     <div className="flex items-center gap-1">
-                                      {/* Star Button */}
+                                      {/* Star */}
                                       <button
                                         onClick={(e) => toggleStar(item.id, e)}
                                         title={item.isStarred ? "Unstar" : "Star"}
-                                        className={`p-1.5 rounded-lg transition ${
+                                        className={`flex items-center justify-center w-7 h-7 rounded-lg transition-all active:scale-95 ${
                                           item.isStarred
-                                            ? "text-amber-500 hover:text-amber-600"
-                                            : "text-slate-400 hover:text-amber-500"
+                                            ? "bg-amber-100 dark:bg-amber-500/20 text-amber-500"
+                                            : "bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 hover:text-amber-500"
                                         }`}
                                       >
-                                        <Star
-                                          className={`w-3.5 h-3.5 ${
-                                            item.isStarred ? "fill-amber-500" : ""
-                                          }`}
-                                        />
+                                        <Star className={`w-3.5 h-3.5 ${item.isStarred ? "fill-amber-500" : ""}`} />
                                       </button>
 
-                                      {/* Mark Read/Unread Toggle */}
+                                      {/* Mark Read/Unread */}
                                       <button
                                         onClick={(e) => toggleReadStatus(item.id, e)}
                                         title={item.isRead ? "Mark as unread" : "Mark as read"}
-                                        className={`p-1.5 rounded-lg text-slate-400 hover:text-[#0062eb] hover:bg-blue-50 dark:hover:bg-slate-800 transition`}
+                                        className={`flex items-center justify-center w-7 h-7 rounded-lg transition-all active:scale-95 ${
+                                          item.isRead
+                                            ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                                            : "bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:text-emerald-500"
+                                        }`}
                                       >
-                                        <CheckCircle2
-                                          className={`w-3.5 h-3.5 ${
-                                            item.isRead ? "text-emerald-500" : ""
-                                          }`}
-                                        />
+                                        <CheckCircle2 className="w-3.5 h-3.5" />
                                       </button>
 
-                                      {/* Delete Button */}
+                                      {/* Delete — isolated with pointer-events and stopPropagation + deletingRef */}
                                       <button
+                                        onPointerDown={(e) => {
+                                          e.stopPropagation();
+                                          deletingRef.current = true;
+                                        }}
                                         onClick={(e) => deleteNotification(item.id, e)}
-                                        title="Dismiss notification"
-                                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-slate-800 transition"
+                                        title="Delete notification"
+                                        className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 transition-all active:scale-95"
                                       >
                                         <Trash2 className="w-3.5 h-3.5" />
                                       </button>

@@ -4,9 +4,9 @@ import { getParentLinkedStudent, getStudentNotifications } from "@/lib/parentDat
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const parentId = searchParams.get("parentId") || "PAR001";
-    const student = await getParentLinkedStudent(parentId);
-    const notifications = await getStudentNotifications(student.id);
+    const studentId = searchParams.get("studentId") || searchParams.get("parentId") || "";
+    const student = await getParentLinkedStudent(studentId);
+    const notifications = await getStudentNotifications(student.id || studentId);
 
     return NextResponse.json({
       success: true,

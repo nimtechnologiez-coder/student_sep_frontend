@@ -35,12 +35,12 @@ export default function ParentSidebar({
   mobileOpen = false,
   onMobileClose,
   linkedStudent = {
-    name: "Arjun Kumar",
-    photoUrl: "/avatar.jpg",
-    course: "Generative AI & LLMs",
-    id: "STU001",
+    name: "",
+    photoUrl: "",
+    course: "",
+    id: "",
   },
-  parentName = "Ramesh Kumar",
+  parentName = "",
 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -59,8 +59,15 @@ export default function ParentSidebar({
   ];
 
   const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("userData");
+      localStorage.removeItem("userRole");
+    }
     router.push("/login");
   };
+
+  const displayName = linkedStudent?.name || "Student";
+  const displayParent = parentName || "Parent";
 
   return (
     <>
@@ -101,21 +108,23 @@ export default function ParentSidebar({
           {/* Linked Student Card Header */}
           <div className={styles.studentCardContainer}>
             <div className={styles.linkedStudentCard}>
-              <Image
-                src={linkedStudent.photoUrl}
-                alt={linkedStudent.name}
-                width={40}
-                height={40}
-                className={styles.studentAvatar}
-                onError={(e) => {
-                  const target = e.target as HTMLElement;
-                  target.style.display = "none";
-                }}
-              />
+              {linkedStudent?.photoUrl && (
+                <Image
+                  src={linkedStudent.photoUrl}
+                  alt={displayName}
+                  width={40}
+                  height={40}
+                  className={styles.studentAvatar}
+                  onError={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.display = "none";
+                  }}
+                />
+              )}
               <div className={styles.studentInfo}>
                 <p className={styles.childLabel}>Linked Student</p>
-                <h4 className={styles.studentName}>{linkedStudent.name}</h4>
-                <p className={styles.studentCourse}>{linkedStudent.course}</p>
+                <h4 className={styles.studentName}>{displayName}</h4>
+                <p className={styles.studentCourse}>{linkedStudent?.course || "Generative AI & LLMs"}</p>
               </div>
             </div>
           </div>
@@ -148,13 +157,14 @@ export default function ParentSidebar({
           <div className={styles.parentProfileCard}>
             <div className={styles.parentMeta}>
               <div className={styles.parentAvatar}>
-                {parentName
+                {displayParent
                   .split(" ")
                   .map((n) => n[0])
-                  .join("")}
+                  .join("")
+                  .toUpperCase() || "P"}
               </div>
               <div>
-                <h5 className={styles.parentName}>{parentName}</h5>
+                <h5 className={styles.parentName}>{displayParent}</h5>
                 <p className={styles.parentRole}>Parent / Guardian</p>
               </div>
             </div>
