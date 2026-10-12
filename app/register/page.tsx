@@ -203,7 +203,7 @@ export default function RegisterPage() {
     };
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/register/", {
+      const res = await fetch("https://student-sep-backend.onrender.com/api/register/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -416,23 +416,22 @@ export default function RegisterPage() {
                     currentStep === 1
                       ? "0%"
                       : currentStep === 2
-                      ? "33.3%"
-                      : currentStep === 3
-                      ? "66.6%"
-                      : "100%",
+                        ? "33.3%"
+                        : currentStep === 3
+                          ? "66.6%"
+                          : "100%",
                 }}
               />
 
               {/* Step 1: Personal Details */}
               <div className={styles.stepNode}>
                 <div
-                  className={`${styles.stepCircle} ${
-                    currentStep > 1
+                  className={`${styles.stepCircle} ${currentStep > 1
                       ? styles.stepComplete
                       : currentStep === 1
-                      ? styles.stepActive
-                      : styles.stepInactive
-                  }`}
+                        ? styles.stepActive
+                        : styles.stepInactive
+                    }`}
                 >
                   {currentStep > 1 ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : "1"}
                 </div>
@@ -449,13 +448,12 @@ export default function RegisterPage() {
               {/* Step 2: Timing & Plan Selection */}
               <div className={styles.stepNode}>
                 <div
-                  className={`${styles.stepCircle} ${
-                    currentStep > 2
+                  className={`${styles.stepCircle} ${currentStep > 2
                       ? styles.stepComplete
                       : currentStep === 2
-                      ? styles.stepActive
-                      : styles.stepInactive
-                  }`}
+                        ? styles.stepActive
+                        : styles.stepInactive
+                    }`}
                 >
                   {currentStep > 2 ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : "2"}
                 </div>
@@ -472,13 +470,12 @@ export default function RegisterPage() {
               {/* Step 3: Payment */}
               <div className={styles.stepNode}>
                 <div
-                  className={`${styles.stepCircle} ${
-                    currentStep > 3
+                  className={`${styles.stepCircle} ${currentStep > 3
                       ? styles.stepComplete
                       : currentStep === 3
-                      ? styles.stepActive
-                      : styles.stepInactive
-                  }`}
+                        ? styles.stepActive
+                        : styles.stepInactive
+                    }`}
                 >
                   {currentStep > 3 ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : "3"}
                 </div>
@@ -495,9 +492,8 @@ export default function RegisterPage() {
               {/* Step 4: Complete */}
               <div className={styles.stepNode}>
                 <div
-                  className={`${styles.stepCircle} ${
-                    currentStep === 4 ? styles.stepComplete : styles.stepInactive
-                  }`}
+                  className={`${styles.stepCircle} ${currentStep === 4 ? styles.stepComplete : styles.stepInactive
+                    }`}
                 >
                   {currentStep === 4 ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : "4"}
                 </div>
@@ -607,7 +603,7 @@ export default function RegisterPage() {
                           if (typeof e.target.showPicker === "function") {
                             e.target.showPicker();
                           }
-                        } catch {}
+                        } catch { }
                       }}
                       onBlur={(e) => {
                         if (!e.target.value) {
@@ -703,9 +699,8 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setBatchTiming("Morning")}
-                  className={`${styles.timingCard} ${
-                    batchTiming === "Morning" ? styles.timingCardSelected : ""
-                  }`}
+                  className={`${styles.timingCard} ${batchTiming === "Morning" ? styles.timingCardSelected : ""
+                    }`}
                 >
                   <Sun className="w-4 h-4 text-amber-500" />
                   <span className={styles.timingTitle}>Morning</span>
@@ -715,9 +710,8 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setBatchTiming("Afternoon")}
-                  className={`${styles.timingCard} ${
-                    batchTiming === "Afternoon" ? styles.timingCardSelected : ""
-                  }`}
+                  className={`${styles.timingCard} ${batchTiming === "Afternoon" ? styles.timingCardSelected : ""
+                    }`}
                 >
                   <SunMedium className="w-4 h-4 text-orange-500" />
                   <span className={styles.timingTitle}>Afternoon</span>
@@ -727,9 +721,8 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setBatchTiming("Evening")}
-                  className={`${styles.timingCard} ${
-                    batchTiming === "Evening" ? styles.timingCardSelected : ""
-                  }`}
+                  className={`${styles.timingCard} ${batchTiming === "Evening" ? styles.timingCardSelected : ""
+                    }`}
                 >
                   <Moon className="w-4 h-4 text-indigo-500" />
                   <span className={styles.timingTitle}>Evening</span>
@@ -747,9 +740,8 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedPlan("placement")}
-                  className={`${styles.planCard} ${
-                    selectedPlan === "placement" ? styles.planCardSelected : ""
-                  }`}
+                  className={`${styles.planCard} ${selectedPlan === "placement" ? styles.planCardSelected : ""
+                    }`}
                 >
                   <div className={styles.planRadioTitle}>
                     <div className={styles.radioCircle}>
@@ -764,9 +756,8 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedPlan("without_placement")}
-                  className={`${styles.planCard} ${
-                    selectedPlan === "without_placement" ? styles.planCardSelected : ""
-                  }`}
+                  className={`${styles.planCard} ${selectedPlan === "without_placement" ? styles.planCardSelected : ""
+                    }`}
                 >
                   <div className={styles.planRadioTitle}>
                     <div className={styles.radioCircle}>
@@ -874,11 +865,10 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => setPaymentOption("full")}
-                    className={`p-2 rounded-lg border text-left cursor-pointer ${
-                      paymentOption === "full"
+                    className={`p-2 rounded-lg border text-left cursor-pointer ${paymentOption === "full"
                         ? "border-[#0066fe] bg-blue-50/50"
                         : "border-slate-200"
-                    }`}
+                      }`}
                   >
                     <span className="text-xs font-bold text-slate-900 block">Full Payment</span>
                     <span className="text-xs font-black text-[#0066fe]">
@@ -889,11 +879,10 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => setPaymentOption("installment")}
-                    className={`p-2 rounded-lg border text-left cursor-pointer ${
-                      paymentOption === "installment"
+                    className={`p-2 rounded-lg border text-left cursor-pointer ${paymentOption === "installment"
                         ? "border-[#0066fe] bg-blue-50/50"
                         : "border-slate-200"
-                    }`}
+                      }`}
                   >
                     <span className="text-xs font-bold text-slate-900 block">2 Installments</span>
                     <span className="text-xs font-black text-[#0066fe]">
@@ -911,11 +900,10 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("upi")}
-                    className={`p-1.5 rounded-lg border text-center flex flex-col items-center gap-0.5 ${
-                      paymentMethod === "upi"
+                    className={`p-1.5 rounded-lg border text-center flex flex-col items-center gap-0.5 ${paymentMethod === "upi"
                         ? "border-[#0066fe] bg-blue-50/50 text-[#0066fe] font-bold"
                         : "border-slate-200 text-slate-600 font-medium"
-                    }`}
+                      }`}
                   >
                     <Wallet className="w-3.5 h-3.5" />
                     <span className="text-[11px]">UPI / QR</span>
@@ -924,11 +912,10 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("card")}
-                    className={`p-1.5 rounded-lg border text-center flex flex-col items-center gap-0.5 ${
-                      paymentMethod === "card"
+                    className={`p-1.5 rounded-lg border text-center flex flex-col items-center gap-0.5 ${paymentMethod === "card"
                         ? "border-[#0066fe] bg-blue-50/50 text-[#0066fe] font-bold"
                         : "border-slate-200 text-slate-600 font-medium"
-                    }`}
+                      }`}
                   >
                     <CreditCard className="w-3.5 h-3.5" />
                     <span className="text-[11px]">Debit / Card</span>
@@ -937,11 +924,10 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("netbanking")}
-                    className={`p-1.5 rounded-lg border text-center flex flex-col items-center gap-0.5 ${
-                      paymentMethod === "netbanking"
+                    className={`p-1.5 rounded-lg border text-center flex flex-col items-center gap-0.5 ${paymentMethod === "netbanking"
                         ? "border-[#0066fe] bg-blue-50/50 text-[#0066fe] font-bold"
                         : "border-slate-200 text-slate-600 font-medium"
-                    }`}
+                      }`}
                   >
                     <Building className="w-3.5 h-3.5" />
                     <span className="text-[11px]">Net Banking</span>
@@ -1047,7 +1033,7 @@ export default function RegisterPage() {
                 <div className="flex items-center justify-between pb-1 border-b border-slate-200">
                   <span className="text-slate-500 font-medium">Amount Paid</span>
                   <span className="font-bold text-emerald-600">
-                    {paymentOption === "installment" 
+                    {paymentOption === "installment"
                       ? `₹${((selectedPlan === "placement" ? 90000 : 60000) / 2).toLocaleString()} (1st Installment)`
                       : `₹${(selectedPlan === "placement" ? 90000 : 60000).toLocaleString()}`}
                   </span>

@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://student-sep-backend.onrender.com";
 
 export function getSelectedChildId(): string {
   if (typeof window === "undefined") return "";
@@ -59,7 +59,7 @@ export function getLoggedInStudentId(): string {
 
 async function fetchFromApi(endpoint: string, studentId?: string) {
   const sid = studentId || getLoggedInStudentId();
-  const url = sid 
+  const url = sid
     ? `${BASE_URL}/api/student/${endpoint}/data/${sid}/`
     : `${BASE_URL}/api/student/${endpoint}/data/`;
 
@@ -100,7 +100,7 @@ export const StudentApi = {
   getNotifications: (studentId?: string) => fetchFromApi("notifications", studentId),
   markNotificationRead: async (notifId: number | string, studentId?: string) => {
     const sid = studentId || getLoggedInStudentId();
-    const url = sid 
+    const url = sid
       ? `${BASE_URL}/api/student/notifications/mark-read/${notifId}/${sid}/`
       : `${BASE_URL}/api/student/notifications/mark-read/${notifId}/`;
     try {
@@ -112,7 +112,7 @@ export const StudentApi = {
   },
   markAllNotificationsRead: async (studentId?: string) => {
     const sid = studentId || getLoggedInStudentId();
-    const url = sid 
+    const url = sid
       ? `${BASE_URL}/api/student/notifications/mark-all-read/${sid}/`
       : `${BASE_URL}/api/student/notifications/mark-all-read/`;
     try {
@@ -124,7 +124,7 @@ export const StudentApi = {
   },
   deleteNotification: async (notifId: number | string, studentId?: string) => {
     const sid = studentId || getLoggedInStudentId();
-    const url = sid 
+    const url = sid
       ? `${BASE_URL}/api/student/notifications/delete/${notifId}/${sid}/`
       : `${BASE_URL}/api/student/notifications/delete/${notifId}/`;
     try {
@@ -136,7 +136,7 @@ export const StudentApi = {
   },
   getRequests: async (studentId?: string) => {
     const sid = studentId || getLoggedInStudentId();
-    const url = sid 
+    const url = sid
       ? `${BASE_URL}/api/student/requests/${sid}/`
       : `${BASE_URL}/api/student/requests/`;
     try {
@@ -149,7 +149,7 @@ export const StudentApi = {
   },
   submitRequest: async (data: FormData | Record<string, any>, studentId?: string) => {
     const sid = studentId || getLoggedInStudentId();
-    const url = sid 
+    const url = sid
       ? `${BASE_URL}/api/student/requests/${sid}/`
       : `${BASE_URL}/api/student/requests/`;
     try {
@@ -168,7 +168,7 @@ export const StudentApi = {
   },
   saveCareerAsset: async (data: FormData | Record<string, any>, studentId?: string) => {
     const sid = studentId || getLoggedInStudentId();
-    const url = sid 
+    const url = sid
       ? `${BASE_URL}/api/student/career/save-asset/${sid}/`
       : `${BASE_URL}/api/student/career/save-asset/`;
     try {

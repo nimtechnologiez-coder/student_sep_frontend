@@ -126,11 +126,11 @@ export interface CurriculumData {
   modules: CurriculumModule[];
 }
 
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://student-sep-backend.onrender.com";
 
 async function fetchDjangoApi(endpoint: string, studentId?: string) {
   let sid = studentId && studentId !== "STU001" && studentId !== "PAR001" ? studentId : "";
-  const url = sid 
+  const url = sid
     ? `${BASE_URL}/api/student/${endpoint}/data/${sid}/`
     : `${BASE_URL}/api/student/${endpoint}/data/`;
 
@@ -153,7 +153,7 @@ export async function getParentLinkedStudent(studentId?: string): Promise<Linked
     p = dashRes?.student || dashRes?.profile || p || {};
   }
   const attendanceRes = await fetchDjangoApi("attendance", studentId);
-  
+
   const rawMentor = p.mentor || p.mentor_name;
   const mentorName = typeof rawMentor === "object" && rawMentor !== null
     ? (rawMentor.name || "Assigned Mentor")
@@ -427,11 +427,11 @@ export function formatRelativeNotificationDate(dateStr?: string): string {
 export async function getStudentNotifications(studentId?: string): Promise<NotificationItem[]> {
   let sid = studentId && studentId !== "STU001" && studentId !== "PAR001" ? studentId : "";
   let rawList: any[] = [];
-  
+
   // 1. Try dedicated parent notifications endpoint first
   try {
-    const parentUrl = sid 
-      ? `${BASE_URL}/api/parent/notifications/${sid}/` 
+    const parentUrl = sid
+      ? `${BASE_URL}/api/parent/notifications/${sid}/`
       : `${BASE_URL}/api/parent/notifications/`;
     const res = await fetch(parentUrl, { cache: "no-store" });
     if (res.ok) {
@@ -548,8 +548,8 @@ export async function getStudentCurriculum(studentId?: string): Promise<Curricul
   const rawMonths: any[] = Array.isArray(curriculumRes?.curriculum)
     ? curriculumRes.curriculum
     : Array.isArray(curriculumRes?.months)
-    ? curriculumRes.months
-    : [];
+      ? curriculumRes.months
+      : [];
 
   const profileRes = await fetchDjangoApi("profile", studentId);
   const courseName = profileRes?.profile?.course || curriculumRes?.course_name || "Generative AI & LLMs";

@@ -137,21 +137,21 @@ export default function AssignmentsPage() {
               description: t.description || "Practical assignment task instructions.",
               submission: t.submission
                 ? {
-                    id: t.submission.id,
-                    submissionUrl: t.submission.submission_url,
-                    submissionText: t.submission.submission_text,
-                    fileUrl: t.submission.file_url
-                      ? (t.submission.file_url.startsWith("http")
-                        ? t.submission.file_url
-                        : `http://127.0.0.1:8000${t.submission.file_url}`)
-                      : undefined,
-                    fileName: t.submission.file_name,
-                    fileSize: t.submission.file_size,
-                    submittedAt: t.submission.submitted_at,
-                    marksObtained: t.submission.marks_obtained,
-                    mentorFeedback: t.submission.mentor_feedback,
-                    status: t.submission.status,
-                  }
+                  id: t.submission.id,
+                  submissionUrl: t.submission.submission_url,
+                  submissionText: t.submission.submission_text,
+                  fileUrl: t.submission.file_url
+                    ? (t.submission.file_url.startsWith("http")
+                      ? t.submission.file_url
+                      : `https://student-sep-backend.onrender.com${t.submission.file_url}`)
+                    : undefined,
+                  fileName: t.submission.file_name,
+                  fileSize: t.submission.file_size,
+                  submittedAt: t.submission.submitted_at,
+                  marksObtained: t.submission.marks_obtained,
+                  mentorFeedback: t.submission.mentor_feedback,
+                  status: t.submission.status,
+                }
                 : undefined,
             };
           });
@@ -182,13 +182,13 @@ export default function AssignmentsPage() {
   const gradedAverage =
     evaluatedTasksWithMarks.length > 0
       ? Math.round(
-          (evaluatedTasksWithMarks.reduce(
-            (acc, curr) => acc + (curr.submission?.marksObtained || 0),
-            0
-          ) /
-            (evaluatedTasksWithMarks.length * 100)) *
-            100
-        )
+        (evaluatedTasksWithMarks.reduce(
+          (acc, curr) => acc + (curr.submission?.marksObtained || 0),
+          0
+        ) /
+          (evaluatedTasksWithMarks.length * 100)) *
+        100
+      )
       : null;
 
   // Filtered dataset
@@ -322,7 +322,7 @@ export default function AssignmentsPage() {
       if (submissionText.trim()) formData.append("submission_text", submissionText.trim());
       if (selectedFile) formData.append("file", selectedFile);
 
-      const res = await fetch("http://127.0.0.1:8000/api/student/submit-task/", {
+      const res = await fetch("https://student-sep-backend.onrender.com/api/student/submit-task/", {
         method: "POST",
         body: formData,
       });
@@ -330,25 +330,25 @@ export default function AssignmentsPage() {
       if (data.success) {
         setSubmitSuccess(true);
         const fileUrl = data.file_url
-          ? (data.file_url.startsWith("http") ? data.file_url : `http://127.0.0.1:8000${data.file_url}`)
+          ? (data.file_url.startsWith("http") ? data.file_url : `https://student-sep-backend.onrender.com${data.file_url}`)
           : undefined;
         setTasksList((prev) =>
           prev.map((t) =>
             t.id === activeModalAssignment.id
               ? {
-                  ...t,
+                ...t,
+                status: "Submitted",
+                submission: {
+                  id: data.submission_id,
+                  submissionUrl: submissionUrl.trim() || undefined,
+                  submissionText: submissionText.trim() || undefined,
+                  fileUrl: fileUrl,
+                  fileName: data.file_name || selectedFile?.name,
+                  fileSize: data.file_size || (selectedFile ? formatFileSize(selectedFile.size) : undefined),
                   status: "Submitted",
-                  submission: {
-                    id: data.submission_id,
-                    submissionUrl: submissionUrl.trim() || undefined,
-                    submissionText: submissionText.trim() || undefined,
-                    fileUrl: fileUrl,
-                    fileName: data.file_name || selectedFile?.name,
-                    fileSize: data.file_size || (selectedFile ? formatFileSize(selectedFile.size) : undefined),
-                    status: "Submitted",
-                    submittedAt: "Just now",
-                  },
-                }
+                  submittedAt: "Just now",
+                },
+              }
               : t
           )
         );
@@ -384,33 +384,29 @@ export default function AssignmentsPage() {
             <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span
-                  className={`text-[11px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
-                    isDark
+                  className={`text-[11px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${isDark
                       ? "text-blue-300 bg-blue-950/60 border-blue-800/60"
                       : "text-[#0062eb] bg-blue-50 border-blue-200"
-                  }`}
+                    }`}
                 >
                   Academic Workspaces
                 </span>
                 <span
-                  className={`text-xs font-semibold ${
-                    isDark ? "text-slate-400" : "text-slate-500"
-                  }`}
+                  className={`text-xs font-semibold ${isDark ? "text-slate-400" : "text-slate-500"
+                    }`}
                 >
                   {student?.course || "Academic Program"} {student?.batch ? `• ${student.batch}` : ""}
                 </span>
               </div>
               <h1
-                className={`text-2xl sm:text-3xl font-black tracking-tight ${
-                  isDark ? "text-white" : "text-[#0a1b39]"
-                }`}
+                className={`text-2xl sm:text-3xl font-black tracking-tight ${isDark ? "text-white" : "text-[#0a1b39]"
+                  }`}
               >
                 Assignments
               </h1>
               <p
-                className={`text-xs sm:text-sm font-medium leading-relaxed max-w-2xl ${
-                  isDark ? "text-slate-300" : "text-slate-600"
-                }`}
+                className={`text-xs sm:text-sm font-medium leading-relaxed max-w-2xl ${isDark ? "text-slate-300" : "text-slate-600"
+                  }`}
               >
                 Complete weekly coding implementations, submit research problem sets, monitor grading statuses, and review actionable feedback from instructors.
               </p>
@@ -418,19 +414,17 @@ export default function AssignmentsPage() {
 
             {/* Quick Summary Pill Dock */}
             <div
-              className={`p-3.5 sm:p-4 rounded-xl border flex items-center gap-4 sm:gap-6 shrink-0 ${
-                isDark ? "bg-[#091328] border-[#15254a]" : "bg-slate-50 border-[#dce8f8]"
-              }`}
+              className={`p-3.5 sm:p-4 rounded-xl border flex items-center gap-4 sm:gap-6 shrink-0 ${isDark ? "bg-[#091328] border-[#15254a]" : "bg-slate-50 border-[#dce8f8]"
+                }`}
             >
               <div>
                 <span className="text-[11px] font-semibold text-slate-400 block">Graded Average</span>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span
-                    className={`text-xl sm:text-2xl font-black ${
-                      gradedAverage !== null
+                    className={`text-xl sm:text-2xl font-black ${gradedAverage !== null
                         ? isDark ? "text-emerald-400" : "text-emerald-600"
                         : "text-slate-400"
-                    }`}
+                      }`}
                   >
                     {gradedAverage !== null ? `${gradedAverage}%` : "N/A"}
                   </span>
@@ -451,9 +445,8 @@ export default function AssignmentsPage() {
                   </span>
                 </div>
                 <span
-                  className={`text-[10px] font-semibold ${
-                    overdueCount > 0 ? "text-rose-500 font-bold" : "text-slate-400"
-                  }`}
+                  className={`text-[10px] font-semibold ${overdueCount > 0 ? "text-rose-500 font-bold" : "text-slate-400"
+                    }`}
                 >
                   {overdueCount > 0 ? `${overdueCount} Past Due Date` : "All submissions on track"}
                 </span>
@@ -538,187 +531,183 @@ export default function AssignmentsPage() {
         {/* =========================================================================
             3. ASSIGNMENT WORKSPACE & CONTROLS (Layout Preserved)
             ========================================================================= */}
-            {/* Attention banner if any overdue tasks */}
-            {urgentAssignments.length > 0 && (
-              <section className={styles.urgentCard}>
-                <div className="flex items-center gap-2 mb-3">
-                  <AlertTriangle className="w-4 h-4 text-rose-500" />
-                  <h3 className="text-sm font-bold text-rose-600 dark:text-rose-400">
-                    Needs Your Attention ({urgentAssignments.length} Items Require Action)
-                  </h3>
-                </div>
+        {/* Attention banner if any overdue tasks */}
+        {urgentAssignments.length > 0 && (
+          <section className={styles.urgentCard}>
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="w-4 h-4 text-rose-500" />
+              <h3 className="text-sm font-bold text-rose-600 dark:text-rose-400">
+                Needs Your Attention ({urgentAssignments.length} Items Require Action)
+              </h3>
+            </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {urgentAssignments.map((asg) => (
-                    <div
-                      key={asg.id}
-                      className="p-3.5 rounded-xl bg-white dark:bg-slate-900/80 border border-rose-200 dark:border-rose-900/50 flex flex-col justify-between"
-                    >
-                      <div>
-                        <span className="text-[10px] font-black uppercase text-rose-500 block mb-1">
-                          {asg.status}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {urgentAssignments.map((asg) => (
+                <div
+                  key={asg.id}
+                  className="p-3.5 rounded-xl bg-white dark:bg-slate-900/80 border border-rose-200 dark:border-rose-900/50 flex flex-col justify-between"
+                >
+                  <div>
+                    <span className="text-[10px] font-black uppercase text-rose-500 block mb-1">
+                      {asg.status}
+                    </span>
+                    <h4 className="text-xs sm:text-sm font-bold line-clamp-1">{asg.title}</h4>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Due: {asg.formattedDueDate}</p>
+                  </div>
+
+                  <button
+                    onClick={() => handleOpenModal(asg)}
+                    className="mt-3 px-4 py-1.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold transition w-fit"
+                  >
+                    Submit Now →
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Filter Tabs & Search Bar */}
+        <section
+          className={`p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 ${isDark ? "bg-[#081024] border-[#15274d]" : "bg-white border-[#e2edf8] shadow-xs"
+            }`}
+        >
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+            {(
+              [
+                { id: "All", label: "All", count: totalCount },
+                { id: "Pending", label: "Pending", count: pendingCount },
+                { id: "Submitted", label: "Submitted", count: submittedCount },
+                { id: "Evaluated", label: "Evaluated", count: evaluatedCount },
+                { id: "Overdue", label: "Overdue", count: overdueCount },
+              ] as const
+            ).map((tab) => {
+              const isActive = activeStatusFilter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveStatusFilter(tab.id as FilterStatus)}
+                  className={`${styles.filterPill} ${isActive ? styles.active : ""}`}
+                >
+                  <span>{tab.label}</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${isActive
+                        ? "bg-white/20 text-white"
+                        : isDark
+                          ? "bg-slate-800 text-slate-400"
+                          : "bg-slate-100 text-slate-600 border border-slate-200"
+                      }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="relative flex-1 md:w-64">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search assignments..."
+              className={`w-full pl-8 pr-7 py-2 rounded-xl text-xs outline-none border transition ${isDark
+                  ? "bg-[#091328] border-[#15254a] text-white placeholder-slate-500 focus:border-[#0062eb]"
+                  : "bg-[#f8fbff] border-[#dce8f8] text-[#0a1b39] placeholder-slate-400 focus:border-[#0062eb]"
+                }`}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        </section>
+
+        {/* Assignment List */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <FileText className="w-4 h-4 text-[#0062eb]" />
+            Assignment List ({filteredAssignments.length} Displayed)
+          </h3>
+
+          <div className="space-y-3">
+            {filteredAssignments.length === 0 ? (
+              <div className="py-16 sm:py-20 px-6 text-center flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+                <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-[#0062eb] flex items-center justify-center mb-3.5">
+                  <FileText className="w-7 h-7 stroke-[2]" />
+                </div>
+                <h3 className={`text-base sm:text-lg font-bold ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
+                  No Assignments Scheduled
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-400 mt-1.5 max-w-md">
+                  There are currently no assignments or evaluations scheduled for <strong className={isDark ? "text-slate-300" : "text-slate-700"}>{student?.batch || "your batch"}</strong>. Practical tasks and problem sets will appear here once published by your mentor.
+                </p>
+              </div>
+            ) : (
+              filteredAssignments.map((asg) => {
+                const badge = getStatusBadge(
+                  asg.status,
+                  asg.submission?.marksObtained
+                );
+
+                return (
+                  <div
+                    key={asg.id}
+                    className={`${styles.card} p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4`}
+                  >
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-blue-500/10 text-[#0062eb]">
+                          {asg.category}
                         </span>
-                        <h4 className="text-xs sm:text-sm font-bold line-clamp-1">{asg.title}</h4>
-                        <p className="text-[11px] text-slate-400 mt-0.5">Due: {asg.formattedDueDate}</p>
+                        <span className="text-xs text-slate-400 font-semibold">
+                          Due: {asg.formattedDueDate}
+                        </span>
                       </div>
+
+                      <h4 className={`text-sm sm:text-base font-bold ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
+                        {asg.title}
+                      </h4>
+
+                      {asg.description && (
+                        <p className="text-xs text-slate-400 line-clamp-1">{asg.description}</p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2.5 sm:gap-3 w-full sm:w-auto shrink-0">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-bold border ${badge.className}`}
+                      >
+                        {badge.label}
+                      </span>
 
                       <button
                         onClick={() => handleOpenModal(asg)}
-                        className="mt-3 px-4 py-1.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold transition w-fit"
+                        className="min-h-[40px] px-4 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-800 hover:border-[#0062eb] text-[#0062eb] transition flex-1 sm:flex-initial text-center flex items-center justify-center"
                       >
-                        Submit Now →
+                        {asg.status === "Evaluated" ? "View Feedback" : "View Assignment >"}
                       </button>
                     </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Filter Tabs & Search Bar */}
-            <section
-              className={`p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 ${
-                isDark ? "bg-[#081024] border-[#15274d]" : "bg-white border-[#e2edf8] shadow-xs"
-              }`}
-            >
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-                {(
-                  [
-                    { id: "All", label: "All", count: totalCount },
-                    { id: "Pending", label: "Pending", count: pendingCount },
-                    { id: "Submitted", label: "Submitted", count: submittedCount },
-                    { id: "Evaluated", label: "Evaluated", count: evaluatedCount },
-                    { id: "Overdue", label: "Overdue", count: overdueCount },
-                  ] as const
-                ).map((tab) => {
-                  const isActive = activeStatusFilter === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveStatusFilter(tab.id as FilterStatus)}
-                      className={`${styles.filterPill} ${isActive ? styles.active : ""}`}
-                    >
-                      <span>{tab.label}</span>
-                      <span
-                        className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
-                          isActive
-                            ? "bg-white/20 text-white"
-                            : isDark
-                            ? "bg-slate-800 text-slate-400"
-                            : "bg-slate-100 text-slate-600 border border-slate-200"
-                        }`}
-                      >
-                        {tab.count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="relative flex-1 md:w-64">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search assignments..."
-                  className={`w-full pl-8 pr-7 py-2 rounded-xl text-xs outline-none border transition ${
-                    isDark
-                      ? "bg-[#091328] border-[#15254a] text-white placeholder-slate-500 focus:border-[#0062eb]"
-                      : "bg-[#f8fbff] border-[#dce8f8] text-[#0a1b39] placeholder-slate-400 focus:border-[#0062eb]"
-                  }`}
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-            </section>
-
-            {/* Assignment List */}
-            <div className="space-y-3">
-              <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-[#0062eb]" />
-                Assignment List ({filteredAssignments.length} Displayed)
-              </h3>
-
-              <div className="space-y-3">
-                {filteredAssignments.length === 0 ? (
-                  <div className="py-16 sm:py-20 px-6 text-center flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
-                    <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-[#0062eb] flex items-center justify-center mb-3.5">
-                      <FileText className="w-7 h-7 stroke-[2]" />
-                    </div>
-                    <h3 className={`text-base sm:text-lg font-bold ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
-                      No Assignments Scheduled
-                    </h3>
-                    <p className="text-xs sm:text-sm text-slate-400 mt-1.5 max-w-md">
-                      There are currently no assignments or evaluations scheduled for <strong className={isDark ? "text-slate-300" : "text-slate-700"}>{student?.batch || "your batch"}</strong>. Practical tasks and problem sets will appear here once published by your mentor.
-                    </p>
                   </div>
-                ) : (
-                  filteredAssignments.map((asg) => {
-                    const badge = getStatusBadge(
-                      asg.status,
-                      asg.submission?.marksObtained
-                    );
-
-                    return (
-                      <div
-                        key={asg.id}
-                        className={`${styles.card} p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4`}
-                      >
-                        <div className="min-w-0 space-y-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-blue-500/10 text-[#0062eb]">
-                              {asg.category}
-                            </span>
-                            <span className="text-xs text-slate-400 font-semibold">
-                              Due: {asg.formattedDueDate}
-                            </span>
-                          </div>
-
-                          <h4 className={`text-sm sm:text-base font-bold ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
-                            {asg.title}
-                          </h4>
-
-                          {asg.description && (
-                            <p className="text-xs text-slate-400 line-clamp-1">{asg.description}</p>
-                          )}
-                        </div>
-
-                        <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2.5 sm:gap-3 w-full sm:w-auto shrink-0">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-bold border ${badge.className}`}
-                          >
-                            {badge.label}
-                          </span>
-
-                          <button
-                            onClick={() => handleOpenModal(asg)}
-                            className="min-h-[40px] px-4 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-800 hover:border-[#0062eb] text-[#0062eb] transition flex-1 sm:flex-initial text-center flex items-center justify-center"
-                          >
-                            {asg.status === "Evaluated" ? "View Feedback" : "View Assignment >"}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
+                );
+              })
+            )}
+          </div>
+        </div>
 
         {/* Modal: Assignment Detail & Submission */}
         {activeModalAssignment && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
             <div
-              className={`w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl p-6 border shadow-2xl space-y-4 animate-in zoom-in-95 ${
-                isDark
+              className={`w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl p-6 border shadow-2xl space-y-4 animate-in zoom-in-95 ${isDark
                   ? "bg-[#0b1429] border-[#1e3363] text-white"
                   : "bg-white border-[#dce8f8] text-[#0a1b39]"
-              }`}
+                }`}
             >
               {/* Header */}
               <div className="flex items-start justify-between gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-3">
@@ -755,11 +744,10 @@ export default function AssignmentsPage() {
                   Objective &amp; Instructions
                 </label>
                 <div
-                  className={`p-3.5 rounded-xl border text-xs leading-relaxed ${
-                    isDark
+                  className={`p-3.5 rounded-xl border text-xs leading-relaxed ${isDark
                       ? "bg-[#070e1f] border-[#152345] text-slate-300"
                       : "bg-[#f8fbff] border-[#e2edf8] text-slate-700"
-                  }`}
+                    }`}
                 >
                   {activeModalAssignment.description}
                 </div>
@@ -908,13 +896,12 @@ export default function AssignmentsPage() {
                             validateAndSelectFile(e.dataTransfer.files[0]);
                           }
                         }}
-                        className={`relative border-2 border-dashed rounded-xl p-5 text-center transition cursor-pointer ${
-                          isDragOver
+                        className={`relative border-2 border-dashed rounded-xl p-5 text-center transition cursor-pointer ${isDragOver
                             ? "border-[#0062eb] bg-blue-500/10"
                             : isDark
-                            ? "border-slate-700 hover:border-slate-500 bg-[#070e1f]"
-                            : "border-slate-200 hover:border-slate-400 bg-slate-50/70"
-                        }`}
+                              ? "border-slate-700 hover:border-slate-500 bg-[#070e1f]"
+                              : "border-slate-200 hover:border-slate-400 bg-slate-50/70"
+                          }`}
                         onClick={() => document.getElementById("taskFileInput")?.click()}
                       >
                         <input
@@ -999,11 +986,10 @@ export default function AssignmentsPage() {
                       value={submissionUrl}
                       onChange={(e) => setSubmissionUrl(e.target.value)}
                       placeholder="https://github.com/your-username/repo-name"
-                      className={`w-full px-3 py-2 rounded-xl border outline-none ${
-                        isDark
+                      className={`w-full px-3 py-2 rounded-xl border outline-none ${isDark
                           ? "bg-[#070e1f] border-[#182952] text-white focus:border-[#0062eb]"
                           : "bg-white border-slate-200 text-[#0a1b39] focus:border-[#0062eb]"
-                      }`}
+                        }`}
                     />
                   </div>
 
@@ -1017,11 +1003,10 @@ export default function AssignmentsPage() {
                       onChange={(e) => setSubmissionText(e.target.value)}
                       rows={3}
                       placeholder="Add key highlights, setup instructions, or notes for your mentor..."
-                      className={`w-full px-3 py-2 rounded-xl border outline-none ${
-                        isDark
+                      className={`w-full px-3 py-2 rounded-xl border outline-none ${isDark
                           ? "bg-[#070e1f] border-[#182952] text-white focus:border-[#0062eb]"
                           : "bg-white border-slate-200 text-[#0a1b39] focus:border-[#0062eb]"
-                      }`}
+                        }`}
                     />
                   </div>
                 </div>

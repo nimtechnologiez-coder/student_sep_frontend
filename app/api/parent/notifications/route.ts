@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
     if (action === "mark-read" && notifId) {
       const res = await fetch(
-        `http://127.0.0.1:8000/api/parent/notifications/mark-read/${notifId}/?student_id=${sid}`,
+        `https://student-sep-backend.onrender.com/api/parent/notifications/mark-read/${notifId}/?student_id=${sid}`,
         { method: "POST" }
       );
       const data = await res.json();
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
     if (action === "mark-all-read") {
       const res = await fetch(
-        `http://127.0.0.1:8000/api/parent/notifications/mark-all-read/?student_id=${sid}`,
+        `https://student-sep-backend.onrender.com/api/parent/notifications/mark-all-read/?student_id=${sid}`,
         { method: "POST" }
       );
       const data = await res.json();
