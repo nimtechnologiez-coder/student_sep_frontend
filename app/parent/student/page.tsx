@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTheme } from "@/components/ThemeProvider";
 import styles from "@/styles/parent/student.module.css";
 import { getLoggedInStudentId } from "@/lib/studentApi";
+import { ParentChildProfileSkeleton } from "@/components/Skeleton";
 import {
   Mail,
   BookOpen,
@@ -20,9 +21,14 @@ export default function StudentProfilePage() {
   const [parent, setParent] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const studentId = getLoggedInStudentId();
-    const url = studentId ? `/api/parent/student?studentId=${studentId}` : "/api/parent/student";
+  const loadStudentData = (targetId?: string) => {
+    const studentId = targetId || getLoggedInStudentId();
+    if (!studentId) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const url = `/api/parent/student?studentId=${studentId}`;
 
     fetch(url)
       .then((res) => res.json())
@@ -34,24 +40,55 @@ export default function StudentProfilePage() {
       })
       .catch((err) => console.error("Error fetching student profile API:", err))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadStudentData();
+
+    const handleChildChanged = (e: any) => {
+      if (e.detail) {
+        loadStudentData(e.detail);
+      }
+    };
+
+    window.addEventListener("parent_child_changed", handleChildChanged);
+    return () => {
+      window.removeEventListener("parent_child_changed", handleChildChanged);
+    };
   }, []);
 
   if (loading || !student) {
-    return (
-      <div className={styles.container}>
-        <div className={`${styles.infoCard} ${isDark ? styles.infoCardDark : ""}`}>
-          <p>Loading Linked Student Profile from API...</p>
-        </div>
-      </div>
-    );
+    return <ParentChildProfileSkeleton />;
   }
 
-  const rawPName = parent?.name || student?.parent_name || student?.parent_guardian_name || student?.guardian_name;
-  const parentName = (rawPName && typeof rawPName === "string" && !rawPName.startsWith("P_") && rawPName !== student?.parent_username)
-    ? rawPName
-    : (student?.name ? `Parent of ${student.name}` : "N/A");
+  const rawPName = parent?.name || student?.parent_name || student?.parent_guardian_name || student?.guardian_name || student?.parent_username;
+  let parentName = "Parent / Guardian";
+  if (rawPName && typeof rawPName === "string") {
+    let clean = rawPName.trim();
+    if (clean.toLowerCase().startsWith("p_")) {
+      clean = clean.slice(2).trim();
+    }
+    if (clean && clean.toLowerCase() !== "parent" && clean.toLowerCase() !== "n/a" && !clean.toLowerCase().startsWith("parent of")) {
+      parentName = clean
+        .split(/\s+/)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(" ");
+    } else if (student?.name) {
+      parentName = `Parent of ${student.name}`;
+    }
+  } else if (student?.name) {
+    parentName = `Parent of ${student.name}`;
+  }
   const parentEmail = (parent?.email && parent.email !== "N/A") ? parent.email : (student?.email || "N/A");
   const parentPhone = (parent?.phone && parent.phone !== "N/A") ? parent.phone : (student?.phone || "N/A");
+
+  const rawMentor = student?.mentor;
+  const mentorName = typeof rawMentor === "object" && rawMentor !== null
+    ? (rawMentor.name || "Unassigned")
+    : (typeof rawMentor === "string" ? rawMentor : "Unassigned");
+  const mentorRole = typeof rawMentor === "object" && rawMentor !== null
+    ? (rawMentor.role || student?.mentorRole || "Mentor")
+    : (typeof student?.mentorRole === "string" ? student.mentorRole : "Mentor");
 
   return (
     <div className={styles.container}>
@@ -106,11 +143,11 @@ export default function StudentProfilePage() {
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Assigned Mentor</span>
-              <span className={styles.detailValue}>{student.mentor || "Unassigned"}</span>
+              <span className={styles.detailValue}>{mentorName}</span>
             </div>
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Mentor Designation</span>
-              <span className={styles.detailValue}>{student.mentorRole || "Mentor"}</span>
+              <span className={styles.detailValue}>{mentorRole}</span>
             </div>
           </div>
         </div>

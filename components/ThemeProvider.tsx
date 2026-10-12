@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useServerInsertedHTML } from "next/navigation";
 
 type Theme = "dark" | "light";
 
@@ -12,12 +13,20 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('nim_theme');if(t==='light'){document.documentElement.classList.add('light');document.documentElement.classList.remove('dark');}else{document.documentElement.classList.add('dark');document.documentElement.classList.remove('light');}}catch(e){}})();`;
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  // Safely inject theme initializer into server-rendered <head> without rendering a <script> in client React tree
+  useServerInsertedHTML(() => (
+    <script
+      key="nim-theme-script"
+      dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }}
+    />
+  ));
+
   const [theme, setThemeState] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Check localStorage or default to dark as per design
     const savedTheme = localStorage.getItem("nim_theme") as Theme | null;
     if (savedTheme === "light" || savedTheme === "dark") {
       setThemeState(savedTheme);
@@ -25,7 +34,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       applyTheme("dark");
     }
-    setMounted(true);
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "nim_theme" && (e.newValue === "light" || e.newValue === "dark")) {
+        setThemeState(e.newValue);
+        applyTheme(e.newValue);
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
   const applyTheme = (t: Theme) => {
@@ -52,7 +69,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
-      <div className={mounted ? theme : "dark"} style={{ minHeight: "100vh" }}>
+      <div style={{ minHeight: "100vh" }}>
         {children}
       </div>
     </ThemeContext.Provider>
@@ -66,4 +83,3 @@ export function useTheme() {
   }
   return context;
 }
-

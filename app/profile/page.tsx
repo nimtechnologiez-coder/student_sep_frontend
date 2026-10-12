@@ -5,6 +5,7 @@ import Image from "next/image";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useTheme } from "@/components/ThemeProvider";
 import { StudentApi } from "@/lib/studentApi";
+import { StudentProfileSkeleton } from "@/components/Skeleton";
 import {
   User,
   Mail,
@@ -46,10 +47,7 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="w-8 h-8 animate-spin text-[#0062eb]" />
-          <span className="ml-3 text-sm font-semibold text-slate-500">Loading student profile...</span>
-        </div>
+        <StudentProfileSkeleton />
       </DashboardLayout>
     );
   }
@@ -69,16 +67,16 @@ export default function ProfilePage() {
       <div className="space-y-6">
         {/* Profile Header Banner Card */}
         <div
-          className={`rounded-3xl border p-6 sm:p-8 transition-all ${
+          className={`rounded-3xl border p-4 sm:p-6 lg:p-8 transition-all ${
             isDark
               ? "bg-gradient-to-r from-[#0b1736] via-[#0d1e46] to-[#0b1736] border-[#182c58] text-white"
               : "bg-gradient-to-r from-white via-[#f3f7fd] to-[#ebf3fe] border-[#d2e4f8] text-[#0a1b39] shadow-sm"
           }`}
         >
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
             {/* Avatar */}
             <div
-              className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-blue-400 shadow-lg shrink-0 flex items-center justify-center text-white text-2xl font-bold"
+              className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-blue-400 shadow-lg shrink-0 flex items-center justify-center text-white text-xl sm:text-2xl font-bold"
               style={{ backgroundColor: profile.avatar_color || "#2563eb" }}
             >
               {profile.initials || profile.name?.substring(0, 2).toUpperCase() || "ST"}
@@ -193,7 +191,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-slate-400 text-[10px] font-semibold uppercase">Email Address</p>
-                  <p className="font-bold">{profile.email || "No email provided"}</p>
+                  <p className="font-bold break-all">{profile.email || "No email provided"}</p>
                 </div>
               </div>
 
@@ -258,7 +256,7 @@ export default function ProfilePage() {
                 <h2 className={`text-sm sm:text-base font-bold mb-4 ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
                   Academic &amp; Mentor Summary
                 </h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+                <div className="grid grid-cols-1 min-[360px]:grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 mb-6">
                   <div className={`p-3.5 rounded-xl border text-center ${isDark ? "bg-[#0c1836] border-[#1a2d59]" : "bg-[#f8fbff] border-[#e2edf8]"}`}>
                     <span className="block text-sm font-bold text-slate-400">{profile.term_credits || "Semester 1"}</span>
                     <span className="text-[11px] font-bold text-slate-500">Term Credits</span>

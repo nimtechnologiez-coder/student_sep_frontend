@@ -6,6 +6,7 @@ import StatCard from "@/components/parent/StatCard";
 import AttendanceTable from "@/components/parent/AttendanceTable";
 import styles from "@/styles/parent/attendance.module.css";
 import { getLoggedInStudentId, StudentApi } from "@/lib/studentApi";
+import { TablePageSkeleton } from "@/components/Skeleton";
 import { Calendar, CheckCircle2, XCircle, Clock } from "lucide-react";
 
 export default function ParentAttendancePage() {
@@ -16,9 +17,14 @@ export default function ParentAttendancePage() {
   const [student, setStudent] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const studentId = getLoggedInStudentId();
-    const url = studentId ? `/api/parent/attendance?studentId=${studentId}` : "/api/parent/attendance";
+  const loadAttendanceData = (targetId?: string) => {
+    const studentId = targetId || getLoggedInStudentId();
+    if (!studentId) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const url = `/api/parent/attendance?studentId=${studentId}`;
 
     fetch(url)
       .then((res) => res.json())
@@ -41,16 +47,25 @@ export default function ParentAttendancePage() {
         }
       }
     });
+  };
+
+  useEffect(() => {
+    loadAttendanceData();
+
+    const handleChildChanged = (e: any) => {
+      if (e.detail) {
+        loadAttendanceData(e.detail);
+      }
+    };
+
+    window.addEventListener("parent_child_changed", handleChildChanged);
+    return () => {
+      window.removeEventListener("parent_child_changed", handleChildChanged);
+    };
   }, []);
 
   if (loading || !data) {
-    return (
-      <div className={styles.container}>
-        <div className={`${styles.statsGrid}`}>
-          <p>Loading Attendance Data from API...</p>
-        </div>
-      </div>
-    );
+    return <TablePageSkeleton title="Loading Attendance Data..." />;
   }
 
   const { summary, attendance } = data;
@@ -58,6 +73,21 @@ export default function ParentAttendancePage() {
 
   return (
     <div className={styles.container}>
+      {/* Header Banner */}
+      <section
+        className={`${styles.headerCard} ${
+          isDark ? styles.headerCardDark : ""
+        }`}
+      >
+        <div>
+          <h1 className={styles.title}>Attendance Records</h1>
+          <p className={styles.subtitle}>
+            Session attendance logs &amp; classroom participation history for{" "}
+            <strong>{studentName}</strong> ({student?.batch || "Assigned Batch"})
+          </p>
+        </div>
+      </section>
+
       {/* Overview Stat Cards */}
       <section className={styles.statsGrid}>
         <StatCard
@@ -102,7 +132,7 @@ export default function ParentAttendancePage() {
       {/* Date-wise Attendance Table */}
       <section>
         <div className={styles.cardHeader}>
-          <h2 className={styles.cardTitle}>
+          <h2 className={`${styles.cardTitle} ${isDark ? styles.cardTitleDark : ""}`}>
             Date-Wise Session Logs ({studentName})
           </h2>
         </div>

@@ -14,10 +14,16 @@
 /* 1. Clean Academic Header Card (No Images / Banners) */
 .headerCard {
   border-radius: 1.25rem;
-  padding: 1.5rem 1.75rem;
+  padding: 1.25rem 1rem;
   border-width: 1px;
   border-style: solid;
   transition: all 0.2s ease;
+}
+
+@media (min-width: 640px) {
+  .headerCard {
+    padding: 1.5rem 1.75rem;
+  }
 }
 
 :global(.dark) .headerCard {

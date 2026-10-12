@@ -1,39 +1,67 @@
-/* AssessmentTable CSS Module */
+/* AssessmentTable CSS Module - Clean layout with wrapping, distinct column widths and zero overlap */
 .tableCard {
   background-color: #ffffff;
   border: 1px solid #dce8f8;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tableCardDark {
-  background-color: #0b1429;
-  border-color: #1a2a4f;
+  background-color: #081024;
+  border-color: #15274d;
+  box-shadow: none;
 }
 
 .responsiveWrapper {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom subtle scrollbar */
+.responsiveWrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.responsiveWrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.tableCardDark .responsiveWrapper::-webkit-scrollbar-track {
+  background: #0b1429;
+}
+
+.responsiveWrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.tableCardDark .responsiveWrapper::-webkit-scrollbar-thumb {
+  background: #1e293b;
 }
 
 .table {
   width: 100%;
+  min-width: 780px;
   border-collapse: collapse;
-  text-align: left;
-  font-size: 13px;
+  font-size: 12px;
+  table-layout: auto;
 }
 
 .table th {
   background-color: #f8fbff;
-  color: #475569;
+  color: #64748b;
   font-weight: 800;
-  font-size: 11px;
+  font-size: 10.5px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 14px 18px;
+  letter-spacing: 0.05em;
+  padding: 12px 14px;
   border-bottom: 1px solid #e2edf8;
   white-space: nowrap;
+  vertical-align: middle;
 }
 
 .tableCardDark .table th {
@@ -42,11 +70,19 @@
   border-bottom-color: #1a2a4f;
 }
 
+.thLeft {
+  text-align: left;
+}
+
+.thCenter {
+  text-align: center;
+}
+
 .table td {
-  padding: 14px 18px;
+  padding: 13px 14px;
   border-bottom: 1px solid #f0f5fc;
   color: #1e293b;
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .tableCardDark .table td {
@@ -54,8 +90,16 @@
   color: #cbd5e1;
 }
 
+.tdCenter {
+  text-align: center;
+}
+
 .table tr:last-child td {
   border-bottom: none;
+}
+
+.table tr {
+  transition: background-color 0.15s ease;
 }
 
 .table tr:hover td {
@@ -67,61 +111,169 @@
 }
 
 .assessmentName {
-  font-weight: 800;
+  font-weight: 700;
   color: #0a1b39;
-  margin: 0 0 2px 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .tableCardDark .assessmentName {
   color: #ffffff;
 }
 
-.moduleText {
+.moduleBadge {
+  display: inline-block;
   font-size: 11px;
   color: #0062eb;
+  background-color: #eff6ff;
+  border: 1px solid #dbeafe;
+  padding: 3px 8px;
+  border-radius: 6px;
   font-weight: 700;
+  word-break: break-word;
+  line-height: 1.3;
+  max-width: 100%;
 }
 
-.tableCardDark .moduleText {
+.tableCardDark .moduleBadge {
   color: #38bdf8;
+  background-color: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.22);
+}
+
+.dateWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.dateText {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.tableCardDark .dateText {
+  color: #cbd5e1;
+}
+
+.timeSub {
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  white-space: nowrap;
 }
 
 .scorePill {
-  font-size: 14px;
-  font-weight: 900;
-  color: #10b981;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #059669;
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.tableCardDark .scorePill {
+  color: #34d399;
+  background-color: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.scorePending {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.tableCardDark .scorePending {
+  color: #94a3b8;
+  background-color: #1e293b;
+  border-color: #334155;
 }
 
 .statusPill {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3.5px 9px;
+  border-radius: 9999px;
+  font-size: 10.5px;
   font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-align: center;
 }
 
 .statusPassed {
   background-color: rgba(16, 185, 129, 0.12);
-  color: #10b981;
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
 .statusPending {
   background-color: rgba(245, 158, 11, 0.12);
   color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.tableCardDark .statusPassed {
+  background-color: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.tableCardDark .statusPending {
+  background-color: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.35);
 }
 
 .feedbackBox {
-  font-size: 12px;
+  font-size: 11.5px;
   color: #475569;
   background-color: #f8fafc;
   border-left: 3px solid #0062eb;
-  padding: 8px 12px;
+  padding: 7px 10px;
   border-radius: 0 8px 8px 0;
   line-height: 1.4;
+  font-weight: 500;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  max-height: 56px;
+  overflow-y: auto;
 }
 
 .tableCardDark .feedbackBox {
-  background-color: #111c38;
+  background-color: #0d1933;
   color: #cbd5e1;
   border-left-color: #38bdf8;
+}
+
+.emptyWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #94a3b8;
 }

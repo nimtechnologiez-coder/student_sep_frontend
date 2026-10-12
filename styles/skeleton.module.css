@@ -1,0 +1,375 @@
+/* =========================================================================
+   YouTube-Style Skeleton Loading Shimmer Animation CSS Module
+   Theme-adaptive (Light & Dark), Zero layout shifts, Zero SSR flicker
+   ========================================================================= */
+
+@keyframes shimmerWave {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* 1. Base Skeleton Pulse / Shimmer Bar */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--skeleton-base, #e2edf8);
+  border-radius: 8px;
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    var(--skeleton-highlight, rgba(255, 255, 255, 0.75)) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmerWave 1.6s infinite ease-in-out;
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* Dark Mode Skeleton */
+:global(html.dark) .skeleton,
+:global(.dark) .skeleton,
+.skeletonDark {
+  background-color: var(--skeleton-base, #0f1b38);
+}
+
+:global(html.dark) .skeleton::after,
+:global(.dark) .skeleton::after,
+.skeletonDark::after {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    var(--skeleton-highlight, rgba(255, 255, 255, 0.08)) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+/* Explicit Light Mode Override (guarantees zero dark flash on refresh) */
+:global(html.light) .skeleton,
+:global(html.light) .skeletonDark {
+  background-color: var(--skeleton-base, #e2edf8) !important;
+}
+
+:global(html.light) .skeleton::after,
+:global(html.light) .skeletonDark::after {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    var(--skeleton-highlight, rgba(255, 255, 255, 0.75)) 50%,
+    rgba(255, 255, 255, 0) 100%
+  ) !important;
+}
+
+/* Reduced Motion for Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after,
+  .skeletonDark::after {
+    animation: none !important;
+    display: none !important;
+  }
+}
+
+/* Shape Variants */
+.text {
+  border-radius: 4px;
+  height: 14px;
+  width: 100%;
+}
+
+.circular {
+  border-radius: 50%;
+}
+
+.rounded {
+  border-radius: 12px;
+}
+
+.rectangular {
+  border-radius: 6px;
+}
+
+/* -------------------------------------------------------------------------
+   2. Reusable Container & Card Shells for Skeletons
+   ------------------------------------------------------------------------- */
+.cardShell {
+  background-color: var(--skeleton-card-bg, #ffffff);
+  border: 1px solid var(--skeleton-card-border, #dce8f8);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+:global(html.dark) .cardShell,
+:global(.dark) .cardShell,
+.cardShellDark {
+  background-color: var(--skeleton-card-bg, #0b1429);
+  border-color: var(--skeleton-card-border, #1a2a4f);
+  box-shadow: none;
+}
+
+:global(html.light) .cardShell,
+:global(html.light) .cardShellDark {
+  background-color: var(--skeleton-card-bg, #ffffff) !important;
+  border-color: var(--skeleton-card-border, #dce8f8) !important;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03) !important;
+}
+
+/* KPI Stat Card Skeleton Shell */
+.statCardShell {
+  background-color: var(--skeleton-card-bg, #ffffff);
+  border: 1px solid var(--skeleton-card-border, #dce8f8);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 116px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+:global(html.dark) .statCardShell,
+:global(.dark) .statCardShell,
+.statCardShellDark {
+  background-color: var(--skeleton-card-bg, #081024);
+  border-color: var(--skeleton-card-border, #15274d);
+  box-shadow: none;
+}
+
+:global(html.light) .statCardShell,
+:global(html.light) .statCardShellDark {
+  background-color: var(--skeleton-card-bg, #ffffff) !important;
+  border-color: var(--skeleton-card-border, #dce8f8) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+}
+
+@media (max-width: 640px) {
+  .statCardShell {
+    padding: 12px 12px;
+    border-radius: 14px;
+    min-height: 122px;
+  }
+}
+
+/* Hero Banner Skeleton Shell */
+.heroBannerShell {
+  border-radius: 16px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #f4f8fe 50%, #eef5ff 100%);
+  border: 1px solid #dce8f8;
+  box-sizing: border-box;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px -2px rgba(0, 98, 235, 0.06), 0 1px 3px rgba(15, 23, 42, 0.03);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+:global(html.dark) .heroBannerShell,
+:global(.dark) .heroBannerShell,
+.heroBannerShellDark {
+  background: linear-gradient(135deg, #091a38 0%, #0d2859 50%, #004eb8 100%);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 78, 184, 0.16);
+}
+
+:global(html.light) .heroBannerShell,
+:global(html.light) .heroBannerShellDark {
+  background: linear-gradient(135deg, #ffffff 0%, #f4f8fe 50%, #eef5ff 100%) !important;
+  border-color: #dce8f8 !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 98, 235, 0.06), 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+}
+
+.heroContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
+}
+
+.heroProfile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  flex: 1 1 380px;
+}
+
+/* Table Skeleton */
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 14px;
+  border: 1px solid var(--skeleton-card-border, #dce8f8);
+  background-color: var(--skeleton-card-bg, #ffffff);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+:global(html.dark) .tableWrapper,
+:global(.dark) .tableWrapper,
+.tableWrapperDark {
+  border-color: var(--skeleton-card-border, #1a2a4f);
+  background-color: var(--skeleton-card-bg, #081024);
+  box-shadow: none;
+}
+
+:global(html.light) .tableWrapper,
+:global(html.light) .tableWrapperDark {
+  background-color: var(--skeleton-card-bg, #ffffff) !important;
+  border-color: var(--skeleton-card-border, #dce8f8) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+}
+
+.tableHeadRow {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  background-color: #f8fbff;
+  border-bottom: 1px solid #e2edf8;
+  gap: 12px;
+}
+
+:global(html.dark) .tableHeadRow,
+:global(.dark) .tableHeadRow,
+.tableHeadRowDark {
+  background-color: #0d1933;
+  border-bottom-color: #1a2a4f;
+}
+
+:global(html.light) .tableHeadRow,
+:global(html.light) .tableHeadRowDark {
+  background-color: #f8fbff !important;
+  border-bottom-color: #e2edf8 !important;
+}
+
+.tableBodyRow {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0f5fc;
+  gap: 12px;
+}
+
+:global(html.dark) .tableBodyRow,
+:global(.dark) .tableBodyRow,
+.tableBodyRowDark {
+  border-bottom-color: #122247;
+}
+
+:global(html.light) .tableBodyRow,
+:global(html.light) .tableBodyRowDark {
+  border-bottom-color: #f0f5fc !important;
+}
+
+.tableBodyRow:last-child {
+  border-bottom: none;
+}
+
+/* -------------------------------------------------------------------------
+   3. Inner Boxes & Structural Elements
+   ------------------------------------------------------------------------- */
+.innerBox {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background-color: #f8fafc;
+  border: 1px solid #e2edf8;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+:global(html.dark) .innerBox,
+:global(.dark) .innerBox {
+  background-color: #0e1933;
+  border-color: #1a2a4f;
+}
+
+:global(html.light) .innerBox {
+  background-color: #f8fafc !important;
+  border-color: #e2edf8 !important;
+}
+
+.mentorBoxShell {
+  width: 160px;
+  height: 48px;
+  border-radius: 12px;
+  background-color: #f8fafc;
+  border: 1px solid #e2edf8;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+:global(html.dark) .mentorBoxShell,
+:global(.dark) .mentorBoxShell {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+:global(html.light) .mentorBoxShell {
+  background-color: #f8fafc !important;
+  border-color: #e2edf8 !important;
+}
+
+.boxDivider {
+  height: 1px;
+  width: 100%;
+  background-color: #e2edf8;
+}
+
+:global(html.dark) .boxDivider,
+:global(.dark) .boxDivider {
+  background-color: #1a2a4f;
+}
+
+:global(html.light) .boxDivider {
+  background-color: #e2edf8 !important;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid #f0f5fc;
+}
+
+:global(html.dark) .cardFooter,
+:global(.dark) .cardFooter {
+  border-top-color: #1a2a4f;
+}
+
+:global(html.light) .cardFooter {
+  border-top-color: #f0f5fc !important;
+}

@@ -20,3 +20,36 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { action, notifId, studentId } = body;
+    const sid = studentId || "";
+
+    if (action === "mark-read" && notifId) {
+      const res = await fetch(
+        `http://127.0.0.1:8000/api/parent/notifications/mark-read/${notifId}/?student_id=${sid}`,
+        { method: "POST" }
+      );
+      const data = await res.json();
+      return NextResponse.json(data);
+    }
+
+    if (action === "mark-all-read") {
+      const res = await fetch(
+        `http://127.0.0.1:8000/api/parent/notifications/mark-all-read/?student_id=${sid}`,
+        { method: "POST" }
+      );
+      const data = await res.json();
+      return NextResponse.json(data);
+    }
+
+    return NextResponse.json({ success: false, error: "Invalid action" }, { status: 400 });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: "Failed to process notification status" },
+      { status: 500 }
+    );
+  }
+}

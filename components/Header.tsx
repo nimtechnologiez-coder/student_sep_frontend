@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "./ThemeProvider";
 import { StudentApi } from "@/lib/studentApi";
 import {
@@ -13,8 +14,6 @@ import {
   ChevronDown,
   Menu,
   User,
-  Settings,
-  HelpCircle,
   LogOut,
   CheckCircle2,
   Clock,
@@ -27,6 +26,7 @@ interface HeaderProps {
 
 export default function Header({ onMobileMenuToggle }: HeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
 
@@ -35,6 +35,16 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("userData");
+      localStorage.removeItem("userRole");
+      sessionStorage.clear();
+    }
+    setProfileDropdownOpen(false);
+    router.push("/login");
+  };
 
   // Real notification data from API
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -78,18 +88,31 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
     }
 
     // Fetch real notifications from Django API
-    StudentApi.getNotifications()
-      .then((res: any) => {
-        if (res.status === "success" || res.success) {
-          const list = res.notifications || [];
-          setNotifications(list);
-          const unread = res.kpi?.unread ?? list.filter((n: any) => !n.is_read).length;
-          setUnreadCount(unread);
-        }
-      })
-      .catch((err: any) => {
-        console.warn("Failed to fetch notifications:", err);
-      });
+    const fetchNotifications = () => {
+      StudentApi.getNotifications()
+        .then((res: any) => {
+          if (res.status === "success" || res.success) {
+            const list = res.notifications || [];
+            setNotifications(list);
+            const unread = res.kpi?.unread ?? list.filter((n: any) => !n.is_read).length;
+            setUnreadCount(unread);
+          }
+        })
+        .catch((err: any) => {
+          console.warn("Failed to fetch notifications:", err);
+        });
+    };
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 4000);
+    window.addEventListener("notificationsUpdated", fetchNotifications);
+    window.addEventListener("focus", fetchNotifications);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("notificationsUpdated", fetchNotifications);
+      window.removeEventListener("focus", fetchNotifications);
+    };
   }, []);
 
   // Close dropdowns on click outside
@@ -114,25 +137,27 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
   }, []);
 
   // Mark all notifications as read
-  const handleMarkAllAsRead = () => {
+  const handleMarkAllAsRead = async () => {
     setUnreadCount(0);
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    await StudentApi.markAllNotificationsRead();
+    window.dispatchEvent(new Event("notificationsUpdated"));
   };
 
   return (
     <header
-      className={`sticky top-0 z-30 h-14 sm:h-16 w-full flex items-center justify-between px-3 sm:px-6 lg:px-8 transition-colors duration-200 ${
+      className={`sticky top-0 z-30 h-14 sm:h-16 w-full flex items-center justify-between px-2 sm:px-6 lg:px-8 transition-colors duration-200 ${
         isDark
           ? "bg-[#070d1d]/90 backdrop-blur-md border-b border-[#142142]"
           : "bg-white/95 backdrop-blur-md border-b border-[#dce8f8]"
       }`}
     >
       {/* Left: Mobile Menu Button, Brand on Mobile & Search Input */}
-      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 max-w-xl pr-2">
+      <div className="flex items-center gap-1.5 sm:gap-3 flex-1 min-w-0 max-w-xl pr-1 sm:pr-2">
         {/* Mobile Hamburger Button */}
         <button
           onClick={onMobileMenuToggle}
-          className={`lg:hidden p-2 rounded-xl border transition-all shrink-0 active:scale-95 ${
+          className={`lg:hidden p-1.5 sm:p-2 rounded-xl border transition-all shrink-0 active:scale-95 ${
             isDark
               ? "border-[#1e2f5b] text-slate-300 hover:bg-[#121e3f] bg-[#0b1429]"
               : "border-[#dce8f8] text-slate-700 hover:bg-slate-100 bg-[#f8fafc]"
@@ -144,20 +169,33 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
 
         {/* Mobile Brand Logo Icon */}
         <Link href="/dashboard" className="lg:hidden flex items-center gap-1 shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0052cc] via-[#00a3ff] to-[#38bdf8] flex items-center justify-center text-white font-black text-xs shadow-sm shadow-blue-500/20 select-none">
-            N
+          <div
+            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center p-0.5 border shadow-sm select-none ${
+              isDark
+                ? "bg-[#0c1836] border-[#1d2d58]"
+                : "bg-white border-[#dce8f8]"
+            }`}
+          >
+            <Image
+              src="/nimlogo.webp"
+              alt="NIM Academy Logo"
+              width={26}
+              height={32}
+              className="w-full h-full object-contain"
+              priority
+            />
           </div>
         </Link>
 
         {/* Search Bar - Fluid Responsive */}
         <div className="relative flex-1 min-w-0 max-w-md">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+          <div className="absolute inset-y-0 left-0 pl-2.5 sm:pl-3 flex items-center pointer-events-none text-slate-400">
             <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
           <input
             type="text"
             placeholder={searchPlaceholder}
-            className={`w-full h-8 sm:h-10 pl-8 sm:pl-10 pr-3 sm:pr-4 rounded-xl text-xs sm:text-sm outline-none transition-all truncate ${
+            className={`w-full h-8 sm:h-10 pl-7 sm:pl-10 pr-2.5 sm:pr-4 rounded-xl text-[11px] sm:text-sm outline-none transition-all truncate ${
               isDark
                 ? "bg-[#0e172e] border border-[#1b2b52] text-slate-200 placeholder-slate-500 focus:border-[#0062eb] focus:ring-2 focus:ring-[#0062eb]/20"
                 : "bg-[#f4f8fe] border border-[#d2e2f6] text-[#0a1b39] placeholder-slate-400 focus:border-[#0062eb] focus:bg-white focus:ring-2 focus:ring-[#0062eb]/15"
@@ -167,13 +205,13 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
       </div>
 
       {/* Right Controls: Theme Toggle + Notifications + User Profile */}
-      <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+      <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
         {/* Dark / Light Mode Switch */}
         <button
           onClick={toggleTheme}
           title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
           aria-label="Toggle Theme"
-          className={`p-2 sm:p-2.5 rounded-xl border transition-all cursor-pointer active:scale-95 shrink-0 ${
+          className={`p-1.5 sm:p-2.5 rounded-xl border transition-all cursor-pointer active:scale-95 shrink-0 ${
             isDark
               ? "bg-[#0e172e] border-[#1b2b52] text-sky-400 hover:bg-[#172447] hover:border-sky-400/40"
               : "bg-[#f0f5fc] border-[#d2e2f6] text-amber-500 hover:bg-amber-50 hover:border-amber-200"
@@ -190,7 +228,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
         <div className="relative" ref={notificationsRef}>
           <button
             onClick={() => setNotificationsOpen(!notificationsOpen)}
-            className={`relative p-2 sm:p-2.5 rounded-xl border transition-all cursor-pointer active:scale-95 shrink-0 ${
+            className={`relative p-1.5 sm:p-2.5 rounded-xl border transition-all cursor-pointer active:scale-95 shrink-0 ${
               isDark
                 ? "bg-[#0e172e] border-[#1b2b52] text-slate-300 hover:bg-[#172447] hover:border-blue-500/40"
                 : "bg-[#f0f5fc] border-[#d2e2f6] text-slate-700 hover:bg-blue-50 hover:text-[#0062eb]"
@@ -253,17 +291,20 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
                 {notifications.length > 0 ? (
                   notifications.slice(0, 5).map((n: any, idx: number) => {
                     const isUnread = !n.is_read;
+                    const actionHref = n.action_url || "/notifications";
                     return (
-                      <div
+                      <Link
                         key={n.id || idx}
-                        className={`p-2.5 rounded-xl transition border text-left ${
+                        href={actionHref}
+                        onClick={() => setNotificationsOpen(false)}
+                        className={`block p-2.5 rounded-xl transition border text-left cursor-pointer ${
                           isUnread
                             ? isDark
                               ? "bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/15"
                               : "bg-blue-50/70 border-blue-200/80 hover:bg-blue-100/50"
                             : isDark
-                            ? "bg-slate-900/40 border-transparent hover:bg-slate-800/40"
-                            : "bg-slate-50/70 border-transparent hover:bg-slate-100/60"
+                              ? "bg-slate-900/40 border-transparent hover:bg-slate-800/40"
+                              : "bg-slate-50/70 border-transparent hover:bg-slate-100/60"
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -284,12 +325,16 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
                         </p>
 
                         <div className="flex items-center justify-between gap-2 mt-2 pt-1 border-t border-slate-200/40 dark:border-slate-800/50 text-[10px] text-slate-400">
-                          <span className="px-1.5 py-0.5 rounded bg-slate-200/50 dark:bg-slate-800 font-semibold uppercase tracking-wider text-[9px]">
+                          <span className={`px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider text-[9px] ${
+                            (n.category === 'Fees' || n.reminder_type)
+                              ? (isDark ? "bg-rose-500/20 text-rose-400" : "bg-rose-100 text-rose-700")
+                              : "bg-slate-200/50 dark:bg-slate-800"
+                          }`}>
                             {n.category || "General"}
                           </span>
                           <span>{n.timestamp || "Just now"}</span>
                         </div>
-                      </div>
+                      </Link>
                     );
                   })
                 ) : (
@@ -405,32 +450,6 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
                     <User className="w-3.5 h-3.5" />
                     <span>My Profile</span>
                   </Link>
-
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setProfileDropdownOpen(false)}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition ${
-                      isDark
-                        ? "hover:bg-blue-600 hover:text-white text-slate-200"
-                        : "hover:bg-blue-50 hover:text-[#0062eb] text-slate-700"
-                    }`}
-                  >
-                    <Settings className="w-3.5 h-3.5" />
-                    <span>Account Settings</span>
-                  </Link>
-
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setProfileDropdownOpen(false)}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition ${
-                      isDark
-                        ? "hover:bg-blue-600 hover:text-white text-slate-200"
-                        : "hover:bg-blue-50 hover:text-[#0062eb] text-slate-700"
-                    }`}
-                  >
-                    <HelpCircle className="w-3.5 h-3.5" />
-                    <span>Help &amp; Support</span>
-                  </Link>
                 </div>
 
                 <div
@@ -438,14 +457,14 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
                     isDark ? "border-slate-700/50" : "border-[#e2edf8]"
                   }`}
                 >
-                  <Link
-                    href="/login"
-                    onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-500/10 transition"
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-500/10 transition cursor-pointer text-left"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                     <span>Logout</span>
-                  </Link>
+                  </button>
                 </div>
               </div>
             </>

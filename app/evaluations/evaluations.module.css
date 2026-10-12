@@ -13,9 +13,15 @@
   position: relative;
   overflow: hidden;
   border-radius: 1.25rem;
-  padding: 1.5rem 1.75rem;
+  padding: 1.25rem 1rem;
   border: 1px solid;
   transition: all 0.25s ease;
+}
+
+@media (min-width: 640px) {
+  .heroCard {
+    padding: 1.5rem 1.75rem;
+  }
 }
 
 :global(.dark) .heroCard {

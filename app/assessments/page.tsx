@@ -123,24 +123,24 @@ export default function AssessmentsPage() {
                   </div>
                 </div>
 
-                <div className="flex flex-col items-start sm:items-end gap-2 shrink-0">
+                <div className="flex flex-col items-stretch sm:items-end gap-2 w-full sm:w-auto shrink-0">
                   {classCompleted ? (
-                    <button className="px-5 py-2.5 rounded-xl bg-[#0062eb] hover:bg-[#0052cc] text-white text-xs font-bold transition shadow-md shadow-blue-600/25 flex items-center gap-1.5 cursor-pointer">
+                    <button className="w-full sm:w-auto justify-center px-5 py-2.5 rounded-xl bg-[#0062eb] hover:bg-[#0052cc] text-white text-xs font-bold transition shadow-md shadow-blue-600/25 flex items-center gap-1.5 cursor-pointer min-h-[40px]">
                       <Play className="w-3.5 h-3.5 fill-current" />
                       <span>Start Assessment</span>
                     </button>
                   ) : (
-                    <div className="flex flex-col items-start sm:items-end gap-1.5">
+                    <div className="flex flex-col items-stretch sm:items-end gap-1.5 w-full sm:w-auto">
                       <button
                         disabled
-                        className="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-400 text-xs font-bold cursor-not-allowed flex items-center gap-1.5"
+                        className="w-full sm:w-auto justify-center px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-400 text-xs font-bold cursor-not-allowed flex items-center gap-1.5 min-h-[40px]"
                       >
                         <Lock className="w-3.5 h-3.5" />
                         <span>Complete Live Class to Unlock</span>
                       </button>
                       <button
                         onClick={() => setClassCompleted(true)}
-                        className="text-[11px] font-bold text-[#0062eb] hover:underline cursor-pointer"
+                        className="text-[11px] font-bold text-[#0062eb] hover:underline cursor-pointer text-center sm:text-right"
                       >
                         Simulate: Mark Class Completed
                       </button>
@@ -179,7 +179,7 @@ export default function AssessmentsPage() {
                 </div>
                 <Link
                   href="/evaluations"
-                  className="px-4 py-2.5 rounded-xl border border-[#0062eb] text-[#0062eb] hover:bg-[#0062eb] hover:text-white text-xs font-bold transition shrink-0"
+                  className="w-full sm:w-auto text-center justify-center px-4 py-2.5 rounded-xl border border-[#0062eb] text-[#0062eb] hover:bg-[#0062eb] hover:text-white text-xs font-bold transition shrink-0 min-h-[40px] flex items-center"
                 >
                   View Syllabus &amp; Mock Tests
                 </Link>

@@ -1,19 +1,26 @@
-/* Parent Header CSS Module */
+/* Parent Header CSS Module - Aligned with Student Portal Header */
 .header {
   position: sticky;
   top: 0;
   z-index: 30;
-  height: 64px;
+  height: 56px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 16px;
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid #dce8f8;
   box-sizing: border-box;
   transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+@media (min-width: 640px) {
+  .header {
+    height: 64px;
+    padding: 0 24px;
+  }
 }
 
 .headerDark {
@@ -24,19 +31,21 @@
 .leftControls {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   flex: 1;
   max-width: 600px;
+  min-width: 0;
 }
 
 .mobileMenuBtn {
   display: none;
   background: transparent;
   border: 1px solid #dce8f8;
-  border-radius: 10px;
-  padding: 8px;
+  border-radius: 12px;
+  padding: 7px;
   color: #475569;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .headerDark .mobileMenuBtn {
@@ -52,17 +61,56 @@
   }
 }
 
+.mobileBrandLogo {
+  display: none;
+  align-items: center;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1024px) {
+  .mobileBrandLogo {
+    display: flex;
+  }
+}
+
+.mobileLogoBox {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  background: #ffffff;
+  border: 1px solid #dce8f8;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.headerDark .mobileLogoBox {
+  background: #0c1836;
+  border-color: #1d2d58;
+  box-shadow: none;
+}
+
+.brandLogoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .linkedBadgePill {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
+  gap: 6px;
+  padding: 5px 12px;
   border-radius: 20px;
   background-color: #f0f6ff;
   border: 1px solid #c7dcfd;
   font-size: 12px;
   font-weight: 700;
   color: #0062eb;
+  white-space: nowrap;
 }
 
 .headerDark .linkedBadgePill {
@@ -74,17 +122,19 @@
 .linkedIcon {
   width: 14px;
   height: 14px;
+  flex-shrink: 0;
 }
 
 .rightControls {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .themeBtn {
   padding: 8px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid #d2e2f6;
   background-color: #f0f5fc;
   color: #f59e0b;
@@ -108,7 +158,7 @@
 .notifBtn {
   position: relative;
   padding: 8px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid #d2e2f6;
   background-color: #f0f5fc;
   color: #475569;
@@ -116,6 +166,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.15s ease;
 }
 
 .headerDark .notifBtn {
@@ -128,16 +179,18 @@
   position: absolute;
   top: -4px;
   right: -4px;
-  width: 16px;
+  min-width: 16px;
   height: 16px;
-  border-radius: 50%;
+  padding: 0 4px;
+  border-radius: 9999px;
   background-color: #ef4444;
   color: #ffffff;
   font-size: 10px;
-  font-weight: 900;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
+  line-height: 1;
 }
 
 .notifDropdown {
@@ -166,7 +219,7 @@
   padding-bottom: 10px;
   border-bottom: 1px solid #e2edf8;
   font-weight: 800;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .headerDark .notifHeader {
@@ -175,9 +228,14 @@
 
 .markRead {
   font-size: 11px;
+  font-weight: 700;
   color: #0062eb;
   cursor: pointer;
   text-decoration: none;
+}
+
+.headerDark .markRead {
+  color: #38bdf8;
 }
 
 .notifList {
@@ -185,12 +243,15 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
 }
 
 .notifItem {
   padding: 8px 10px;
   border-radius: 10px;
   background-color: #f8fafc;
+  border: 1px solid transparent;
 }
 
 .headerDark .notifItem {
@@ -201,12 +262,18 @@
   font-size: 12px;
   font-weight: 700;
   margin: 0;
+  line-height: 1.3;
 }
 
 .notifTime {
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 500;
   color: #64748b;
-  margin: 2px 0 0 0;
+  margin: 3px 0 0 0;
+}
+
+.headerDark .notifTime {
+  color: #94a3b8;
 }
 
 .parentProfileBtn {
@@ -218,6 +285,7 @@
   border: 1px solid #d2e2f6;
   background-color: #f0f5fc;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .headerDark .parentProfileBtn {
@@ -242,6 +310,10 @@
   font-size: 12px;
   font-weight: 800;
   color: #0a1b39;
+  max-width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .headerDark .parentNameSmall {
@@ -249,7 +321,188 @@
 }
 
 @media (max-width: 640px) {
-  .linkedBadgePill span:last-child {
+  .linkedBadgePill span:first-of-type {
     display: none;
   }
+  .childSwitcherBtn span:first-of-type {
+    display: none;
+  }
+  .childSwitcherBtn strong {
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .parentNameSmall {
+    max-width: 80px;
+  }
 }
+
+@media (max-width: 480px) {
+  .header {
+    padding: 0 10px;
+  }
+  .leftControls {
+    gap: 8px;
+  }
+  .rightControls {
+    gap: 6px;
+  }
+  .themeBtn,
+  .notifBtn {
+    padding: 6px;
+  }
+  .parentProfileBtn {
+    padding: 3px;
+  }
+  .parentNameSmall {
+    display: none;
+  }
+  .childSwitcherBtn strong {
+    max-width: 80px;
+  }
+  .linkedBadgePill strong {
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .notifDropdown {
+    width: min(300px, calc(100vw - 20px));
+    right: -10px;
+  }
+}
+
+@media (max-width: 340px) {
+  .header {
+    padding: 0 6px;
+  }
+  .leftControls {
+    gap: 6px;
+  }
+  .rightControls {
+    gap: 4px;
+  }
+  .childSwitcherBtn strong,
+  .linkedBadgePill strong {
+    max-width: 65px;
+  }
+}
+
+.childSwitcherWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.childSwitcherBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background-color: #f0f6ff;
+  border: 1px solid #c7dcfd;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0062eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.childSwitcherBtn:hover {
+  background-color: #e0edff;
+  border-color: #93c5fd;
+}
+
+.headerDark .childSwitcherBtn {
+  background-color: #0b1836;
+  border-color: #1c356b;
+  color: #38bdf8;
+}
+
+.headerDark .childSwitcherBtn:hover {
+  background-color: #12244f;
+  border-color: #2563eb;
+}
+
+.childDropdown {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  min-width: 260px;
+  background-color: #ffffff;
+  border: 1px solid #d2e2f6;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  padding: 8px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.headerDark .childDropdown {
+  background-color: #0c142b;
+  border-color: #1e2f5b;
+  color: #f1f5f9;
+}
+
+.childDropdownItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.childDropdownItem:hover {
+  background-color: #f1f5f9;
+}
+
+.headerDark .childDropdownItem:hover {
+  background-color: #162548;
+}
+
+.childDropdownItemActive {
+  background-color: #eff6ff;
+}
+
+.headerDark .childDropdownItemActive {
+  background-color: #11234a;
+}
+
+.childItemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.childItemName {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.headerDark .childItemName {
+  color: #f8fafc;
+}
+
+.childItemMeta {
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.headerDark .childItemMeta {
+  color: #94a3b8;
+}
+
+

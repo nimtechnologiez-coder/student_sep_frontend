@@ -6,18 +6,39 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+@media (min-width: 640px) {
+  .container {
+    gap: 1.5rem;
+  }
 }
 
 /* 1. Welcome Header Section */
 .welcomeCard {
   position: relative;
   overflow: hidden;
-  border-radius: 1.5rem;
-  padding: 1.5rem 1.75rem;
+  border-radius: 1.25rem;
+  padding: 1.25rem 1rem;
   border: 1px solid;
   transition: all 0.25s ease;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .welcomeCard {
+    border-radius: 1.5rem;
+    padding: 1.5rem 1.75rem;
+  }
 }
 
 :global(.dark) .welcomeCard {
@@ -56,10 +77,21 @@
 .nextClassCard {
   position: relative;
   overflow: hidden;
-  border-radius: 1.5rem;
-  padding: 1.5rem 1.75rem;
+  border-radius: 1.25rem;
+  padding: 1.25rem 1rem;
   border: 1px solid;
   transition: all 0.2s ease;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .nextClassCard {
+    border-radius: 1.5rem;
+    padding: 1.5rem 1.75rem;
+  }
 }
 
 :global(.dark) .nextClassCard {
@@ -76,11 +108,23 @@
 
 /* 3. Base Dashboard Card */
 .dashCard {
-  border-radius: 1.25rem;
-  padding: 1.35rem;
+  border-radius: 1rem;
+  padding: 1rem 0.875rem;
   border-width: 1px;
   border-style: solid;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .dashCard {
+    border-radius: 1.25rem;
+    padding: 1.35rem;
+  }
 }
 
 :global(.dark) .dashCard {
@@ -106,14 +150,25 @@
 
 /* 4. Overview KPI Stat Cards */
 .statCard {
-  border-radius: 1rem;
-  padding: 0.85rem;
+  border-radius: 0.875rem;
+  padding: 0.75rem 0.65rem;
   border-width: 1px;
   border-style: solid;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+@media (min-width: 420px) {
+  .statCard {
+    padding: 0.85rem 0.75rem;
+  }
 }
 
 @media (min-width: 640px) {
@@ -217,7 +272,7 @@
 /* 7. Curriculum Month Step Card - Modern Glassmorphism & Stepper Aesthetic */
 .monthCard {
   border-radius: 0.875rem;
-  padding: 0.85rem 0.75rem;
+  padding: 0.75rem 0.65rem;
   border-width: 1px;
   border-style: solid;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -228,6 +283,10 @@
   position: relative;
   overflow: hidden;
   text-decoration: none;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 @media (min-width: 640px) {
@@ -241,6 +300,16 @@
   transform: translateY(-2px);
 }
 
+.monthCardCompleted {
+  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+  border-color: #86efac;
+}
+
+.monthCardCompleted:hover {
+  border-color: #4ade80;
+  box-shadow: 0 8px 20px -4px rgba(34, 197, 94, 0.15);
+}
+
 :global(.dark) .monthCardCompleted {
   background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(10, 20, 42, 0.95) 100%);
   border-color: rgba(16, 185, 129, 0.3);
@@ -251,14 +320,15 @@
   box-shadow: 0 8px 24px -4px rgba(16, 185, 129, 0.2);
 }
 
-:global(.light) .monthCardCompleted {
-  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
-  border-color: #86efac;
+.monthCardActive {
+  background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+  border-color: #3b82f6;
+  box-shadow: 0 6px 20px rgba(0, 98, 235, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
-:global(.light) .monthCardCompleted:hover {
-  border-color: #4ade80;
-  box-shadow: 0 8px 20px -4px rgba(34, 197, 94, 0.15);
+.monthCardActive:hover {
+  border-color: #2563eb;
+  box-shadow: 0 10px 24px rgba(0, 98, 235, 0.18);
 }
 
 :global(.dark) .monthCardActive {
@@ -272,15 +342,14 @@
   box-shadow: 0 10px 30px rgba(0, 98, 235, 0.35);
 }
 
-:global(.light) .monthCardActive {
-  background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
-  border-color: #3b82f6;
-  box-shadow: 0 6px 20px rgba(0, 98, 235, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+.monthCardUpcoming {
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  border-color: #e2e8f0;
 }
 
-:global(.light) .monthCardActive:hover {
-  border-color: #2563eb;
-  box-shadow: 0 10px 24px rgba(0, 98, 235, 0.18);
+.monthCardUpcoming:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.06);
 }
 
 :global(.dark) .monthCardUpcoming {
@@ -292,15 +361,5 @@
   border-color: #28447e;
   background: linear-gradient(180deg, rgba(16, 29, 62, 0.9) 0%, rgba(10, 20, 44, 1) 100%);
   box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4);
-}
-
-:global(.light) .monthCardUpcoming {
-  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
-  border-color: #e2e8f0;
-}
-
-:global(.light) .monthCardUpcoming:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.06);
 }
 

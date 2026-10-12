@@ -16,7 +16,7 @@ export default function DashboardHero() {
 
   return (
     <div
-      className={`relative w-full rounded-[24px] sm:rounded-[28px] border transition-all duration-300 overflow-hidden mb-6 p-5 sm:p-6 lg:p-7 ${
+      className={`relative w-full rounded-2xl sm:rounded-[28px] border transition-all duration-300 overflow-hidden mb-6 p-4 sm:p-6 lg:p-7 ${
         isDark
           ? "bg-gradient-to-r from-[#07132b] via-[#091a3c] to-[#07132b] border-[#15274e] text-white shadow-xl shadow-black/40"
           : "bg-gradient-to-r from-white via-[#f0f6fe] to-[#e8f2fe] border-[#d2e4f8] text-[#0a1b39] shadow-sm shadow-blue-500/5"
@@ -35,7 +35,7 @@ export default function DashboardHero() {
       />
 
       {/* 3-Part Hero Layout: Greeting & Batch (Left), Quote (Center), 3D Artwork (Right) */}
-      <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6">
         {/* =========================================================================
             LEFT AREA: STUDENT GREETING & BATCH INFORMATION
             ========================================================================= */}
@@ -48,7 +48,7 @@ export default function DashboardHero() {
             Good Morning,
           </p>
           <h1
-            className={`text-2xl sm:text-3xl xl:text-[34px] font-black tracking-tight leading-tight mb-2.5 ${
+            className={`text-xl sm:text-3xl xl:text-[34px] font-black tracking-tight leading-tight mb-2 sm:mb-2.5 ${
               isDark ? "text-white" : "text-[#0a1b39]"
             }`}
           >
@@ -57,9 +57,9 @@ export default function DashboardHero() {
           </h1>
 
           {/* Batch & Cohort Badges */}
-          <div className="flex flex-wrap items-center gap-2 mb-3.5">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-3 sm:mb-3.5">
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border transition-colors ${
                 isDark
                   ? "bg-[#0c1c42] border-[#1b356e] text-sky-400"
                   : "bg-blue-50 border-blue-200 text-[#0062eb]"
@@ -81,7 +81,7 @@ export default function DashboardHero() {
           </div>
 
           <p
-            className={`text-xs sm:text-sm leading-relaxed mb-5 ${
+            className={`text-xs sm:text-sm leading-relaxed mb-4 sm:mb-5 ${
               isDark ? "text-slate-300" : "text-slate-600 font-medium"
             }`}
           >
@@ -92,7 +92,7 @@ export default function DashboardHero() {
 
           <Link
             href="/classes"
-            className="inline-flex items-center justify-center gap-2 px-6 py-2.5 sm:py-3 rounded-2xl bg-[#0062eb] hover:bg-[#0052cc] text-white text-xs sm:text-sm font-bold shadow-lg shadow-blue-600/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-2xl bg-[#0062eb] hover:bg-[#0052cc] text-white text-xs sm:text-sm font-bold shadow-lg shadow-blue-600/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer min-h-[42px]"
           >
             <span>Continue Learning</span>
             <ArrowRight className="w-4 h-4" />
@@ -117,7 +117,7 @@ export default function DashboardHero() {
         {/* =========================================================================
             RIGHT AREA: 3D HERO ARTWORK (Student climbing to "A BRIGHTER FUTURE")
             ========================================================================= */}
-        <div className="relative h-40 sm:h-48 lg:h-52 w-full lg:w-[340px] xl:w-[380px] rounded-2xl overflow-hidden shadow-lg border border-blue-400/20 shrink-0">
+        <div className="relative h-36 sm:h-48 lg:h-52 w-full lg:w-[340px] xl:w-[380px] rounded-2xl overflow-hidden shadow-lg border border-blue-400/20 shrink-0">
           <Image
             src="/hero_illustration.jpg"
             alt="A Brighter Future - Student Career Pathway"

@@ -15,8 +15,19 @@
 
 @media (min-width: 1024px) {
   .loginPageLayout {
+    flex-direction: row;
     height: 100vh;
     overflow: hidden;
+  }
+}
+
+@media (max-width: 1023px) {
+  .loginPageLayout {
+    flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
   }
 }
 
@@ -270,12 +281,15 @@
 
 @media (max-width: 1023px) {
   .rightCardPanel {
+    flex: 1 1 100%;
     height: auto;
     min-height: 100vh;
     width: 100%;
+    max-width: 100%;
     background-color: #ebf3f9;
     padding: 24px 16px;
     justify-content: flex-start;
+    box-sizing: border-box;
   }
 }
 
@@ -731,11 +745,14 @@
 
 @media (max-width: 1023px) {
   .rightCardPanel {
+    flex: 1 1 100%;
     height: auto;
     min-height: 100vh;
     width: 100%;
-    padding: 28px 16px 20px 16px;
+    max-width: 100%;
+    padding: 20px 14px 24px 14px;
     justify-content: flex-start;
+    box-sizing: border-box;
   }
 }
 
@@ -748,6 +765,7 @@
   align-items: center;
   gap: 12px;
   margin-bottom: auto;
+  box-sizing: border-box;
 }
 
 .loginTopPrompt {
@@ -767,6 +785,7 @@
   text-decoration: none;
   transition: all 0.15s ease;
   letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 .createAccountPillBtn:hover {
@@ -787,13 +806,47 @@
   position: relative;
   margin: 14px 0;
   transition: all 0.2s ease-in-out;
+  box-sizing: border-box;
 }
 
 @media (max-width: 640px) {
+  .loginTopNav {
+    max-width: 100%;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 0 2px;
+  }
+
   .exactCard {
-    padding: 24px 20px 20px 20px;
+    max-width: 100%;
+    padding: 22px 18px 18px 18px;
     border-radius: 22px;
-    margin: 12px 0;
+    margin: 8px 0 14px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .loginTopNav {
+    max-width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .loginTopPrompt {
+    font-size: 0.78rem;
+  }
+
+  .createAccountPillBtn {
+    font-size: 0.75rem;
+    padding: 4px 12px;
+  }
+
+  .exactCard {
+    max-width: 100%;
+    padding: 18px 14px 16px 14px;
+    border-radius: 20px;
+    margin: 6px 0 12px 0;
   }
 }
 
@@ -1074,6 +1127,24 @@
   margin-top: 1px;
 }
 
+@media (max-width: 480px) {
+  .roleSelectorBar {
+    gap: 4px;
+    padding: 3px;
+    margin-top: 14px;
+  }
+  .roleTab {
+    padding: 6px 2px;
+    min-height: 54px;
+  }
+  .roleTabTitle {
+    font-size: 0.72rem;
+  }
+  .roleTabSubtitle {
+    font-size: 0.60rem;
+  }
+}
+
 /* Outer Footer */
 .loginOuterFooter {
   width: 100%;
@@ -1117,6 +1188,8 @@
   box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
   max-width: 420px;
   width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
   padding: 24px;
   position: relative;
 }

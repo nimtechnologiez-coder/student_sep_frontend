@@ -6,6 +6,7 @@ import StatCard from "@/components/parent/StatCard";
 import AssessmentTable from "@/components/parent/AssessmentTable";
 import styles from "@/styles/parent/assessments.module.css";
 import { getLoggedInStudentId, StudentApi } from "@/lib/studentApi";
+import { TablePageSkeleton } from "@/components/Skeleton";
 import { Award, CheckCircle2, Clock } from "lucide-react";
 
 export default function ParentAssessmentsPage() {
@@ -16,9 +17,14 @@ export default function ParentAssessmentsPage() {
   const [student, setStudent] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const studentId = getLoggedInStudentId();
-    const url = studentId ? `/api/parent/assessments?studentId=${studentId}` : "/api/parent/assessments";
+  const loadAssessmentsData = (targetId?: string) => {
+    const studentId = targetId || getLoggedInStudentId();
+    if (!studentId) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const url = `/api/parent/assessments?studentId=${studentId}`;
 
     fetch(url)
       .then((res) => res.json())
@@ -41,16 +47,25 @@ export default function ParentAssessmentsPage() {
         }
       }
     });
+  };
+
+  useEffect(() => {
+    loadAssessmentsData();
+
+    const handleChildChanged = (e: any) => {
+      if (e.detail) {
+        loadAssessmentsData(e.detail);
+      }
+    };
+
+    window.addEventListener("parent_child_changed", handleChildChanged);
+    return () => {
+      window.removeEventListener("parent_child_changed", handleChildChanged);
+    };
   }, []);
 
   if (loading || !data) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.statsGrid}>
-          <p>Loading Assessment Data from API...</p>
-        </div>
-      </div>
-    );
+    return <TablePageSkeleton title="Loading Evaluations & Scorecard..." />;
   }
 
   const { assessments } = data;
@@ -84,6 +99,25 @@ export default function ParentAssessmentsPage() {
 
   return (
     <div className={styles.container}>
+      {/* Header Banner */}
+      <section
+        className={`${styles.headerCard} ${
+          isDark ? styles.headerCardDark : ""
+        }`}
+      >
+        <div>
+          <div className={styles.badgeWrap}>
+            <Award size={13} />
+            <span>Academic Evaluations &amp; Scorecard</span>
+          </div>
+          <h1 className={styles.title}>Academic Assessments</h1>
+          <p className={styles.subtitle}>
+            Quizzes, evaluations, and performance benchmarks for{" "}
+            <strong>{studentName}</strong> ({student?.batch || "Assigned Batch"})
+          </p>
+        </div>
+      </section>
+
       {/* Assessment Stat Cards */}
       <section className={styles.statsGrid}>
         <StatCard
@@ -118,8 +152,8 @@ export default function ParentAssessmentsPage() {
 
       {/* Assessment Table & Feedback */}
       <section>
-        <div style={{ marginBottom: "16px" }}>
-          <h2 style={{ fontSize: "16px", fontWeight: 800, margin: 0 }}>
+        <div className={styles.cardHeader}>
+          <h2 className={`${styles.cardTitle} ${isDark ? styles.cardTitleDark : ""}`}>
             Academic Evaluations &amp; Mentor Feedback ({studentName})
           </h2>
         </div>

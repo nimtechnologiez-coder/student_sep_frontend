@@ -6,6 +6,7 @@ import ClassCard from "@/components/parent/ClassCard";
 import styles from "@/styles/parent/classes.module.css";
 import { ClassSession } from "@/lib/parentData";
 import { getLoggedInStudentId, StudentApi } from "@/lib/studentApi";
+import { ClassesPageSkeleton } from "@/components/Skeleton";
 import { CalendarCheck } from "lucide-react";
 
 export default function ParentClassesPage() {
@@ -16,9 +17,14 @@ export default function ParentClassesPage() {
   const [student, setStudent] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const studentId = getLoggedInStudentId();
-    const url = studentId ? `/api/parent/classes?studentId=${studentId}` : "/api/parent/classes";
+  const loadClassesData = (targetId?: string) => {
+    const studentId = targetId || getLoggedInStudentId();
+    if (!studentId) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const url = `/api/parent/classes?studentId=${studentId}`;
 
     fetch(url)
       .then((res) => res.json())
@@ -44,16 +50,25 @@ export default function ParentClassesPage() {
         }
       }
     });
+  };
+
+  useEffect(() => {
+    loadClassesData();
+
+    const handleChildChanged = (e: any) => {
+      if (e.detail) {
+        loadClassesData(e.detail);
+      }
+    };
+
+    window.addEventListener("parent_child_changed", handleChildChanged);
+    return () => {
+      window.removeEventListener("parent_child_changed", handleChildChanged);
+    };
   }, []);
 
   if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={`${styles.headerCard} ${isDark ? styles.headerCardDark : ""}`}>
-          <p>Loading Upcoming Classes from API...</p>
-        </div>
-      </div>
-    );
+    return <ClassesPageSkeleton />;
   }
 
   const studentName = student?.name || "Student";

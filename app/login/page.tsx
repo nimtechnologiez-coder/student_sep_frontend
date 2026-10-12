@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import styles from "../auth.module.css";
 
@@ -69,6 +70,10 @@ export default function LoginPage() {
         if (typeof window !== "undefined") {
           localStorage.setItem("userRole", activeRole);
           localStorage.setItem("userData", JSON.stringify(data));
+          if (activeRole === "parent" && (data.student_id || data.children?.[0]?.student_id)) {
+            localStorage.setItem("parent_selected_child_id", data.student_id || data.children[0].student_id);
+          }
+          window.dispatchEvent(new Event("nim_student_plan_updated"));
         }
         setTimeout(() => {
           router.push(activeRole === "parent" ? "/parent/dashboard" : "/dashboard");
@@ -112,15 +117,15 @@ export default function LoginPage() {
       <section className={styles.leftHeroPanel}>
         {/* Top Left Branding */}
         <div className="flex items-center gap-3.5">
-          <div className="text-white">
-            {/* Graduation Cap Solid Academic Icon */}
-            <svg
-              className="w-10 h-10 drop-shadow"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M12 3L1 9L12 15L21 10.09V17H23V9M5 13.18V17.18C5 19.94 8.13 22 12 22C15.87 22 19 19.94 19 17.18V13.18L12 17.03L5 13.18Z" />
-            </svg>
+          <div className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-md p-1.5 flex items-center justify-center border border-white/20 shadow-md shrink-0">
+            <Image
+              src="/nimlogo.webp"
+              alt="NIM Academy Logo"
+              width={38}
+              height={46}
+              className="w-full h-full object-contain"
+              priority
+            />
           </div>
           <div>
             <h2 className="text-[25px] font-extrabold tracking-tight text-white leading-tight">
@@ -259,15 +264,15 @@ export default function LoginPage() {
         <div className={styles.exactCard}>
           {/* Brand Header Inside Card */}
           <div className={styles.loginBrandCenter}>
-            <div className={styles.loginBrandIconWrap}>
-              {/* Solid Royal Blue Academic Cap Icon */}
-              <svg
-                className="w-12 h-12 text-[#0062eb] drop-shadow-sm"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 3L1 9L12 15L21 10.09V17H23V9M5 13.18V17.18C5 19.94 8.13 22 12 22C15.87 22 19 19.94 19 17.18V13.18L12 17.03L5 13.18Z" />
-              </svg>
+            <div className="w-14 h-14 mx-auto mb-2.5 rounded-2xl bg-slate-50 border border-slate-200/80 p-2 flex items-center justify-center shadow-sm">
+              <Image
+                src="/nimlogo.webp"
+                alt="NIM Academy Logo"
+                width={42}
+                height={50}
+                className="w-full h-full object-contain"
+                priority
+              />
             </div>
             <h2 className={styles.loginBrandNameText}>
               NIM Academy

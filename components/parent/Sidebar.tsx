@@ -85,8 +85,17 @@ export default function ParentSidebar({
         {/* Top: Brand Header */}
         <div>
           <div className={styles.brandHeader}>
-            <Link href="/parent/dashboard" className={styles.brandLink}>
-              <div className={styles.brandLogo}>N</div>
+            <Link href="/parent/dashboard" onClick={onMobileClose} className={styles.brandLink}>
+              <div className={styles.brandLogo}>
+                <Image
+                  src="/nimlogo.webp"
+                  alt="NIM Academy Logo"
+                  width={34}
+                  height={42}
+                  className={styles.brandLogoImg}
+                  priority
+                />
+              </div>
               <div>
                 <h1 className={styles.brandTitle}>NIM Academy</h1>
                 <p className={styles.brandBadge}>Parent Portal</p>
@@ -108,7 +117,7 @@ export default function ParentSidebar({
           {/* Linked Student Card Header */}
           <div className={styles.studentCardContainer}>
             <div className={styles.linkedStudentCard}>
-              {linkedStudent?.photoUrl && (
+              {linkedStudent?.photoUrl ? (
                 <Image
                   src={linkedStudent.photoUrl}
                   alt={displayName}
@@ -120,6 +129,10 @@ export default function ParentSidebar({
                     target.style.display = "none";
                   }}
                 />
+              ) : (
+                <div className={styles.studentAvatarFallback}>
+                  {displayName.substring(0, 2).toUpperCase() || "ST"}
+                </div>
               )}
               <div className={styles.studentInfo}>
                 <p className={styles.childLabel}>Linked Student</p>
@@ -163,8 +176,8 @@ export default function ParentSidebar({
                   .join("")
                   .toUpperCase() || "P"}
               </div>
-              <div>
-                <h5 className={styles.parentName}>{displayParent}</h5>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <h5 className={styles.parentName} title={displayParent}>{displayParent}</h5>
                 <p className={styles.parentRole}>Parent / Guardian</p>
               </div>
             </div>

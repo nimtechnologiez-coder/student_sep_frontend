@@ -1,32 +1,55 @@
-/* My Classes CSS Module */
+/* My Classes CSS Module - Aligned with Student Portal Classes */
 .container {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
+@media (min-width: 640px) {
+  .container {
+    gap: 24px;
+  }
+}
+
 .headerCard {
   background-color: #ffffff;
   border: 1px solid #dce8f8;
   border-radius: 18px;
-  padding: 22px;
+  padding: 18px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 16px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+@media (min-width: 640px) {
+  .headerCard {
+    border-radius: 20px;
+    padding: 24px;
+  }
 }
 
 .headerCardDark {
-  background-color: #0b1429;
-  border-color: #1a2a4f;
+  background-color: #081024;
+  border-color: #15274d;
+  box-shadow: none;
 }
 
 .title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 900;
+  letter-spacing: -0.02em;
   color: #0a1b39;
   margin: 0;
+  line-height: 1.25;
+}
+
+@media (min-width: 640px) {
+  .title {
+    font-size: 28px;
+  }
 }
 
 .headerCardDark .title {
@@ -37,6 +60,14 @@
   font-size: 12px;
   color: #64748b;
   margin: 4px 0 0 0;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+@media (min-width: 640px) {
+  .subtitle {
+    font-size: 13px;
+  }
 }
 
 .headerCardDark .subtitle {
@@ -45,8 +76,14 @@
 
 .classesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .classesGrid {
+    gap: 20px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -54,3 +91,4 @@
     grid-template-columns: 1fr;
   }
 }
+

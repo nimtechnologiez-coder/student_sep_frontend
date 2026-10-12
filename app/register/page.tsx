@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   GraduationCap,
@@ -34,6 +35,24 @@ import styles from "./register.module.css";
 
 export default function RegisterPage() {
   const router = useRouter();
+
+  const dobInputRef = useRef<HTMLInputElement>(null);
+
+  const handleOpenDatePicker = () => {
+    if (dobInputRef.current) {
+      if (dobInputRef.current.type !== "date") {
+        dobInputRef.current.type = "date";
+      }
+      dobInputRef.current.focus();
+      try {
+        if (typeof dobInputRef.current.showPicker === "function") {
+          dobInputRef.current.showPicker();
+        }
+      } catch {
+        // Fallback or ignore if already open
+      }
+    }
+  };
 
   // 4-Step Flow: 1: Personal Details -> 2: Timing & Plan Selection -> 3: Payment -> 4: Complete
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
@@ -158,7 +177,10 @@ export default function RegisterPage() {
     const generatedRegId = `NIM-2026-${Math.floor(10000 + Math.random() * 90000)}`;
     const generatedTxnId = `TXN-${Math.floor(10000000 + Math.random() * 90000000)}`;
 
-    const amountToPay = selectedPlan === "placement" ? 90000 : 60000;
+    const totalCourseFee = selectedPlan === "placement" ? 90000 : 60000;
+    const paymentOptStr = paymentOption === "installment" ? "2 Installments" : "Full Payment";
+    const amountToPay = paymentOption === "installment" ? (totalCourseFee / 2) : totalCourseFee;
+    const balanceDue = paymentOption === "installment" ? (totalCourseFee / 2) : 0;
 
     const payload = {
       student_id: generatedRegId,
@@ -171,10 +193,13 @@ export default function RegisterPage() {
       address: formData.address,
       timing_preference: batchTiming,
       plan: selectedPlan === "placement" ? "Placement Included" : "Without Placement",
+      payment_option: paymentOptStr,
+      total_fee: totalCourseFee,
       amount: amountToPay,
+      balance_due: balanceDue,
       payment_method: paymentMethod,
       transaction_id: generatedTxnId,
-      course: selectedPlan === "placement" ? "Full Stack Web Development (Placement)" : "Full Stack Web Development"
+      course: "Generative AI & LLMs"
     };
 
     try {
@@ -214,7 +239,16 @@ export default function RegisterPage() {
       <section className={styles.leftHeroSection}>
         {/* Top Branding */}
         <div className={styles.heroBrand}>
-          <GraduationCap className="w-9 h-9 text-white stroke-[2.2]" />
+          <div className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-md p-1.5 flex items-center justify-center border border-white/20 shadow-md shrink-0">
+            <Image
+              src="/nimlogo.webp"
+              alt="NIM Academy Logo"
+              width={38}
+              height={46}
+              className="w-full h-full object-contain"
+              priority
+            />
+          </div>
           <div>
             <h2 className={styles.heroBrandTitle}>NIM Academy</h2>
             <p className={styles.heroBrandSub}>Learn | Grow | Build Your Future</p>
@@ -344,8 +378,15 @@ export default function RegisterPage() {
         <div className={styles.registerCard}>
           {/* Header */}
           <div className={styles.brandHeader}>
-            <div className={styles.brandIcon}>
-              <GraduationCap className="w-8 h-8 stroke-[2.2]" />
+            <div className="w-12 h-12 mx-auto mb-2.5 rounded-2xl bg-blue-50/90 border border-blue-100 p-1.5 flex items-center justify-center shadow-sm">
+              <Image
+                src="/nimlogo.webp"
+                alt="NIM Academy Logo"
+                width={36}
+                height={44}
+                className="w-full h-full object-contain"
+                priority
+              />
             </div>
             <h1 className={styles.cardMainTitle}>
               {currentStep === 1 && "Personal Details"}
@@ -538,23 +579,44 @@ export default function RegisterPage() {
 
                 {/* Date of Birth */}
                 <div>
-                  <label className={styles.fieldLabel}>
+                  <label className={styles.fieldLabel} htmlFor="dobInput">
                     Date of Birth <span className={styles.reqStar}>*</span>
                   </label>
-                  <div className={styles.inputWrap}>
+                  <div
+                    className={`${styles.inputWrap} ${styles.dateInputWrap}`}
+                    onClick={handleOpenDatePicker}
+                  >
                     <Calendar className={styles.inputIcon} />
                     <input
-                      type="text"
+                      id="dobInput"
+                      ref={dobInputRef}
+                      type={formData.dob ? "date" : "text"}
                       name="dob"
                       value={formData.dob}
                       onChange={handleChange}
                       placeholder="dd - mm - yyyy"
-                      onFocus={(e) => (e.target.type = "date")}
-                      onBlur={(e) => {
-                        if (!e.target.value) e.target.type = "text";
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenDatePicker();
                       }}
-                      className={styles.textInput}
+                      onFocus={(e) => {
+                        if (e.target.type !== "date") {
+                          e.target.type = "date";
+                        }
+                        try {
+                          if (typeof e.target.showPicker === "function") {
+                            e.target.showPicker();
+                          }
+                        } catch {}
+                      }}
+                      onBlur={(e) => {
+                        if (!e.target.value) {
+                          e.target.type = "text";
+                        }
+                      }}
+                      className={`${styles.textInput} ${styles.dateInput}`}
                       required
+                      max={new Date().toISOString().split("T")[0]}
                     />
                   </div>
                 </div>
@@ -975,11 +1037,42 @@ export default function RegisterPage() {
                   </span>
                 </div>
 
+                <div className="flex items-center justify-between pb-1 border-b border-slate-200">
+                  <span className="text-slate-500 font-medium">Payment Option</span>
+                  <span className="font-bold text-[#0066fe]">
+                    {paymentOption === "installment" ? "2 Installments" : "Full Payment"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between pb-1 border-b border-slate-200">
+                  <span className="text-slate-500 font-medium">Amount Paid</span>
+                  <span className="font-bold text-emerald-600">
+                    {paymentOption === "installment" 
+                      ? `₹${((selectedPlan === "placement" ? 90000 : 60000) / 2).toLocaleString()} (1st Installment)`
+                      : `₹${(selectedPlan === "placement" ? 90000 : 60000).toLocaleString()}`}
+                  </span>
+                </div>
+
+                {paymentOption === "installment" && (
+                  <div className="flex items-center justify-between pb-1 border-b border-slate-200">
+                    <span className="text-slate-500 font-medium">Remaining Balance</span>
+                    <span className="font-bold text-amber-600">
+                      ₹{((selectedPlan === "placement" ? 90000 : 60000) / 2).toLocaleString()} (2nd Installment Due)
+                    </span>
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500 font-medium">Payment Status</span>
-                  <span className="inline-flex items-center gap-1 font-bold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                    <CheckCircle2 className="w-3 h-3" /> Paid &amp; Confirmed
-                  </span>
+                  {paymentOption === "installment" ? (
+                    <span className="inline-flex items-center gap-1 font-bold text-blue-600 bg-blue-500/10 px-2 py-0.5 rounded-full">
+                      <CheckCircle2 className="w-3 h-3" /> 1st Installment Paid
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 font-bold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                      <CheckCircle2 className="w-3 h-3" /> Paid &amp; Confirmed
+                    </span>
+                  )}
                 </div>
               </div>
 

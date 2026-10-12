@@ -15,13 +15,19 @@
 /* 1. Header Card */
 .headerCard {
   border-radius: 1.25rem;
-  padding: 1.5rem 1.75rem;
+  padding: 1.25rem 1rem;
   border-width: 1px;
   border-style: solid;
   transition: all 0.2s ease;
   background-color: #ffffff;
   border-color: #e2edf8;
   box-shadow: 0 2px 12px rgba(0, 98, 235, 0.04);
+}
+
+@media (min-width: 640px) {
+  .headerCard {
+    padding: 1.5rem 1.75rem;
+  }
 }
 
 :global(.dark) .headerCard {
@@ -240,4 +246,55 @@
   background-color: #10b981;
   box-shadow: 0 0 8px #10b981;
   animation: livePulse 1.8s infinite;
+}
+
+/* 9. Responsive Classes Grid */
+.classesGrid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .classesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .classesGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.classGridCard {
+  border-radius: 1.25rem;
+  border-width: 1px;
+  border-style: solid;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: #ffffff;
+  border-color: #e2edf8;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.classGridCard:hover {
+  border-color: #bfdbfe;
+  box-shadow: 0 8px 24px rgba(0, 98, 235, 0.08);
+  transform: translateY(-2px);
+}
+
+:global(.dark) .classGridCard {
+  background-color: #081024;
+  border-color: #15274d;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+}
+
+:global(.dark) .classGridCard:hover {
+  border-color: rgba(0, 98, 235, 0.4);
 }

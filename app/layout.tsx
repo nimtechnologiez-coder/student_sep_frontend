@@ -16,6 +16,16 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "NIM AI Career Academy - Student Portal & Dashboard",
   description: "Official Student Portal & AI Dashboard for NIM Academy.",
+  icons: {
+    icon: [
+      {
+        url: "/nimlogo.webp",
+        type: "image/webp",
+      },
+    ],
+    shortcut: "/nimlogo.webp",
+    apple: "/nimlogo.webp",
+  },
 };
 
 export default function RootLayout({
@@ -30,11 +40,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('nim_theme');if(t==='light'){document.documentElement.classList.add('light');document.documentElement.classList.remove('dark');}else{document.documentElement.classList.add('dark');document.documentElement.classList.remove('light');}}catch(e){}})();`,
-          }}
-        />
+        <link rel="icon" href="/nimlogo.webp" type="image/webp" />
+        <link rel="shortcut icon" href="/nimlogo.webp" type="image/webp" />
+        <link rel="apple-touch-icon" href="/nimlogo.webp" />
       </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider>{children}</ThemeProvider>

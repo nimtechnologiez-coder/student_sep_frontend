@@ -5,8 +5,9 @@
 /* Main Container */
 .mainContainer {
   min-height: 100vh;
-  width: 100vw;
-  max-width: 100vw;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   background-color: #ebf3f9;
@@ -196,12 +197,13 @@
 .rightFormSection {
   width: 100%;
   min-height: 100vh;
+  height: auto;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  padding: 1.5rem 1.5rem;
-  overflow-y: auto;
+  padding: 1.25rem 1rem 2rem 1rem;
+  overflow-y: visible;
   box-sizing: border-box;
 }
 
@@ -209,7 +211,9 @@
   .rightFormSection {
     width: 50%;
     height: 100vh;
+    justify-content: space-between;
     padding: 1.5rem 2.25rem;
+    overflow-y: auto;
   }
 }
 
@@ -259,9 +263,15 @@
   box-shadow: 0 20px 30px -10px rgba(15, 23, 42, 0.06), 0 8px 12px -6px rgba(15, 23, 42, 0.03);
   display: flex;
   flex-direction: column;
-  margin-top: auto;
-  margin-bottom: auto;
+  margin: 0 auto 1.5rem auto;
   box-sizing: border-box;
+}
+
+@media (min-width: 1024px) {
+  .registerCard {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
 }
 
 .brandHeader {
@@ -466,6 +476,26 @@
 
 .textInput::placeholder {
   color: #94a3b8;
+}
+
+.dateInputWrap {
+  cursor: pointer;
+}
+
+.dateInput {
+  cursor: pointer;
+}
+
+.dateInput::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+  padding: 2px;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.dateInput::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 /* Preferred Batch Timing 3-Card Grid (Morning, Afternoon, Evening ONLY - No time range) */
@@ -744,12 +774,51 @@
 }
 
 /* ==========================================================================
-   RESPONSIVE MEDIA QUERIES (Mobile Breakpoint)
+   RESPONSIVE MEDIA QUERIES (Tablet & Mobile Breakpoints)
    ========================================================================== */
+@media (max-width: 768px) {
+  .registerCard {
+    padding: 1.35rem 1.35rem;
+    border-radius: 1.25rem;
+  }
+
+  .brandHeader {
+    margin-bottom: 0.85rem;
+  }
+
+  .cardMainTitle {
+    font-size: 1.25rem;
+  }
+
+  .progressWrap {
+    margin: 0 auto 1.15rem auto;
+  }
+
+  .stepCircle {
+    width: 1.85rem;
+    height: 1.85rem;
+    font-size: 0.725rem;
+  }
+}
+
 @media (max-width: 640px) {
   .personalGrid {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
+    gap: 0.65rem;
+  }
+
+  .fieldLabel {
+    font-size: 0.74rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .inputWrap {
+    height: 2.45rem;
+    padding: 0.35rem 0.65rem;
+  }
+
+  .textInput {
+    font-size: 0.78rem;
   }
 
   .timingGrid {
@@ -764,6 +833,7 @@
 
   .progressWrap {
     max-width: 100%;
+    margin-bottom: 0.85rem;
   }
 
   .stepLabel {
@@ -771,10 +841,66 @@
   }
 
   .registerCard {
-    padding: 1.25rem 1.25rem;
+    padding: 1.15rem 1.15rem;
+    border-radius: 1.2rem;
   }
 
   .rightFormSection {
-    padding: 1rem 1rem;
+    padding: 1rem 0.85rem 1.75rem 0.85rem;
+  }
+
+  .submitBtn {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
   }
 }
+
+@media (max-width: 480px) {
+  .registerCard {
+    padding: 1rem 0.75rem;
+    border-radius: 1.1rem;
+  }
+
+  .personalGrid {
+    gap: 0.55rem;
+  }
+
+  .inputWrap {
+    height: 2.35rem;
+    border-radius: 0.65rem;
+  }
+
+  .fieldLabel {
+    font-size: 0.72rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .rightFormSection {
+    padding: 0.75rem 0.5rem 1.5rem 0.5rem;
+  }
+
+  .topLoginHeader {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .footerText {
+    flex-direction: column;
+    text-align: center;
+    gap: 4px;
+    padding-top: 0.65rem;
+  }
+
+  .btnGroup {
+    flex-direction: column-reverse;
+  }
+
+  .backBtn,
+  .submitBtnGroup {
+    width: 100%;
+  }
+}
+

@@ -102,7 +102,7 @@ export default function PlacementPage() {
                   </div>
                 </div>
 
-                <button className="px-5 py-2.5 rounded-xl bg-[#0062eb] hover:bg-[#0052cc] text-white text-xs font-bold transition shadow-md shadow-blue-600/25 shrink-0">
+                <button className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#0062eb] hover:bg-[#0052cc] text-white text-xs font-bold transition shadow-md shadow-blue-600/25 shrink-0 min-h-[40px]">
                   Apply via NIM Portal
                 </button>
               </div>

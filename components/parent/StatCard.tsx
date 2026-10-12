@@ -29,58 +29,87 @@ export default function StatCard({
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  const getIconClass = () => {
-    switch (iconColor) {
-      case "green":
-        return styles.greenIcon;
-      case "purple":
-        return styles.purpleIcon;
-      case "amber":
-        return styles.amberIcon;
-      default:
-        return styles.blueIcon;
-    }
+  const iconClasses: Record<string, string> = {
+    blue: styles.scBlueIcon,
+    green: styles.scGreenIcon,
+    purple: styles.scPurpleIcon,
+    amber: styles.scAmberIcon,
   };
 
-  const getBadgeClass = () => {
-    switch (badgeType) {
-      case "success":
-        return styles.badgeSuccess;
-      case "warning":
-        return styles.badgeWarning;
-      default:
-        return styles.badge;
-    }
+  const progressClasses: Record<string, string> = {
+    blue: styles.scBlueProgress,
+    green: styles.scGreenProgress,
+    purple: styles.scPurpleProgress,
+    amber: styles.scAmberProgress,
   };
+
+  const badgeClasses: Record<string, string> = {
+    info: styles.scBadgeInfo,
+    success: styles.scBadgeSuccess,
+    warning: styles.scBadgeWarning,
+  };
+
+  const progress = Math.min(
+    100,
+    Math.max(0, progressPercentage ?? 0)
+  );
 
   return (
-    <div
-      className={`${styles.statCard} ${isDark ? styles.statCardDark : ""}`}
+    <article
+      className={`${styles.scCard} ${isDark ? styles.scCardDark : ""
+        }`}
     >
-      <div className={styles.headerRow}>
-        <p className={styles.title}>{title}</p>
-        <div className={`${styles.iconWrapper} ${getIconClass()}`}>
-          <Icon size={18} />
+      <header className={styles.scHeader}>
+        <p className={styles.scTitle}>{title}</p>
+
+        <div
+          className={`${styles.scIcon} ${iconClasses[iconColor] ?? styles.scBlueIcon
+            }`}
+        >
+          <Icon size={18} aria-hidden="true" />
         </div>
-      </div>
+      </header>
 
-      <div>
-        <div className={styles.valueRow}>
-          <h3 className={styles.value}>{value}</h3>
-          {badge && <span className={getBadgeClass()}>{badge}</span>}
+      <div className={styles.scBody}>
+        <div className={styles.scValueRow}>
+          <h3 className={styles.scValue}>{value}</h3>
+
+          {badge && (
+            <span
+              className={`${styles.scBadge} ${badgeClasses[badgeType] ?? styles.scBadgeInfo
+                }`}
+            >
+              {badge}
+            </span>
+          )}
         </div>
 
-        {subtext && <p className={styles.subtext}>{subtext}</p>}
-
-        {typeof progressPercentage === "number" && (
-          <div className={styles.progressBarTrack}>
-            <div
-              className={styles.progressBarFill}
-              style={{ width: `${Math.min(100, Math.max(0, progressPercentage))}%` }}
-            />
-          </div>
+        {subtext && (
+          <p className={styles.scSubtext}>{subtext}</p>
         )}
+
+        <div className={styles.scProgressWrapper}>
+          {typeof progressPercentage === "number" ? (
+            <div
+              className={styles.scProgressTrack}
+              role="progressbar"
+              aria-valuenow={progress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`${title} progress`}
+            >
+              <div
+                className={`${styles.scProgressFill} ${progressClasses[iconColor] ??
+                  styles.scBlueProgress
+                  }`}
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          ) : (
+            <div className={styles.scProgressPlaceholder} />
+          )}
+        </div>
       </div>
-    </div>
+    </article>
   );
 }

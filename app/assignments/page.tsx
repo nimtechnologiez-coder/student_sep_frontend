@@ -6,6 +6,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { useTheme } from "@/components/ThemeProvider";
 import styles from "./assignments.module.css";
 import { StudentApi } from "@/lib/studentApi";
+import { TablePageSkeleton } from "@/components/Skeleton";
 import {
   FileText,
   Calendar,
@@ -64,6 +65,9 @@ export interface AssignmentItem {
     id?: number;
     submissionUrl?: string;
     submissionText?: string;
+    fileUrl?: string;
+    fileName?: string;
+    fileSize?: string;
     submittedAt?: string;
     marksObtained?: number;
     mentorFeedback?: string;
@@ -80,11 +84,14 @@ export default function AssignmentsPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"earliest" | "latest">("earliest");
 
-  // Modal State
+  // Modal & File Upload State
   const [activeModalAssignment, setActiveModalAssignment] = useState<AssignmentItem | null>(null);
   const [submissionUrl, setSubmissionUrl] = useState<string>("");
   const [submissionText, setSubmissionText] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<boolean>(false);
 
   // Dynamic API State
@@ -133,6 +140,13 @@ export default function AssignmentsPage() {
                     id: t.submission.id,
                     submissionUrl: t.submission.submission_url,
                     submissionText: t.submission.submission_text,
+                    fileUrl: t.submission.file_url
+                      ? (t.submission.file_url.startsWith("http")
+                        ? t.submission.file_url
+                        : `http://127.0.0.1:8000${t.submission.file_url}`)
+                      : undefined,
+                    fileName: t.submission.file_name,
+                    fileSize: t.submission.file_size,
                     submittedAt: t.submission.submitted_at,
                     marksObtained: t.submission.marks_obtained,
                     mentorFeedback: t.submission.mentor_feedback,
@@ -243,20 +257,118 @@ export default function AssignmentsPage() {
     }
   };
 
+  const ALLOWED_EXTENSIONS = [
+    ".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx", ".zip", ".png", ".jpg", ".jpeg"
+  ];
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  };
+
+  const validateAndSelectFile = (file: File) => {
+    const ext = "." + (file.name.split(".").pop() || "").toLowerCase();
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      setSubmitError(`Unsupported format "${ext}". Allowed formats: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, ZIP, PNG, JPG, JPEG.`);
+      setSelectedFile(null);
+      return;
+    }
+    if (file.size > 25 * 1024 * 1024) {
+      setSubmitError("File size exceeds 25 MB maximum limit.");
+      setSelectedFile(null);
+      return;
+    }
+    setSubmitError(null);
+    setSelectedFile(file);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      validateAndSelectFile(e.target.files[0]);
+    }
+  };
+
   const handleOpenModal = (assignment: AssignmentItem) => {
     setActiveModalAssignment(assignment);
     setSubmissionUrl(assignment.submission?.submissionUrl || "");
     setSubmissionText(assignment.submission?.submissionText || "");
+    setSelectedFile(null);
+    setSubmitError(null);
     setSubmitSuccess(false);
+    setIsDragOver(false);
+  };
+
+  const handleSubmitDeliverable = async () => {
+    if (!activeModalAssignment) return;
+    setSubmitError(null);
+
+    const hasFile = !!selectedFile;
+    const hasUrl = !!submissionUrl.trim();
+    const hasText = !!submissionText.trim();
+
+    // Prevent submission if no required deliverable is provided
+    if (!hasFile && !hasUrl && !hasText) {
+      setSubmitError("Please provide at least one deliverable: upload a task file, provide a repository link, or add submission notes.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append("task_id", activeModalAssignment.id);
+      formData.append("student_id", student?.student_id || "");
+      if (submissionUrl.trim()) formData.append("submission_url", submissionUrl.trim());
+      if (submissionText.trim()) formData.append("submission_text", submissionText.trim());
+      if (selectedFile) formData.append("file", selectedFile);
+
+      const res = await fetch("http://127.0.0.1:8000/api/student/submit-task/", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSubmitSuccess(true);
+        const fileUrl = data.file_url
+          ? (data.file_url.startsWith("http") ? data.file_url : `http://127.0.0.1:8000${data.file_url}`)
+          : undefined;
+        setTasksList((prev) =>
+          prev.map((t) =>
+            t.id === activeModalAssignment.id
+              ? {
+                  ...t,
+                  status: "Submitted",
+                  submission: {
+                    id: data.submission_id,
+                    submissionUrl: submissionUrl.trim() || undefined,
+                    submissionText: submissionText.trim() || undefined,
+                    fileUrl: fileUrl,
+                    fileName: data.file_name || selectedFile?.name,
+                    fileSize: data.file_size || (selectedFile ? formatFileSize(selectedFile.size) : undefined),
+                    status: "Submitted",
+                    submittedAt: "Just now",
+                  },
+                }
+              : t
+          )
+        );
+        setTimeout(() => {
+          setActiveModalAssignment(null);
+        }, 1200);
+      } else {
+        setSubmitError(data.error || "Submission failed. Please check inputs and retry.");
+      }
+    } catch (e: any) {
+      setSubmitError(e.message || "Network error while submitting deliverable.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="w-8 h-8 animate-spin text-[#0062eb]" />
-          <span className="ml-3 text-sm font-semibold text-slate-500">Loading assignments...</span>
-        </div>
+        <TablePageSkeleton title="Loading Assignments & Projects..." />
       </DashboardLayout>
     );
   }
@@ -353,7 +465,7 @@ export default function AssignmentsPage() {
         {/* =========================================================================
             2. REAL KPI SUMMARY CARDS
             ========================================================================= */}
-        <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <section className="grid grid-cols-1 min-[360px]:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
           <div className={styles.statCard}>
             <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-[#0062eb] flex items-center justify-center shrink-0">
               <FileText className="w-5 h-5" />
@@ -577,7 +689,7 @@ export default function AssignmentsPage() {
                           )}
                         </div>
 
-                        <div className="flex items-center gap-3 shrink-0">
+                        <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2.5 sm:gap-3 w-full sm:w-auto shrink-0">
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-bold border ${badge.className}`}
                           >
@@ -586,7 +698,7 @@ export default function AssignmentsPage() {
 
                           <button
                             onClick={() => handleOpenModal(asg)}
-                            className="px-4 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-800 hover:border-[#0062eb] text-[#0062eb] transition"
+                            className="min-h-[40px] px-4 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-800 hover:border-[#0062eb] text-[#0062eb] transition flex-1 sm:flex-initial text-center flex items-center justify-center"
                           >
                             {asg.status === "Evaluated" ? "View Feedback" : "View Assignment >"}
                           </button>
@@ -602,66 +714,291 @@ export default function AssignmentsPage() {
         {activeModalAssignment && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
             <div
-              className={`w-full max-w-lg rounded-2xl p-6 border shadow-2xl space-y-4 animate-in zoom-in-95 ${
+              className={`w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl p-6 border shadow-2xl space-y-4 animate-in zoom-in-95 ${
                 isDark
                   ? "bg-[#0b1429] border-[#1e3363] text-white"
                   : "bg-white border-[#dce8f8] text-[#0a1b39]"
               }`}
             >
-              <div className="flex items-start justify-between gap-3">
+              {/* Header */}
+              <div className="flex items-start justify-between gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-3">
                 <div>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-blue-500/15 text-[#0062eb]">
-                    {activeModalAssignment.category}
-                  </span>
-                  <h3 className="text-base font-bold leading-snug mt-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded text-[11px] font-black uppercase tracking-wider bg-blue-500/15 text-[#0062eb]">
+                      {activeModalAssignment.category}
+                    </span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                      {activeModalAssignment.moduleCode}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-bold leading-snug mt-1.5">
                     {activeModalAssignment.title}
                   </h3>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Due Date: {activeModalAssignment.formattedDueDate}
-                  </p>
+                  <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
+                    <span>Due: {activeModalAssignment.formattedDueDate}</span>
+                    <span>&bull;</span>
+                    <span className="text-[#0062eb] font-semibold">{activeModalAssignment.maxMarks} Marks</span>
+                  </div>
                 </div>
 
                 <button
                   onClick={() => setActiveModalAssignment(null)}
-                  className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer"
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div
-                className={`p-3.5 rounded-xl border text-xs leading-relaxed ${
-                  isDark
-                    ? "bg-[#070e1f] border-[#152345] text-slate-300"
-                    : "bg-[#f8fbff] border-[#e2edf8] text-slate-700"
-                }`}
-              >
-                {activeModalAssignment.description}
+              {/* Task Description / Instructions */}
+              <div>
+                <label className="text-xs font-semibold text-slate-400 block mb-1">
+                  Objective &amp; Instructions
+                </label>
+                <div
+                  className={`p-3.5 rounded-xl border text-xs leading-relaxed ${
+                    isDark
+                      ? "bg-[#070e1f] border-[#152345] text-slate-300"
+                      : "bg-[#f8fbff] border-[#e2edf8] text-slate-700"
+                  }`}
+                >
+                  {activeModalAssignment.description}
+                </div>
               </div>
 
-              {activeModalAssignment.submission?.mentorFeedback && (
-                <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
-                  <span className="font-bold text-emerald-600 block mb-1">
-                    Mentor Feedback (Score: {activeModalAssignment.submission.marksObtained}/100)
-                  </span>
-                  <p className={isDark ? "text-slate-300" : "text-slate-700"}>
-                    {activeModalAssignment.submission.mentorFeedback}
-                  </p>
+              {/* IF ALREADY SUBMITTED: Show submitted deliverables and evaluation feedback */}
+              {activeModalAssignment.submission && (
+                <div className="space-y-3 pt-1">
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                        {activeModalAssignment.status === "Evaluated" ? "Task Evaluated" : "Deliverables Submitted & In Review"}
+                      </span>
+                    </div>
+                    {activeModalAssignment.submission.submittedAt && (
+                      <span className="text-[11px] text-slate-400">
+                        Submitted: {activeModalAssignment.submission.submittedAt}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Submitted File */}
+                  {activeModalAssignment.submission.fileName && (
+                    <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="p-2 rounded-lg bg-blue-500/10 text-[#0062eb]">
+                          <FileText className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold truncate">
+                            {activeModalAssignment.submission.fileName}
+                          </p>
+                          {activeModalAssignment.submission.fileSize && (
+                            <p className="text-[10px] text-slate-400">
+                              {activeModalAssignment.submission.fileSize}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      {activeModalAssignment.submission.fileUrl && (
+                        <a
+                          href={activeModalAssignment.submission.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          download
+                          className="px-3 py-1.5 rounded-lg bg-[#0062eb] text-white text-xs font-bold flex items-center gap-1.5 hover:bg-[#0052cc] transition shrink-0"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>Download</span>
+                        </a>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Submitted Link */}
+                  {activeModalAssignment.submission.submissionUrl && (
+                    <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600">
+                          <Paperclip className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold truncate">Project Repository</p>
+                          <p className="text-[11px] text-[#0062eb] truncate">
+                            {activeModalAssignment.submission.submissionUrl}
+                          </p>
+                        </div>
+                      </div>
+                      <a
+                        href={activeModalAssignment.submission.submissionUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-bold flex items-center gap-1.5 hover:border-[#0062eb] transition shrink-0"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Visit</span>
+                      </a>
+                    </div>
+                  )}
+
+                  {/* Submitted Notes */}
+                  {activeModalAssignment.submission.submissionText && (
+                    <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs">
+                      <span className="font-semibold text-slate-400 block mb-1">Your Submission Notes:</span>
+                      <p className={isDark ? "text-slate-300" : "text-slate-700"}>
+                        {activeModalAssignment.submission.submissionText}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Mentor Feedback & Marks */}
+                  {activeModalAssignment.submission.mentorFeedback && (
+                    <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400">Mentor Evaluation &amp; Feedback</span>
+                        {activeModalAssignment.submission.marksObtained != null && (
+                          <span className="font-black text-emerald-600 dark:text-emerald-400">
+                            Score: {activeModalAssignment.submission.marksObtained}/{activeModalAssignment.maxMarks || 100}
+                          </span>
+                        )}
+                      </div>
+                      <p className={isDark ? "text-slate-300" : "text-slate-700"}>
+                        {activeModalAssignment.submission.mentorFeedback}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Submission fields for pending tasks */}
+              {/* IF PENDING / SUBMISSION FORM */}
               {!activeModalAssignment.submission && (
-                <div className="space-y-3 text-xs pt-1">
+                <div className="space-y-3.5 text-xs pt-1">
+                  {/* Error / Success Alerts */}
+                  {submitError && (
+                    <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{submitError}</span>
+                    </div>
+                  )}
+                  {submitSuccess && (
+                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 shrink-0" />
+                      <span>Submission recorded successfully! Your mentor will evaluate your deliverable.</span>
+                    </div>
+                  )}
+
+                  {/* 1. File Upload Area */}
+                  <div>
+                    <label className="text-slate-400 font-semibold block mb-1.5 flex items-center justify-between">
+                      <span>Task Deliverable File</span>
+                      <span className="text-[10px] text-slate-400">Max 25 MB</span>
+                    </label>
+
+                    {!selectedFile ? (
+                      <div
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setIsDragOver(true);
+                        }}
+                        onDragLeave={() => setIsDragOver(false)}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          setIsDragOver(false);
+                          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                            validateAndSelectFile(e.dataTransfer.files[0]);
+                          }
+                        }}
+                        className={`relative border-2 border-dashed rounded-xl p-5 text-center transition cursor-pointer ${
+                          isDragOver
+                            ? "border-[#0062eb] bg-blue-500/10"
+                            : isDark
+                            ? "border-slate-700 hover:border-slate-500 bg-[#070e1f]"
+                            : "border-slate-200 hover:border-slate-400 bg-slate-50/70"
+                        }`}
+                        onClick={() => document.getElementById("taskFileInput")?.click()}
+                      >
+                        <input
+                          id="taskFileInput"
+                          type="file"
+                          accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.png,.jpg,.jpeg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,application/x-zip-compressed,image/png,image/jpeg"
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <div className="w-10 h-10 rounded-full bg-blue-500/15 text-[#0062eb] flex items-center justify-center">
+                            <Upload className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-xs">
+                              Click to browse or drag &amp; drop file
+                            </p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">
+                              PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, ZIP, PNG, JPG, JPEG
+                            </p>
+                          </div>
+                          <span className="inline-block mt-1 px-3 py-1 rounded-lg bg-[#0062eb] text-white font-semibold text-[11px] shadow-sm">
+                            Upload File
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Selected File Preview Box */
+                      <div className="p-3.5 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/70 dark:bg-blue-950/30 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="p-2 rounded-lg bg-[#0062eb] text-white">
+                            <FileText className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-bold text-xs truncate text-[#0a1b39] dark:text-white">
+                                {selectedFile.name}
+                              </span>
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                            </div>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                              {formatFileSize(selectedFile.size)} &bull; Ready to upload
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById("taskFileInput")?.click()}
+                            className="text-[11px] font-bold text-[#0062eb] hover:underline cursor-pointer"
+                          >
+                            Change
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedFile(null)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 cursor-pointer"
+                            title="Remove file"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                          <input
+                            id="taskFileInput"
+                            type="file"
+                            accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.png,.jpg,.jpeg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,application/x-zip-compressed,image/png,image/jpeg"
+                            onChange={handleFileChange}
+                            className="hidden"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 2. Repository / Project Link */}
                   <div>
                     <label className="text-slate-400 font-semibold block mb-1">
-                      Repository / Project Link
+                      Repository / Project Link <span className="font-normal text-[11px]">(Optional if file attached)</span>
                     </label>
                     <input
                       type="url"
                       value={submissionUrl}
                       onChange={(e) => setSubmissionUrl(e.target.value)}
-                      placeholder="https://github.com/..."
+                      placeholder="https://github.com/your-username/repo-name"
                       className={`w-full px-3 py-2 rounded-xl border outline-none ${
                         isDark
                           ? "bg-[#070e1f] border-[#182952] text-white focus:border-[#0062eb]"
@@ -670,15 +1007,16 @@ export default function AssignmentsPage() {
                     />
                   </div>
 
+                  {/* 3. Submission Notes */}
                   <div>
                     <label className="text-slate-400 font-semibold block mb-1">
-                      Submission Notes / Description
+                      Submission Notes / Description <span className="font-normal text-[11px]">(Optional)</span>
                     </label>
                     <textarea
                       value={submissionText}
                       onChange={(e) => setSubmissionText(e.target.value)}
                       rows={3}
-                      placeholder="Notes for instructor..."
+                      placeholder="Add key highlights, setup instructions, or notes for your mentor..."
                       className={`w-full px-3 py-2 rounded-xl border outline-none ${
                         isDark
                           ? "bg-[#070e1f] border-[#182952] text-white focus:border-[#0062eb]"
@@ -689,23 +1027,36 @@ export default function AssignmentsPage() {
                 </div>
               )}
 
-              <div className="flex items-center justify-end gap-3 pt-2">
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
                 <button
                   onClick={() => setActiveModalAssignment(null)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   Close
                 </button>
                 {!activeModalAssignment.submission && (
                   <button
-                    onClick={() => {
-                      alert("Submission recorded. Your mentor will evaluate the deliverables.");
-                      setActiveModalAssignment(null);
-                    }}
-                    className="px-5 py-2 rounded-xl bg-[#0062eb] hover:bg-[#0052cc] text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                    disabled={isSubmitting || submitSuccess}
+                    onClick={handleSubmitDeliverable}
+                    className="px-5 py-2.5 rounded-xl bg-[#0062eb] hover:bg-[#0052cc] text-white text-xs font-bold transition flex items-center gap-2 cursor-pointer disabled:opacity-50 shadow-md shadow-blue-500/20"
                   >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>Submit Deliverable</span>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Uploading &amp; Submitting...</span>
+                      </>
+                    ) : submitSuccess ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        <span>Submitted!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        <span>Submit Deliverable</span>
+                      </>
+                    )}
                   </button>
                 )}
               </div>

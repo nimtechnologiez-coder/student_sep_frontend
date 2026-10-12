@@ -1,39 +1,54 @@
-/* AttendanceTable CSS Module */
+/* AttendanceTable CSS Module - Aligned with Student Portal Tables */
 .tableCard {
   background-color: #ffffff;
   border: 1px solid #dce8f8;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
 }
 
 .tableCardDark {
-  background-color: #0b1429;
-  border-color: #1a2a4f;
+  background-color: #081024;
+  border-color: #15274d;
+  box-shadow: none;
 }
 
 .responsiveWrapper {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 13px;
+  font-size: 12px;
+}
+
+@media (min-width: 640px) {
+  .table {
+    font-size: 13px;
+  }
 }
 
 .table th {
   background-color: #f8fbff;
-  color: #475569;
+  color: #64748b;
   font-weight: 800;
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 14px 18px;
+  letter-spacing: 0.05em;
+  padding: 12px 14px;
   border-bottom: 1px solid #e2edf8;
   white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .table th {
+    font-size: 11px;
+    padding: 14px 18px;
+  }
 }
 
 .tableCardDark .table th {
@@ -43,10 +58,16 @@
 }
 
 .table td {
-  padding: 14px 18px;
+  padding: 12px 14px;
   border-bottom: 1px solid #f0f5fc;
   color: #1e293b;
   vertical-align: middle;
+}
+
+@media (min-width: 640px) {
+  .table td {
+    padding: 14px 18px;
+  }
 }
 
 .tableCardDark .table td {
@@ -70,6 +91,13 @@
   font-weight: 800;
   color: #0a1b39;
   white-space: nowrap;
+  font-size: 12px;
+}
+
+@media (min-width: 640px) {
+  .dateCell {
+    font-size: 13px;
+  }
 }
 
 .tableCardDark .dateCell {
@@ -79,6 +107,8 @@
 .timeCell {
   font-size: 11px;
   color: #64748b;
+  font-weight: 500;
+  margin-top: 2px;
 }
 
 .tableCardDark .timeCell {
@@ -88,6 +118,7 @@
 .topicCell {
   font-weight: 700;
   color: #0a1b39;
+  line-height: 1.35;
 }
 
 .tableCardDark .topicCell {
@@ -107,12 +138,20 @@
 .statusPill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  font-size: 10px;
   font-weight: 800;
   white-space: nowrap;
+  line-height: 1.2;
+}
+
+@media (min-width: 640px) {
+  .statusPill {
+    font-size: 11px;
+    padding: 3.5px 10px;
+  }
 }
 
 .statusPresent {
@@ -129,3 +168,4 @@
   background-color: rgba(245, 158, 11, 0.12);
   color: #d97706;
 }
+

@@ -5,6 +5,7 @@ import Link from "next/link";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useTheme } from "@/components/ThemeProvider";
 import { StudentApi, getLoggedInStudentId } from "@/lib/studentApi";
+import { NotificationsPageSkeleton } from "@/components/Skeleton";
 import styles from "./notifications.module.css";
 import {
   Bell,
@@ -36,6 +37,12 @@ import {
   MessageSquare,
   ArrowRight,
   RefreshCw,
+  HelpCircle,
+  Paperclip,
+  Upload,
+  UserCheck,
+  User,
+  CreditCard,
 } from "lucide-react";
 
 // Notification Data Structure
@@ -43,7 +50,7 @@ interface NotificationItem {
   id: string;
   title: string;
   message: string;
-  category: "classes" | "assignments" | "evaluations" | "announcements" | "system";
+  category: "classes" | "assignments" | "evaluations" | "announcements" | "system" | "fees";
   priority: "urgent" | "high" | "normal";
   timestamp: string;
   dateGroup: "Today" | "Yesterday" | "Earlier This Week";
@@ -60,153 +67,8 @@ export default function NotificationsPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  // Initial Notifications State
-  const [notifications, setNotifications] = useState<NotificationItem[]>([
-    {
-      id: "notif-1",
-      title: "NLP & Transformers Live Session starts in 30 mins",
-      message:
-        "Join Mentor Priya Sharma for Week 14: Attention Mechanism & Multi-Head Self-Attention. Please keep your PyTorch notebook ready.",
-      category: "classes",
-      priority: "urgent",
-      timestamp: "30 mins ago",
-      dateGroup: "Today",
-      isRead: false,
-      isStarred: true,
-      subject: "NLP & Transformers",
-      actionUrl: "/classes",
-      actionLabel: "Join Live Class",
-      details:
-        "Today's session covers theoretical derivations of Scaled Dot-Product Attention, positional encodings, and a hands-on coding walkthrough using Google Colab. Have your Google Meet link open 5 minutes prior to the start time.",
-      sender: "Priya Sharma (Lead AI Mentor)",
-    },
-    {
-      id: "notif-2",
-      title: "New Assignment Posted: Text Classification using BERT",
-      message:
-        "Assignment #8 is now live. Build and fine-tune a BERT-based classifier for sentiment analysis. Deadline: 25 Sep 2026, 11:59 PM.",
-      category: "assignments",
-      priority: "high",
-      timestamp: "2 hours ago",
-      dateGroup: "Today",
-      isRead: false,
-      isStarred: false,
-      subject: "NLP & Transformers",
-      actionUrl: "/assignments",
-      actionLabel: "View Assignment",
-      details:
-        "Dataset and boilerplate code are available in the assignment portal. Make sure your notebook achieves an F1-score of at least 0.85 on the validation split. Submit before the cutoff to avoid late penalties.",
-      sender: "Academic Evaluations Board",
-    },
-    {
-      id: "notif-3",
-      title: "Evaluation 1 Detailed Scorecard & Feedback Published",
-      message:
-        "Your official scorecard for Evaluation 1 (Python, Math & ML Foundations) is now available with mentor feedback. You achieved 88%!",
-      category: "evaluations",
-      priority: "normal",
-      timestamp: "5 hours ago",
-      dateGroup: "Today",
-      isRead: false,
-      isStarred: true,
-      subject: "Evaluation 1",
-      actionUrl: "/evaluations",
-      actionLabel: "View Scorecard",
-      details:
-        "Congratulations on scoring in the top 10% of your batch. Your highest performance was in Model Building (17/20) and Python & Programming (18/20). Review individual question comments to target areas for Evaluation 2.",
-      sender: "Dr. Vikram Seth (Evaluation Director)",
-    },
-    {
-      id: "notif-4",
-      title: "Assignment Graded: NLP Data Preprocessing (Score: 95/100)",
-      message:
-        "Mentor Rahul Mehta has reviewed your tokenization and embedding pipeline. Excellent work handling OOV tokens and subword chunking!",
-      category: "assignments",
-      priority: "normal",
-      timestamp: "Yesterday at 4:30 PM",
-      dateGroup: "Yesterday",
-      isRead: true,
-      isStarred: false,
-      subject: "NLP & Transformers",
-      actionUrl: "/assignments",
-      actionLabel: "View Feedback",
-      details:
-        "Feedback: 'Great pipeline design, robust regex cleaning, and seamless integration with Hugging Face Tokenizers. Minor suggestion: consider adding batching for datasets larger than 100k samples.'",
-      sender: "Rahul Mehta (AI Instructor)",
-    },
-    {
-      id: "notif-5",
-      title: "Curriculum Milestone Unlocked: Month 4 Repository & Materials",
-      message:
-        "You have officially unlocked all Week 13–16 resources, including slide decks, PyTorch notebooks, and the gateway challenge for NLP.",
-      category: "system",
-      priority: "normal",
-      timestamp: "Yesterday at 11:00 AM",
-      dateGroup: "Yesterday",
-      isRead: true,
-      isStarred: false,
-      subject: "Curriculum",
-      actionUrl: "/curriculum",
-      actionLabel: "Explore Materials",
-      details:
-        "Access the newly uploaded GitHub repository links, sample question banks, and pre-recorded foundation walkthroughs directly from your Curriculum tab.",
-      sender: "NIM AI Learning Systems",
-    },
-    {
-      id: "notif-6",
-      title: "Guest Masterclass: Production RAG Architectures at Scale",
-      message:
-        "Exclusive masterclass this Saturday with Guest Speaker from Tech Lead at Google Cloud. Learn vector indexing, reranking & latency optimizations.",
-      category: "announcements",
-      priority: "high",
-      timestamp: "2 days ago",
-      dateGroup: "Earlier This Week",
-      isRead: true,
-      isStarred: true,
-      subject: "Career & Masterclasses",
-      actionUrl: "/classes",
-      actionLabel: "Reserve Seat",
-      details:
-        "Date: Saturday, 27 Sep 2026 at 4:00 PM IST. Attendance will count towards extra credit in Month 5 (GenAI & RAG). Seats are limited to active cohort students.",
-      sender: "Career & Industry Relations",
-    },
-    {
-      id: "notif-7",
-      title: "Monthly Attendance Report: 92% Attendance Recorded for September",
-      message:
-        "Your attendance is well above the required 80% threshold. You are fully eligible for placement drive participation and Evaluation 2.",
-      category: "classes",
-      priority: "normal",
-      timestamp: "3 days ago",
-      dateGroup: "Earlier This Week",
-      isRead: true,
-      isStarred: false,
-      subject: "Attendance",
-      actionUrl: "/attendance",
-      actionLabel: "View Attendance Record",
-      details:
-        "Total Sessions: 24 | Present: 22 | Late: 1 | Absent: 1. Keep maintaining your 8-day streak to earn the Attendance Excellence Badge.",
-      sender: "Student Operations Desk",
-    },
-    {
-      id: "notif-8",
-      title: "Important Notice: Evaluation 2 Gateway Date Announced",
-      message:
-        "Evaluation 2 will take place on 15 Oct 2026. Topics covered: Deep Learning, CNNs, RNNs, and Transformers.",
-      category: "evaluations",
-      priority: "high",
-      timestamp: "4 days ago",
-      dateGroup: "Earlier This Week",
-      isRead: true,
-      isStarred: false,
-      subject: "Evaluations",
-      actionUrl: "/evaluations",
-      actionLabel: "Review Syllabus",
-      details:
-        "Evaluation format: 60 minutes multiple choice & conceptual questions (40%), followed by a 90-minute live coding challenge (60%). Mock tests open on 5 Oct 2026.",
-      sender: "Academic Evaluations Board",
-    },
-  ]);
+  // Notifications State (real data from Django API)
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   // Filters State
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -234,82 +96,175 @@ export default function NotificationsPage() {
 
   // Toast feedback state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  // Support Request State
+
+  // Recipient details interface
+  interface RecipientInfo {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+  }
+
+  // Support Request State ("Any Doubts? Ask")
   const [supportOpen, setSupportOpen] = useState<boolean>(false);
+  const [recipientType, setRecipientType] = useState<"Mentor" | "Admin">("Mentor");
+  const [assignedMentor, setAssignedMentor] = useState<RecipientInfo | null>(null);
+  const [availableAdmin, setAvailableAdmin] = useState<RecipientInfo | null>(null);
   const [supportSubject, setSupportSubject] = useState("");
-  const [supportCategory, setSupportCategory] = useState("Technical Support");
+  const [supportCategory, setSupportCategory] = useState("Doubt / Academic Question");
   const [supportPriority, setSupportPriority] = useState("Normal");
   const [supportMessage, setSupportMessage] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   
-  // Real Data Fetch
-  React.useEffect(() => {
-    fetch('http://localhost:8000/api/student/notifications/STU001/')
-      .then(r => r.json())
-      .then(data => {
-        if (data.notifications && data.notifications.length > 0) {
-          const mapped = data.notifications.map((n: any): NotificationItem => ({
-            // Prefix with "api-" so API IDs never clash with dummy "notif-N" IDs
-            id: `api-${n.id}`,
-            title: n.title,
-            message: n.message,
-            category: (
-              n.category?.toLowerCase().includes('academic') ? 'announcements'
-              : n.category?.toLowerCase().includes('class') ? 'classes'
-              : n.category?.toLowerCase().includes('assign') ? 'assignments'
-              : n.category?.toLowerCase().includes('eval') ? 'evaluations'
-              : 'system'
-            ) as NotificationItem['category'],
-            priority: 'normal' as NotificationItem['priority'],
-            timestamp: n.timestamp || 'Just now',
-            dateGroup: 'Today' as NotificationItem['dateGroup'],
-            isRead: n.is_read,
-            isStarred: false,
-            subject: n.category || 'General',
-            actionUrl: undefined,
-            actionLabel: undefined,
-            details: n.message,
-            sender: n.category || 'NIM AI Portal',
-          }));
+  // Real Data Fetch from Django API
+  const loadNotifications = React.useCallback(() => {
+    const studentId = getLoggedInStudentId();
+    StudentApi.getNotifications(studentId)
+      .then((data: any) => {
+        if (data?.assigned_mentor) setAssignedMentor(data.assigned_mentor);
+        if (data?.available_admin) setAvailableAdmin(data.available_admin);
+        if ((data.status === "success" || data.success) && Array.isArray(data.notifications)) {
+          const mapped: NotificationItem[] = data.notifications.map((n: any): NotificationItem => {
+            const rawCat = (n.category || '').toLowerCase();
+            const rawTitle = (n.title || '').toLowerCase();
+            const reminderType = n.reminder_type || '';
 
-          // Deduplicate: skip items whose IDs already exist in state (guards against StrictMode double-fire)
-          setNotifications(prev => {
-            const existingIds = new Set(prev.map(p => p.id));
-            const newItems = mapped.filter((m: NotificationItem) => !existingIds.has(m.id));
-            return newItems.length > 0 ? [...newItems, ...prev] : prev;
+            let category: NotificationItem['category'] = 'system';
+            if (rawCat.includes('fee') || rawCat.includes('payment') || reminderType || rawTitle.includes('fee')) {
+              category = 'fees';
+            } else if (rawCat.includes('academic') || rawCat.includes('announc')) {
+              category = 'announcements';
+            } else if (rawCat.includes('class')) {
+              category = 'classes';
+            } else if (rawCat.includes('assign')) {
+              category = 'assignments';
+            } else if (rawCat.includes('eval')) {
+              category = 'evaluations';
+            }
+
+            let priority: NotificationItem['priority'] = 'normal';
+            if (reminderType === 'overdue' || rawTitle.includes('overdue')) {
+              priority = 'urgent';
+            } else if (reminderType === 'upcoming_7_days' || rawTitle.includes('upcoming') || rawTitle.includes('reminder')) {
+              priority = 'high';
+            }
+
+            const actionUrl = n.action_url || (category === 'fees' ? '/fees' : undefined);
+            const actionLabel = n.action_label || (
+              category === 'fees'
+                ? (priority === 'urgent' ? 'Pay Overdue Fee' : 'Go to Fees & Payments')
+                : undefined
+            );
+
+            return {
+              id: String(n.id),
+              title: n.title,
+              message: n.message,
+              category,
+              priority,
+              timestamp: n.timestamp || 'Just now',
+              dateGroup: 'Today' as NotificationItem['dateGroup'],
+              isRead: Boolean(n.is_read),
+              isStarred: false,
+              subject: n.category || (category === 'fees' ? 'Fees & Payments' : 'General'),
+              actionUrl,
+              actionLabel,
+              details: n.message,
+              sender: n.target_group || (category === 'fees' ? 'Accounts & Finance' : 'NIM Academy Admin'),
+            };
           });
+
+          setNotifications(mapped);
         }
       })
-      .catch(err => console.error(err));
+      .catch((err: any) => console.error("Error fetching notifications:", err))
+      .finally(() => setIsLoading(false));
   }, []);
+
+  React.useEffect(() => {
+    const studentId = getLoggedInStudentId();
+    StudentApi.getRequests(studentId).then((res: any) => {
+      if (res?.assigned_mentor) setAssignedMentor(res.assigned_mentor);
+      if (res?.available_admin) setAvailableAdmin(res.available_admin);
+    }).catch(() => {});
+  }, []);
+
+  React.useEffect(() => {
+    loadNotifications();
+    // Automatically poll every 30 seconds to fetch scheduled background reminders without page refresh
+    const interval = setInterval(loadNotifications, 30000);
+    window.addEventListener("notificationsUpdated", loadNotifications);
+    window.addEventListener("focus", loadNotifications);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("notificationsUpdated", loadNotifications);
+      window.removeEventListener("focus", loadNotifications);
+    };
+  }, [loadNotifications]);
 
   const handleSupportSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!supportSubject.trim()) {
+      setSubmitError("Please enter a subject for your question.");
+      return;
+    }
+    if (!supportMessage.trim()) {
+      setSubmitError("Please enter your message or doubt description.");
+      return;
+    }
+
     setIsSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(null);
+
     try {
-      const res = await fetch('http://localhost:8000/api/student/requests/STU001/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subject: supportSubject,
-          category: supportCategory,
-          priority: supportPriority,
-          description: supportMessage
-        })
-      });
-      if (res.ok) {
-        setSupportOpen(false);
-        showToast("Support request submitted successfully!");
+      const studentId = getLoggedInStudentId();
+      const formData = new FormData();
+      formData.append("subject", supportSubject.trim());
+      formData.append("description", supportMessage.trim());
+      formData.append("message", supportMessage.trim());
+      formData.append("category", supportCategory);
+      formData.append("priority", supportPriority);
+      formData.append("recipient_type", recipientType);
+      
+      if (recipientType === "Mentor" && assignedMentor?.id) {
+        formData.append("target_user_id", String(assignedMentor.id));
+      } else if (recipientType === "Admin" && availableAdmin?.id) {
+        formData.append("target_user_id", String(availableAdmin.id));
+      }
+
+      if (selectedFile) {
+        formData.append("attachment", selectedFile);
+      }
+
+      const res = await StudentApi.submitRequest(formData, studentId);
+      if (res && (res.status === "success" || res.success)) {
+        const targetName = recipientType === "Mentor" ? (assignedMentor?.name || "Assigned Mentor") : (availableAdmin?.name || "Admin Support");
+        showToast(`Doubt sent to ${targetName} successfully!`);
+        setSubmitSuccess(`Your doubt has been submitted to ${targetName}!`);
         setSupportSubject("");
         setSupportMessage("");
+        setSelectedFile(null);
+        loadNotifications();
+        setTimeout(() => {
+          setSupportOpen(false);
+          setSubmitSuccess(null);
+        }, 1200);
+      } else {
+        setSubmitError(res?.message || "Failed to submit. Please try again.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      showToast("Error submitting request.");
+      setSubmitError(err?.message || "Error submitting request. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
-
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -317,17 +272,21 @@ export default function NotificationsPage() {
   };
 
   // Actions
-  const markAsRead = (id: string) => {
+  const markAsRead = async (id: string) => {
     setNotifications((prev) =>
       prev.map((item) => (item.id === id ? { ...item, isRead: true } : item))
     );
+    await StudentApi.markNotificationRead(id);
+    window.dispatchEvent(new Event("notificationsUpdated"));
   };
 
-  const toggleReadStatus = (id: string, e: React.MouseEvent) => {
+  const toggleReadStatus = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setNotifications((prev) =>
       prev.map((item) => (item.id === id ? { ...item, isRead: !item.isRead } : item))
     );
+    await StudentApi.markNotificationRead(id);
+    window.dispatchEvent(new Event("notificationsUpdated"));
   };
 
   const toggleStar = (id: string, e: React.MouseEvent) => {
@@ -337,7 +296,7 @@ export default function NotificationsPage() {
     );
   };
 
-  const deleteNotification = (id: string, e: React.MouseEvent) => {
+  const deleteNotification = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     // Set the deleting flag so the card's onClick guard skips opening the modal
@@ -346,25 +305,37 @@ export default function NotificationsPage() {
     // If the deleted item was open in the modal, close the modal
     setSelectedNotif((prev) => (prev && prev.id === id ? null : prev));
     showToast("Notification deleted");
+    
+    // Call backend API to delete notification ONLY for this target student
+    await StudentApi.deleteNotification(id);
+    window.dispatchEvent(new Event("notificationsUpdated"));
+
     // Reset the flag after the event bubble completes
     setTimeout(() => { deletingRef.current = false; }, 0);
   };
 
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
     setNotifications((prev) => prev.map((item) => ({ ...item, isRead: true })));
     showToast("All notifications marked as read");
+    await StudentApi.markAllNotificationsRead();
+    window.dispatchEvent(new Event("notificationsUpdated"));
   };
 
-  const clearAllRead = () => {
-    const unreadOnly = notifications.filter((item) => !item.isRead);
-    setNotifications(unreadOnly);
-    showToast("Cleared all read notifications");
+  const clearAllRead = async () => {
+    const readItems = notifications.filter((item) => item.isRead);
+    setNotifications((prev) => prev.filter((item) => !item.isRead));
+    showToast("Cleared read notifications");
+    for (const item of readItems) {
+      await StudentApi.deleteNotification(item.id);
+    }
+    window.dispatchEvent(new Event("notificationsUpdated"));
   };
 
   // Computed Metrics
   const totalCount = notifications.length;
   const unreadCount = notifications.filter((n) => !n.isRead).length;
   const urgentCount = notifications.filter((n) => n.priority === "urgent" || n.priority === "high").length;
+  const feesCount = notifications.filter((n) => n.category === "fees").length;
   const classesCount = notifications.filter((n) => n.category === "classes").length;
   const assignmentsCount = notifications.filter((n) => n.category === "assignments").length;
   const evaluationsCount = notifications.filter((n) => n.category === "evaluations").length;
@@ -420,6 +391,13 @@ export default function NotificationsPage() {
   // Category Icon & Color Helper
   const getCategoryMeta = (category: string) => {
     switch (category) {
+      case "fees":
+        return {
+          icon: CreditCard,
+          label: "Fees & Payment",
+          badgeBg: isDark ? "bg-rose-500/15 text-rose-400 border-rose-500/30" : "bg-rose-50 text-rose-700 border-rose-200",
+          iconBg: isDark ? "bg-rose-500/20 text-rose-400" : "bg-rose-100 text-rose-700",
+        };
       case "classes":
         return {
           icon: Calendar,
@@ -457,6 +435,14 @@ export default function NotificationsPage() {
         };
     }
   };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <NotificationsPageSkeleton />
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -524,43 +510,48 @@ export default function NotificationsPage() {
             </div>
 
             {/* Right: Quick Action Controls */}
-            <div className="flex items-center gap-2.5 flex-wrap self-start lg:self-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full lg:w-auto shrink-0">
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
-                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                  className={`inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                     isDark
                       ? "bg-[#0f1d3c] border-[#1f376a] text-slate-200 hover:bg-[#16274e] hover:text-white"
                       : "bg-white border-[#dce8f8] text-[#0a1b39] hover:bg-blue-50 hover:text-[#0062eb] shadow-sm"
                   }`}
                 >
                   <CheckCheck className="w-4 h-4 text-[#0062eb]" />
-                  <span>Mark All Read</span>
+                  <span className="whitespace-nowrap">Mark All Read</span>
                 </button>
               )}
 
-              <button
-                  onClick={() => setSupportOpen(true)}
-                  className={`hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-md active:scale-95 ${
-                    isDark
-                      ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
-                      : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
-                  }`}
+              {/* Action column: Any Doubts? Ask on top, Preferences directly below it with equal spacing */}
+              <div className="flex flex-col sm:flex-row lg:flex-col gap-2 w-full sm:w-auto min-w-0 sm:min-w-[175px]">
+                <button
+                  onClick={() => {
+                    setSubmitError(null);
+                    setSubmitSuccess(null);
+                    setSupportOpen(true);
+                  }}
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-md hover:shadow-lg active:scale-95 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-600 cursor-pointer"
+                  title="Ask doubts or submit request"
                 >
-                  <ShieldAlert className="w-4 h-4" />
-                  <span>Support Request</span>
+                  <HelpCircle className="w-4 h-4 text-white shrink-0" />
+                  <span className="whitespace-nowrap">Any Doubts? Ask</span>
                 </button>
+
                 <button
                   onClick={() => setSettingsOpen(true)}
-                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                  isDark
-                    ? "bg-[#0f1d3c] border-[#1f376a] text-slate-200 hover:bg-[#16274e]"
-                    : "bg-white border-[#dce8f8] text-[#0a1b39] hover:bg-slate-50 shadow-sm"
-                }`}
-              >
-                <SlidersHorizontal className="w-4 h-4 text-slate-400" />
-                <span>Preferences</span>
-              </button>
+                  className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                    isDark
+                      ? "bg-[#0f1d3c] border-[#1f376a] text-slate-200 hover:bg-[#16274e]"
+                      : "bg-white border-[#dce8f8] text-[#0a1b39] hover:bg-slate-50 shadow-sm"
+                  }`}
+                >
+                  <SlidersHorizontal className="w-4 h-4 text-slate-400 shrink-0" />
+                  <span className="whitespace-nowrap">Preferences</span>
+                </button>
+              </div>
             </div>
           </div>
         </section>
@@ -568,7 +559,7 @@ export default function NotificationsPage() {
         {/* =========================================================================
             2. ROW OF 4 KPI METRIC CARDS
             ========================================================================= */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <section className="grid grid-cols-1 min-[360px]:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {/* KPI 1: Total Notifications */}
           <div className={`${styles.card} p-4 flex flex-col justify-between`}>
             <div className="flex items-center justify-between mb-2">
@@ -798,6 +789,7 @@ export default function NotificationsPage() {
                 {[
                   { id: "all", label: "All", count: totalCount },
                   { id: "unread", label: "Unread", count: unreadCount },
+                  { id: "fees", label: "Fees", count: feesCount },
                   { id: "classes", label: "Classes", count: classesCount },
                   { id: "assignments", label: "Assignments", count: assignmentsCount },
                   { id: "evaluations", label: "Evaluations", count: evaluationsCount },
@@ -1081,7 +1073,7 @@ export default function NotificationsPage() {
         {selectedNotif && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
             <div
-              className={`w-full max-w-lg rounded-2xl p-6 border shadow-2xl space-y-4 animate-in zoom-in-95 ${
+              className={`w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl p-6 border shadow-2xl space-y-4 animate-in zoom-in-95 ${
                 isDark
                   ? "bg-[#0b1429] border-[#1e3363] text-white"
                   : "bg-white border-[#dce8f8] text-[#0a1b39]"
@@ -1194,7 +1186,7 @@ export default function NotificationsPage() {
         {settingsOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
             <div
-              className={`w-full max-w-md rounded-2xl p-6 border shadow-2xl space-y-5 animate-in zoom-in-95 ${
+              className={`w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl p-6 border shadow-2xl space-y-5 animate-in zoom-in-95 ${
                 isDark
                   ? "bg-[#0b1429] border-[#1e3363] text-white"
                   : "bg-white border-[#dce8f8] text-[#0a1b39]"
@@ -1300,6 +1292,359 @@ export default function NotificationsPage() {
                   Save Preferences
                 </button>
               </div>
+            </div>
+          </div>
+        )}        {/* =========================================================================
+            6. MODAL: ANY DOUBTS? ASK (SUPPORT / DOUBT FORM)
+            ========================================================================= */}
+        {supportOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm animate-in fade-in">
+            <div
+              className={`w-full max-w-[540px] rounded-2xl border shadow-2xl flex flex-col max-h-[92vh] overflow-hidden animate-in zoom-in-95 ${
+                isDark
+                  ? "bg-[#0b1429] border-[#1e3363] text-white"
+                  : "bg-white border-[#dce8f8] text-[#0a1b39]"
+              }`}
+            >
+              {/* Modal Header - Compact & neatly aligned */}
+              <div className={`px-5 sm:px-6 py-3.5 flex items-center justify-between border-b shrink-0 ${isDark ? "border-[#1e3363]" : "border-slate-100"}`}>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 flex items-center justify-center text-white shadow-md shadow-blue-500/25 shrink-0">
+                    <HelpCircle className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base leading-tight">Any Doubts? Ask</h3>
+                    <p className={`text-[11px] mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                      Directly reach your assigned Mentor or Academy Admin
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSupportOpen(false);
+                    setSubmitError(null);
+                    setSubmitSuccess(null);
+                  }}
+                  className={`p-1.5 rounded-lg transition cursor-pointer ${
+                    isDark ? "text-slate-400 hover:text-white hover:bg-slate-800" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Form container with scroll safety and fixed footer */}
+              <form onSubmit={handleSupportSubmit} className="flex flex-col flex-1 overflow-hidden">
+                {/* Form Body - Evenly spaced without unnecessary scrolling on desktop */}
+                <div className="px-5 sm:px-6 py-3.5 sm:py-4 overflow-y-auto space-y-3 flex-1">
+                  {submitError && (
+                    <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-medium flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                      <span>{submitError}</span>
+                    </div>
+                  )}
+
+                  {submitSuccess && (
+                    <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-xs font-medium flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 shrink-0" />
+                      <span>{submitSuccess}</span>
+                    </div>
+                  )}
+
+                  {/* 1. Recipient Selection: Mentor vs Admin (Equal Width & Height) */}
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 text-slate-400">
+                      Send Doubt / Request To <span className="text-red-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-3 w-full">
+                      <button
+                        type="button"
+                        onClick={() => setRecipientType("Mentor")}
+                        className={`p-2.5 rounded-xl border flex items-center gap-2.5 transition text-left cursor-pointer w-full h-[52px] min-h-[52px] ${
+                          recipientType === "Mentor"
+                            ? isDark
+                              ? "bg-blue-600/20 border-blue-500 text-white ring-2 ring-blue-500/40"
+                              : "bg-blue-50/80 border-[#0062eb] text-[#0062eb] ring-2 ring-blue-500/20 shadow-sm"
+                            : isDark
+                            ? "bg-[#070e1f] border-[#152345] text-slate-300 hover:border-slate-600"
+                            : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                          recipientType === "Mentor" ? "bg-[#0062eb] text-white shadow-sm" : isDark ? "bg-slate-800 text-slate-400" : "bg-slate-200 text-slate-600"
+                        }`}>
+                          <UserCheck className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold truncate">Mentor</p>
+                          <p className={`text-[10px] truncate ${isDark ? "text-slate-400" : "text-slate-500"}`}>Subject & Tasks</p>
+                        </div>
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                          recipientType === "Mentor"
+                            ? "border-[#0062eb] bg-[#0062eb] text-white"
+                            : isDark ? "border-slate-600" : "border-slate-300"
+                        }`}>
+                          {recipientType === "Mentor" && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setRecipientType("Admin")}
+                        className={`p-2.5 rounded-xl border flex items-center gap-2.5 transition text-left cursor-pointer w-full h-[52px] min-h-[52px] ${
+                          recipientType === "Admin"
+                            ? isDark
+                              ? "bg-purple-600/20 border-purple-500 text-white ring-2 ring-purple-500/40"
+                              : "bg-purple-50/80 border-purple-600 text-purple-700 ring-2 ring-purple-500/20 shadow-sm"
+                            : isDark
+                            ? "bg-[#070e1f] border-[#152345] text-slate-300 hover:border-slate-600"
+                            : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                          recipientType === "Admin" ? "bg-purple-600 text-white shadow-sm" : isDark ? "bg-slate-800 text-slate-400" : "bg-slate-200 text-slate-600"
+                        }`}>
+                          <ShieldAlert className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold truncate">Admin</p>
+                          <p className={`text-[10px] truncate ${isDark ? "text-slate-400" : "text-slate-500"}`}>Portal & Official</p>
+                        </div>
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                          recipientType === "Admin"
+                            ? "border-purple-600 bg-purple-600 text-white"
+                            : isDark ? "border-slate-600" : "border-slate-300"
+                        }`}>
+                          {recipientType === "Admin" && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </div>
+                      </button>
+                    </div>
+
+                    {/* Selected Recipient Card (Aligned Directly Below Selection) */}
+                    <div className={`mt-2 p-2.5 rounded-xl border text-xs w-full transition-all ${
+                      isDark ? "bg-[#070e1f] border-[#17264a]" : "bg-slate-50 border-slate-200"
+                    }`}>
+                      {recipientType === "Mentor" ? (
+                        assignedMentor ? (
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
+                                {assignedMentor.name?.charAt(0)?.toUpperCase() || "M"}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="font-bold text-xs truncate">{assignedMentor.name}</span>
+                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-500/15 text-blue-500 border border-blue-500/20">
+                                    Assigned Mentor
+                                  </span>
+                                </div>
+                                <p className={`text-[11px] truncate mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                                  {assignedMentor.email || "Primary batch mentor"}
+                                </p>
+                              </div>
+                            </div>
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Active" />
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 text-amber-500 text-xs py-0.5">
+                            <Info className="w-4 h-4 shrink-0" />
+                            <span>No mentor currently assigned to your batch. You can select Admin to receive support.</span>
+                          </div>
+                        )
+                      ) : (
+                        availableAdmin ? (
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 to-pink-600 text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
+                                {availableAdmin.name?.charAt(0)?.toUpperCase() || "A"}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="font-bold text-xs truncate">{availableAdmin.name}</span>
+                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/15 text-purple-600 border border-purple-500/20">
+                                    Available Admin
+                                  </span>
+                                </div>
+                                <p className={`text-[11px] truncate mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                                  {availableAdmin.email || "Administrative Support Desk"}
+                                </p>
+                              </div>
+                            </div>
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Active" />
+                          </div>
+                        ) : (
+                          <div className={`flex items-center gap-2 text-xs py-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                            <Info className="w-4 h-4 shrink-0" />
+                            <span>Institution Admin Desk (admin@nim.edu)</span>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 2. Subject Input (Full Width) */}
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider mb-1 text-slate-400">
+                      Subject <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder={recipientType === "Mentor" ? "e.g., Doubt regarding Python Machine Learning assignment" : "e.g., Query about portal access or course module"}
+                      value={supportSubject}
+                      onChange={(e) => setSupportSubject(e.target.value)}
+                      className={`w-full h-[38px] px-3.5 rounded-xl text-xs sm:text-sm border transition outline-none ${
+                        isDark
+                          ? "bg-[#070e1f] border-[#152345] focus:border-blue-500 text-white placeholder-slate-500"
+                          : "bg-white border-slate-200 focus:border-[#0062eb] text-[#0a1b39] placeholder-slate-400"
+                      }`}
+                    />
+                  </div>
+
+                  {/* 3. Category & Priority (Equal Width in One Row) */}
+                  <div className="grid grid-cols-2 gap-3 w-full">
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider mb-1 text-slate-400">
+                        Category
+                      </label>
+                      <select
+                        value={supportCategory}
+                        onChange={(e) => setSupportCategory(e.target.value)}
+                        className={`w-full h-[38px] px-3 rounded-xl text-xs border outline-none cursor-pointer ${
+                          isDark
+                            ? "bg-[#070e1f] border-[#152345] text-white"
+                            : "bg-white border-slate-200 text-[#0a1b39]"
+                        }`}
+                      >
+                        <option value="Doubt / Academic Question">Doubt / Question</option>
+                        <option value="Assignment / Task Help">Assignment Help</option>
+                        <option value="Class Clarification">Class Clarification</option>
+                        <option value="Technical Issue">Technical Issue</option>
+                        <option value="General Inquiry">General Inquiry</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider mb-1 text-slate-400">
+                        Priority
+                      </label>
+                      <select
+                        value={supportPriority}
+                        onChange={(e) => setSupportPriority(e.target.value)}
+                        className={`w-full h-[38px] px-3 rounded-xl text-xs border outline-none cursor-pointer ${
+                          isDark
+                            ? "bg-[#070e1f] border-[#152345] text-white"
+                            : "bg-white border-slate-200 text-[#0a1b39]"
+                        }`}
+                      >
+                        <option value="Normal">Normal</option>
+                        <option value="High">High</option>
+                        <option value="Urgent">Urgent</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* 4. Message / Description (Full Width with Proper Height) */}
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider mb-1 text-slate-400">
+                      Message <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      required
+                      rows={3}
+                      placeholder="Describe your doubt in detail. Mention any specific error, concept, or code section..."
+                      value={supportMessage}
+                      onChange={(e) => setSupportMessage(e.target.value)}
+                      className={`w-full h-[80px] min-h-[75px] p-2.5 sm:p-3 rounded-xl text-xs sm:text-sm border resize-none transition outline-none leading-relaxed ${
+                        isDark
+                          ? "bg-[#070e1f] border-[#152345] focus:border-blue-500 text-white placeholder-slate-500"
+                          : "bg-white border-slate-200 focus:border-[#0062eb] text-[#0a1b39] placeholder-slate-400"
+                      }`}
+                    />
+                  </div>
+
+                  {/* 5. Optional Attachment (Full Width & Clearly Visible) */}
+                  <div className="pb-1">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider mb-1 text-slate-400">
+                      Attachment <span className="text-slate-400 font-normal lowercase">(optional: PDF, DOC, PNG, JPG, ZIP...)</span>
+                    </label>
+                    {selectedFile ? (
+                      <div className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-xs ${
+                        isDark ? "bg-[#070e1f] border-[#1e3363]" : "bg-blue-50/50 border-blue-200"
+                      }`}>
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Paperclip className="w-4 h-4 text-[#0062eb] shrink-0" />
+                          <div className="min-w-0">
+                            <p className="font-bold truncate text-xs">{selectedFile.name}</p>
+                            <p className={`text-[10px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedFile(null)}
+                          className="p-1 rounded text-red-500 hover:bg-red-500/10 transition cursor-pointer"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className={`w-full border-2 border-dashed rounded-xl h-[42px] px-3.5 flex items-center justify-center gap-2 cursor-pointer transition text-xs font-medium ${
+                        isDark
+                          ? "border-slate-700 hover:border-blue-500 hover:bg-slate-800/40 text-slate-300"
+                          : "border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 text-slate-600"
+                      }`}>
+                        <Upload className="w-4 h-4 text-[#0062eb] shrink-0" />
+                        <span className="truncate">Upload supporting screenshot or file</span>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.png,.jpg,.jpeg"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              setSelectedFile(e.target.files[0]);
+                            }
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+
+                {/* Modal Footer - Fixed at bottom: Cancel on the left, Send on the right */}
+                <div className={`px-5 sm:px-6 py-3 sm:py-3.5 border-t flex items-center justify-between w-full shrink-0 ${isDark ? "border-[#1e3363]" : "border-slate-100"}`}>
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => {
+                      setSupportOpen(false);
+                      setSubmitError(null);
+                      setSubmitSuccess(null);
+                    }}
+                    className={`px-5 py-2.5 rounded-xl text-xs font-bold border transition cursor-pointer ${
+                      isDark ? "border-slate-700 hover:bg-slate-800 text-slate-300" : "border-slate-200 hover:bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold transition shadow-md shadow-blue-600/25 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Sending...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-3.5 h-3.5" />
+                        <span>Send to {recipientType}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

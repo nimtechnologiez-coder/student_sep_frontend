@@ -5,6 +5,7 @@ import Link from "next/link";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useTheme } from "@/components/ThemeProvider";
 import { StudentApi } from "@/lib/studentApi";
+import { TablePageSkeleton } from "@/components/Skeleton";
 import {
   CreditCard,
   CheckCircle2,
@@ -83,15 +84,23 @@ export default function FeesPage() {
 
         if (feesData?.payments && Array.isArray(feesData.payments)) {
           const mapped: PaymentRecord[] = feesData.payments.map((p: any, idx: number) => ({
-            id: String(p.id || idx),
-            invoiceId: p.receipt_number || `NIM-INV-${1000 + idx}`,
-            description: p.description || "Tuition Fee Installment",
+            id: String(p.id ?? idx),
+            invoiceId: p.transaction_id || `REC-#${p.id || 1000 + idx}`,
+            description: p.installment_name || p.description || "Tuition Fee Installment",
             date: p.payment_date || "Recorded Date",
-            paymentMode: p.payment_mode || "Online Gateway",
+            paymentMode: p.payment_method || p.payment_mode || "Online Gateway",
             amount: p.amount || 0,
-            status: "Paid",
+            status: p.status || "Paid",
           }));
-          setPayments(mapped);
+          const seen = new Set<string>();
+          const uniqueMapped: PaymentRecord[] = [];
+          for (const item of mapped) {
+            if (!seen.has(item.id)) {
+              seen.add(item.id);
+              uniqueMapped.push(item);
+            }
+          }
+          setPayments(uniqueMapped);
         } else {
           setPayments([]);
         }
@@ -159,10 +168,7 @@ export default function FeesPage() {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="w-8 h-8 animate-spin text-[#0062eb]" />
-          <span className="ml-3 text-sm font-semibold text-slate-500">Loading fee records...</span>
-        </div>
+        <TablePageSkeleton title="Loading Tuition & Payment Dues..." />
       </DashboardLayout>
     );
   }
@@ -203,11 +209,11 @@ export default function FeesPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => setPaymentModalOpen(true)}
-                className="px-5 py-2.5 rounded-xl bg-[#0062eb] hover:bg-[#0052cc] text-white text-xs font-bold transition shadow-md shadow-blue-600/25 flex items-center gap-2 cursor-pointer active:scale-[0.98]"
+                className="w-full sm:w-auto justify-center px-5 py-2.5 rounded-xl bg-[#0062eb] hover:bg-[#0052cc] text-white text-xs font-bold transition shadow-md shadow-blue-600/25 flex items-center gap-2 cursor-pointer active:scale-[0.98] min-h-[40px]"
               >
                 <Wallet className="w-4 h-4" />
                 <span>Pay Fee (₹{totalOutstanding.toLocaleString()})</span>
@@ -219,7 +225,7 @@ export default function FeesPage() {
         {/* =========================================================================
             2. REAL 4-COLUMN FINANCIAL STAT METRICS GRID
             ========================================================================= */}
-        <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <section className="grid grid-cols-1 min-[360px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div
             className={`p-5 rounded-2xl border transition-all ${
               isDark ? "bg-[#081024] border-[#15274d]" : "bg-white border-[#e2edf8] shadow-sm"
@@ -339,24 +345,28 @@ export default function FeesPage() {
                   className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#081024] flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                      <Receipt className="w-5 h-5" />
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                      p.status === "Paid" ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
+                    }`}>
+                      {p.status === "Paid" ? <Receipt className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
                     </div>
                     <div>
                       <h4 className={`text-sm font-bold ${isDark ? "text-white" : "text-[#0a1b39]"}`}>
                         {p.description}
                       </h4>
                       <p className="text-xs text-slate-400 mt-0.5">
-                        Receipt: {p.invoiceId} • Date: {p.date} • Mode: {p.paymentMode}
+                        Ref / TXN: <span className="font-mono">{p.invoiceId}</span> • Date: {p.date} • Mode: {p.paymentMode}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <strong className="text-base font-black text-emerald-600">
+                  <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800/80">
+                    <strong className={`text-base font-black ${p.status === "Paid" ? "text-emerald-600" : "text-amber-600"}`}>
                       ₹{p.amount.toLocaleString()}
                     </strong>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                      p.status === "Paid" ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
+                    }`}>
                       {p.status}
                     </span>
                   </div>
@@ -370,7 +380,7 @@ export default function FeesPage() {
         {paymentModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
             <div
-              className={`w-full max-w-md rounded-2xl p-6 border shadow-2xl space-y-4 animate-in zoom-in-95 ${
+              className={`w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl p-6 border shadow-2xl space-y-4 animate-in zoom-in-95 ${
                 isDark
                   ? "bg-[#0b1429] border-[#1e3363] text-white"
                   : "bg-white border-[#dce8f8] text-[#0a1b39]"
