@@ -185,6 +185,34 @@ export const StudentApi = {
       return { status: "error", message: e.message || "Network Error" };
     }
   },
+  toggleStar: async (notifId: number | string, studentId?: string) => {
+    const sid = studentId || getLoggedInStudentId();
+    const url = sid
+      ? `${BASE_URL}/api/student/notifications/toggle-star/${notifId}/${sid}/`
+      : `${BASE_URL}/api/student/notifications/toggle-star/${notifId}/`;
+    try {
+      const res = await fetch(url, { method: "POST", cache: "no-store" });
+      return await res.json();
+    } catch (e) {
+      return { success: false };
+    }
+  },
+  replyToRequest: async (requestId: number | string, message: string, studentId?: string) => {
+    const sid = studentId || getLoggedInStudentId();
+    const url = sid
+      ? `${BASE_URL}/api/student/requests/${sid}/reply/${requestId}/`
+      : `${BASE_URL}/api/student/requests/${requestId}/reply/`;
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      return await res.json();
+    } catch (e: any) {
+      return { status: "error", message: e.message || "Network Error" };
+    }
+  },
   getParentChildren: async (parentId?: string) => {
     const pid = parentId || getLoggedInStudentId();
     if (!pid) return { success: false, children: [] };

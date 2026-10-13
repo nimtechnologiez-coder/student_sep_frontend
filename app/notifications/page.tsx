@@ -120,6 +120,11 @@ export default function NotificationsPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   
+  // Student Doubts & Conversations State
+  const [requests, setRequests] = useState<any[]>([]);
+  const [replyInputs, setReplyInputs] = useState<{ [reqId: number]: string }>({});
+  const [submittingReplyId, setSubmittingReplyId] = useState<number | null>(null);
+
   // Real Data Fetch from Django API
   const loadNotifications = React.useCallback(() => {
     const studentId = getLoggedInStudentId();
@@ -127,6 +132,9 @@ export default function NotificationsPage() {
       .then((data: any) => {
         if (data?.assigned_mentor) setAssignedMentor(data.assigned_mentor);
         if (data?.available_admin) setAvailableAdmin(data.available_admin);
+        if (Array.isArray(data.requests)) {
+          setRequests(data.requests);
+        }
         if ((data.status === "success" || data.success) && Array.isArray(data.notifications)) {
           const mapped: NotificationItem[] = data.notifications.map((n: any): NotificationItem => {
             const rawCat = (n.category || '').toLowerCase();
@@ -147,9 +155,9 @@ export default function NotificationsPage() {
             }
 
             let priority: NotificationItem['priority'] = 'normal';
-            if (reminderType === 'overdue' || rawTitle.includes('overdue')) {
+            if (n.priority === 'urgent' || reminderType === 'overdue' || rawTitle.includes('overdue')) {
               priority = 'urgent';
-            } else if (reminderType === 'upcoming_7_days' || rawTitle.includes('upcoming') || rawTitle.includes('reminder')) {
+            } else if (n.priority === 'high' || reminderType === 'upcoming_7_days' || rawTitle.includes('upcoming') || rawTitle.includes('reminder')) {
               priority = 'high';
             }
 
@@ -169,7 +177,7 @@ export default function NotificationsPage() {
               timestamp: n.timestamp || 'Just now',
               dateGroup: 'Today' as NotificationItem['dateGroup'],
               isRead: Boolean(n.is_read),
-              isStarred: false,
+              isStarred: Boolean(n.is_starred),
               subject: n.category || (category === 'fees' ? 'Fees & Payments' : 'General'),
               actionUrl,
               actionLabel,
@@ -289,11 +297,34 @@ export default function NotificationsPage() {
     window.dispatchEvent(new Event("notificationsUpdated"));
   };
 
-  const toggleStar = (id: string, e: React.MouseEvent) => {
+  const toggleStar = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setNotifications((prev) =>
       prev.map((item) => (item.id === id ? { ...item, isStarred: !item.isStarred } : item))
     );
+    await StudentApi.toggleStar(id);
+    window.dispatchEvent(new Event("notificationsUpdated"));
+  };
+
+  const handleReplySubmit = async (requestId: number) => {
+    const text = (replyInputs[requestId] || "").trim();
+    if (!text) return;
+
+    setSubmittingReplyId(requestId);
+    try {
+      const res = await StudentApi.replyToRequest(requestId, text);
+      if (res && (res.status === "success" || res.success)) {
+        showToast("Reply sent successfully!");
+        setReplyInputs((prev) => ({ ...prev, [requestId]: "" }));
+        loadNotifications();
+      } else {
+        showToast(res?.message || "Failed to send reply");
+      }
+    } catch (e) {
+      showToast("Error sending reply");
+    } finally {
+      setSubmittingReplyId(null);
+    }
   };
 
   const deleteNotification = async (id: string, e: React.MouseEvent) => {
@@ -789,6 +820,7 @@ export default function NotificationsPage() {
                 {[
                   { id: "all", label: "All", count: totalCount },
                   { id: "unread", label: "Unread", count: unreadCount },
+                  { id: "doubts", label: "Doubts & Discussions", count: requests.length },
                   { id: "fees", label: "Fees", count: feesCount },
                   { id: "classes", label: "Classes", count: classesCount },
                   { id: "assignments", label: "Assignments", count: assignmentsCount },
@@ -826,8 +858,158 @@ export default function NotificationsPage() {
               </div>
             </div>
 
-            {/* Notifications List Grouped By Date */}
-            {filteredNotifications.length === 0 ? (
+            {/* Notifications or Doubts List */}
+            {activeCategory === "doubts" ? (
+              requests.length === 0 ? (
+                <div className={`${styles.card} p-12 text-center flex flex-col items-center justify-center`}>
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-3 ${isDark ? "bg-slate-800/60 text-slate-500" : "bg-blue-50 text-blue-500"}`}>
+                    <HelpCircle className="w-7 h-7 stroke-[1.8]" />
+                  </div>
+                  <h3 className={`text-base font-bold ${isDark ? "text-white" : "text-[#0a1b39]"}`}>No Doubts Asked Yet</h3>
+                  <p className={`text-xs mt-1 max-w-sm font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                    Have an academic question or need administrative assistance? Click &quot;Any Doubts? Ask&quot; to reach your mentor or admin support directly.
+                  </p>
+                  <button
+                    onClick={() => setSupportOpen(true)}
+                    className="mt-4 px-4 py-2 rounded-xl bg-[#0062eb] hover:bg-[#0052cc] text-white text-xs font-bold transition shadow-md shadow-blue-600/20"
+                  >
+                    Ask a Doubt
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {requests.map((req) => {
+                    const isInProgress = req.status === "In Progress";
+                    const isResolved = req.status === "Resolved";
+                    const repliesList: any[] = Array.isArray(req.replies) ? req.replies : [];
+
+                    return (
+                      <div key={req.id} className={`${styles.card} p-5 space-y-4 transition-all duration-200 border ${isDark ? "border-slate-800" : "border-slate-200"}`}>
+                        {/* Header */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                                isResolved
+                                  ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                                  : isInProgress
+                                  ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                                  : "bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30"
+                              }`}>
+                                {req.status}
+                              </span>
+                              <span className={`text-[11px] px-2 py-0.5 rounded-md font-semibold ${isDark ? "bg-slate-800 text-slate-300" : "bg-slate-100 text-slate-700"}`}>
+                                {req.category}
+                              </span>
+                              <span className={`text-[11px] px-2 py-0.5 rounded-md font-semibold ${
+                                req.priority === "Urgent" ? "bg-rose-500/15 text-rose-500" : req.priority === "High" ? "bg-amber-500/15 text-amber-600" : isDark ? "bg-slate-800 text-slate-400" : "bg-slate-100 text-slate-600"
+                              }`}>
+                                {req.priority} Priority
+                              </span>
+                            </div>
+                            <h4 className={`text-base font-bold ${isDark ? "text-white" : "text-[#0a1b39]"}`}>{req.subject}</h4>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 shrink-0">
+                            <span className="px-2.5 py-1 rounded-lg bg-[#007782]/10 text-[#007782] font-bold">
+                              To: {req.recipient_type} ({req.recipient_name})
+                            </span>
+                            <span>{req.created_at}</span>
+                          </div>
+                        </div>
+
+                        {/* Question Description */}
+                        <div className={`p-3.5 rounded-xl text-sm leading-relaxed ${isDark ? "bg-slate-900/60 text-slate-200 border border-slate-800/80" : "bg-slate-50 text-slate-700 border border-slate-200/60"}`}>
+                          <p className="whitespace-pre-wrap">{req.description}</p>
+                          {req.attachment_url && (
+                            <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-800">
+                              <a
+                                href={req.attachment_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                              >
+                                <Paperclip className="w-3.5 h-3.5" />
+                                <span>Attachment: {req.attachment_name || "View Attachment"}</span>
+                              </a>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Conversation Thread / Replies */}
+                        {repliesList.length > 0 && (
+                          <div className="space-y-2.5 pt-1">
+                            <div className="text-xs font-bold tracking-wider uppercase text-slate-400 flex items-center gap-2">
+                              <MessageSquare className="w-3.5 h-3.5" />
+                              <span>Conversation Thread ({repliesList.length})</span>
+                            </div>
+
+                            <div className="space-y-2.5 pl-2 border-l-2 border-blue-500/30">
+                              {repliesList.map((reply: any) => {
+                                const isFromStudent = reply.sender_type === "student";
+                                return (
+                                  <div
+                                    key={reply.id}
+                                    className={`p-3 rounded-xl text-xs sm:text-sm leading-relaxed ${
+                                      isFromStudent
+                                        ? isDark ? "bg-blue-950/30 border border-blue-900/40 text-blue-200" : "bg-blue-50/70 border border-blue-200/60 text-blue-950"
+                                        : isDark ? "bg-[#007782]/15 border border-[#007782]/30 text-emerald-200" : "bg-emerald-50/70 border border-emerald-200/60 text-emerald-950"
+                                    }`}
+                                  >
+                                    <div className="flex items-center justify-between mb-1 text-[11px] font-bold">
+                                      <span className={isFromStudent ? "text-blue-600 dark:text-blue-400" : "text-[#007782] dark:text-[#00a2b0]"}>
+                                        {reply.sender_name} ({reply.sender_type.toUpperCase()})
+                                      </span>
+                                      <span className="text-slate-400 font-normal">{reply.created_at}</span>
+                                    </div>
+                                    <p className="whitespace-pre-wrap">{reply.message}</p>
+                                    {reply.attachment_url && (
+                                      <div className="mt-1.5">
+                                        <a href={reply.attachment_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 underline">
+                                          <Paperclip className="w-3 h-3" />
+                                          <span>{reply.attachment_name || "Attachment"}</span>
+                                        </a>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Quick Reply Form */}
+                        <div className="pt-2 flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={replyInputs[req.id] || ""}
+                            onChange={(e) => setReplyInputs({ ...replyInputs, [req.id]: e.target.value })}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleReplySubmit(req.id);
+                              }
+                            }}
+                            placeholder="Type a follow-up reply or query..."
+                            className={`flex-1 px-3.5 py-2 rounded-xl text-xs sm:text-sm outline-none border transition ${
+                              isDark ? "bg-slate-900 border-slate-800 text-white placeholder-slate-500 focus:border-blue-500" : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 focus:border-blue-500"
+                            }`}
+                          />
+                          <button
+                            onClick={() => handleReplySubmit(req.id)}
+                            disabled={submittingReplyId === req.id || !(replyInputs[req.id] || "").trim()}
+                            className="px-4 py-2 rounded-xl bg-[#0062eb] hover:bg-[#0052cc] disabled:opacity-50 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm shrink-0 cursor-pointer"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                            <span>{submittingReplyId === req.id ? "Sending..." : "Reply"}</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )
+            ) : filteredNotifications.length === 0 ? (
               /* Empty State */
               <div className={`${styles.card} p-12 text-center flex flex-col items-center justify-center`}>
                 <div
