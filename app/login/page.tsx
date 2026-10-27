@@ -13,15 +13,11 @@ export default function LoginPage() {
   const [emailOrPhone, setEmailOrPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
   const [activeRole, setActiveRole] = useState<UserRole>("student");
 
   const [errors, setErrors] = useState<{ emailOrPhone?: string; password?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
-  const [showForgotModal, setShowForgotModal] = useState(false);
-  const [forgotEmail, setForgotEmail] = useState("");
-  const [forgotStatus, setForgotStatus] = useState<string | null>(null);
 
   const validate = () => {
     const errs: { emailOrPhone?: string; password?: string } = {};
@@ -94,19 +90,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleForgotSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!forgotEmail.trim()) {
-      setForgotStatus("Please enter your registered email or phone.");
-      return;
-    }
-    setForgotStatus("Password reset link sent! Please check your inbox.");
-    setTimeout(() => {
-      setShowForgotModal(false);
-      setForgotStatus(null);
-      setForgotEmail("");
-    }, 2000);
-  };
 
   return (
     <div className={styles.loginPageLayout}>
@@ -373,28 +356,6 @@ export default function LoginPage() {
               )}
             </div>
 
-            {/* Remember Me & Forgot Password */}
-            <div className={styles.optionsRow}>
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-[#0062eb] focus:ring-[#0062eb] transition-colors"
-                />
-                <span className="text-slate-700 font-medium text-xs sm:text-[13px]">
-                  Remember me
-                </span>
-              </label>
-
-              <button
-                type="button"
-                onClick={() => setShowForgotModal(true)}
-                className="text-[#0062eb] hover:text-blue-700 text-xs sm:text-[13px] font-semibold hover:underline"
-              >
-                Forgot Password?
-              </button>
-            </div>
 
             {/* Primary Login CTA Button */}
             <button
@@ -458,61 +419,6 @@ export default function LoginPage() {
         </div>
       </section>
 
-      {/* Forgot Password Modal */}
-      {showForgotModal && (
-        <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
-          <div className={styles.modalContent}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-bold text-slate-900">Reset Password</h3>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowForgotModal(false);
-                  setForgotStatus(null);
-                }}
-                className="text-slate-400 hover:text-slate-600 p-1"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-500 mb-4">
-              Enter your registered email or phone to receive your password reset link.
-            </p>
-
-            {forgotStatus ? (
-              <div className="p-3 rounded-xl bg-blue-50 text-blue-700 text-xs font-medium border border-blue-200 mb-3">
-                {forgotStatus}
-              </div>
-            ) : (
-              <form onSubmit={handleForgotSubmit} className="space-y-3">
-                <input
-                  type="text"
-                  placeholder="Registered email or phone"
-                  value={forgotEmail}
-                  onChange={(e) => setForgotEmail(e.target.value)}
-                  className={styles.mockupInput}
-                  required
-                />
-                <div className="flex gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowForgotModal(false)}
-                    className={styles.secondaryButton || "px-4 py-2 rounded-lg border text-sm"}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className={styles.submitButton || "px-4 py-2 rounded-lg bg-[#0062eb] text-white text-sm font-semibold"}>
-                    Send Reset Link
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
