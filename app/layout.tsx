@@ -44,7 +44,7 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/nimlogo.webp" type="image/webp" />
         <link rel="apple-touch-icon" href="/nimlogo.webp" />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

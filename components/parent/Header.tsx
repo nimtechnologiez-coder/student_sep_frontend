@@ -48,7 +48,18 @@ export default function ParentHeader({
   useEffect(() => {
     StudentApi.getNotifications().then((res) => {
       if (res && res.status === "success" && Array.isArray(res.notifications)) {
-        setNotifications(res.notifications);
+        const filtered = res.notifications.filter((n: any) => {
+          const rawCat = (n.category || '').toLowerCase();
+          const rawTitle = (n.title || '').toLowerCase();
+          const rawMsg = (n.message || '').toLowerCase();
+          const rawGroup = (n.target_group || '').toLowerCase();
+
+          if (rawGroup === 'admin') return false;
+          if (rawCat.includes('enroll') || rawTitle.includes('enroll') || rawMsg.includes('registered and paid')) return false;
+          if (rawCat.includes('payment') || rawTitle.includes('fee payment') || rawTitle.includes('payment successful') || rawTitle.includes('payment recorded')) return false;
+          return true;
+        });
+        setNotifications(filtered);
       }
     });
   }, []);

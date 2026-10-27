@@ -22,11 +22,9 @@ import {
   CheckCircle2,
   X,
   FileText,
-  CreditCard,
-  Wallet,
-  Building,
   Check,
   BadgeCheck,
+  Download,
   Sun,
   SunMedium,
   Moon,
@@ -77,17 +75,23 @@ export default function RegisterPage() {
 
   // Step 3: Payment Details State
   const [paymentOption, setPaymentOption] = useState<"full" | "installment">("full");
-  const [paymentMethod, setPaymentMethod] = useState<"upi" | "card" | "netbanking">("upi");
   const [confirmPayment, setConfirmPayment] = useState(true);
 
   // Status & Modal states
   const [errorMsg, setErrorMsg] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
 
-  // Step 4 Confirmation Identifiers
+  // Step 4 Confirmation & Invoice Identifiers
   const [registrationId, setRegistrationId] = useState("NIM-2026-78412");
   const [transactionId, setTransactionId] = useState("TXN-98421045");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [paymentDate, setPaymentDate] = useState("");
+  const [invoicePdfBase64, setInvoicePdfBase64] = useState("");
+  const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
+  const [hasAutoDownloaded, setHasAutoDownloaded] = useState(false);
 
   // Close Terms modal on Escape key press
   useEffect(() => {
@@ -107,6 +111,150 @@ export default function RegisterPage() {
     if (errorMsg) setErrorMsg("");
   };
 
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleChange(e);
+    if (emailError) setEmailError("");
+  };
+
+  // Helper to check email uniqueness in backend asynchronously
+  const checkEmailUnique = async (emailToCheck: string): Promise<boolean> => {
+    const trimmed = (emailToCheck || "").trim();
+    if (!trimmed || !trimmed.includes("@")) return true;
+
+    setIsCheckingEmail(true);
+    const urls = [
+      `http://127.0.0.1:8000/api/check-email/?email=${encodeURIComponent(trimmed)}`,
+      `http://localhost:8000/api/check-email/?email=${encodeURIComponent(trimmed)}`,
+      `${process.env.NEXT_PUBLIC_API_URL || "https://student-sep-backend.onrender.com"}/api/check-email/?email=${encodeURIComponent(trimmed)}`,
+    ];
+    const uniqueUrls = Array.from(new Set(urls));
+
+    for (const url of uniqueUrls) {
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          setIsCheckingEmail(false);
+          if (data && data.exists) {
+            setEmailError("This email address is already registered.");
+            return false;
+          }
+          setEmailError("");
+          return true;
+        }
+      } catch {
+        // Fallback to next url
+      }
+    }
+    setIsCheckingEmail(false);
+    return true;
+  };
+
+  const handleEmailBlur = async () => {
+    if (formData.email && formData.email.includes("@")) {
+      await checkEmailUnique(formData.email);
+    }
+  };
+
+  // Helper to trigger direct blob download in browser
+  const triggerInvoiceDownload = (data: {
+    pdfBase64?: string;
+    studentId?: string;
+    transactionId?: string;
+  }) => {
+    const sId = data.studentId || registrationId || "Student";
+    if (data.pdfBase64) {
+      try {
+        const byteCharacters = atob(data.pdfBase64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = `Invoice-${sId}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+        return;
+      } catch (e) {
+        console.error("PDF base64 auto-download error:", e);
+      }
+    }
+  };
+
+  // Fallback download invoice button handler
+  const handleDownloadInvoice = async () => {
+    setIsDownloadingInvoice(true);
+    try {
+      if (invoicePdfBase64) {
+        triggerInvoiceDownload({
+          pdfBase64: invoicePdfBase64,
+          studentId: registrationId,
+          transactionId: transactionId,
+        });
+        setIsDownloadingInvoice(false);
+        return;
+      }
+
+      const sId = registrationId || "Student";
+      const urls = [
+        `http://127.0.0.1:8000/api/invoice/download/?student_id=${encodeURIComponent(sId)}&transaction_id=${encodeURIComponent(transactionId)}`,
+        `http://localhost:8000/api/invoice/download/?student_id=${encodeURIComponent(sId)}&transaction_id=${encodeURIComponent(transactionId)}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://student-sep-backend.onrender.com"}/api/invoice/download/?student_id=${encodeURIComponent(sId)}&transaction_id=${encodeURIComponent(transactionId)}`,
+      ];
+      const uniqueUrls = Array.from(new Set(urls));
+
+      for (const url of uniqueUrls) {
+        try {
+          const res = await fetch(url, { cache: "no-store" });
+          if (res.ok) {
+            const blob = await res.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = `Invoice-${sId}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+            setIsDownloadingInvoice(false);
+            return;
+          }
+        } catch {
+          // Fallback to next url
+        }
+      }
+    } catch (err) {
+      console.error("Invoice download error:", err);
+    } finally {
+      setIsDownloadingInvoice(false);
+    }
+  };
+
+  // Automatically trigger invoice download when entering Step 4
+  useEffect(() => {
+    if (currentStep === 4 && !hasAutoDownloaded) {
+      setHasAutoDownloaded(true);
+      const timer = setTimeout(() => {
+        if (invoicePdfBase64) {
+          triggerInvoiceDownload({
+            pdfBase64: invoicePdfBase64,
+            studentId: registrationId,
+            transactionId: transactionId,
+          });
+        } else {
+          handleDownloadInvoice();
+        }
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep, hasAutoDownloaded, invoicePdfBase64, registrationId, transactionId]);
+
   const handleAcceptTerms = () => {
     setFormData((prev) => ({ ...prev, agreeTerms: true }));
     setShowTermsModal(false);
@@ -116,7 +264,7 @@ export default function RegisterPage() {
   };
 
   // Step 1 Validation & Proceed to Step 2
-  const handleProceedToStep2 = (e: React.FormEvent) => {
+  const handleProceedToStep2 = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.fullName.trim()) {
       setErrorMsg("Please enter your full name.");
@@ -147,7 +295,15 @@ export default function RegisterPage() {
       return;
     }
 
+    // Check duplicate email validation before proceeding to step 2
+    const isUnique = await checkEmailUnique(formData.email);
+    if (!isUnique) {
+      setEmailError("This email address is already registered.");
+      return;
+    }
+
     setErrorMsg("");
+    setEmailError("");
     setCurrentStep(2);
   };
 
@@ -163,7 +319,94 @@ export default function RegisterPage() {
     setCurrentStep(3);
   };
 
-  // Step 3 Complete Payment & Advance to Step 4 Complete (Connect to Django API)
+  // Helper to dynamically load Razorpay checkout script
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (typeof window !== "undefined" && (window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+      const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+      if (existingScript) {
+        if ((window as any).Razorpay) {
+          resolve(true);
+          return;
+        }
+        existingScript.addEventListener("load", () => resolve(true));
+        existingScript.addEventListener("error", () => resolve(false));
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  // Helper to call backend create-order endpoint with local & deployed fallbacks
+  const createRegistrationOrder = async (orderPayload: any) => {
+    const urls = [
+      "http://127.0.0.1:8000/api/register/create-order/",
+      "http://localhost:8000/api/register/create-order/",
+      `${process.env.NEXT_PUBLIC_API_URL || "https://student-sep-backend.onrender.com"}/api/register/create-order/`,
+    ];
+    const uniqueUrls = Array.from(new Set(urls));
+    let lastError = "Could not initialize Razorpay order.";
+
+    for (const url of uniqueUrls) {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderPayload),
+          cache: "no-store",
+        });
+        const data = await res.json();
+        if (res.ok && data?.success) {
+          return data;
+        } else if (data?.error) {
+          lastError = data.error;
+        }
+      } catch (err: any) {
+        lastError = err?.message || lastError;
+      }
+    }
+    return { success: false, error: lastError };
+  };
+
+  // Helper to call registration endpoint with verified Razorpay details
+  const submitVerifiedRegistration = async (registrationPayload: any) => {
+    const urls = [
+      "http://127.0.0.1:8000/api/register/",
+      "http://localhost:8000/api/register/",
+      `${process.env.NEXT_PUBLIC_API_URL || "https://student-sep-backend.onrender.com"}/api/register/`,
+    ];
+    const uniqueUrls = Array.from(new Set(urls));
+    let lastError = "Could not verify registration with server.";
+
+    for (const url of uniqueUrls) {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(registrationPayload),
+          cache: "no-store",
+        });
+        const data = await res.json();
+        if (res.ok && data?.success) {
+          return data;
+        } else if (data?.error) {
+          lastError = data.error;
+        }
+      } catch (err: any) {
+        lastError = err?.message || lastError;
+      }
+    }
+    return { success: false, error: lastError };
+  };
+
+  // Step 3 Complete Payment & Advance to Step 4 Complete (Verified Razorpay Gateway)
   const handleCompletePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!confirmPayment) {
@@ -174,60 +417,167 @@ export default function RegisterPage() {
     setErrorMsg("");
     setIsProcessing(true);
 
-    const generatedRegId = `NIM-2026-${Math.floor(10000 + Math.random() * 90000)}`;
-    const generatedTxnId = `TXN-${Math.floor(10000000 + Math.random() * 90000000)}`;
-
     const totalCourseFee = selectedPlan === "placement" ? 90000 : 60000;
     const paymentOptStr = paymentOption === "installment" ? "2 Installments" : "Full Payment";
     const amountToPay = paymentOption === "installment" ? (totalCourseFee / 2) : totalCourseFee;
     const balanceDue = paymentOption === "installment" ? (totalCourseFee / 2) : 0;
 
-    const payload = {
-      student_id: generatedRegId,
-      name: formData.fullName,
-      email: formData.email,
-      phone: formData.phone,
-      dob: formData.dob,
-      guardian_name: formData.guardianName,
-      guardian_phone: formData.guardianPhone,
-      address: formData.address,
-      timing_preference: batchTiming,
-      plan: selectedPlan === "placement" ? "Placement Included" : "Without Placement",
-      payment_option: paymentOptStr,
-      total_fee: totalCourseFee,
-      amount: amountToPay,
-      balance_due: balanceDue,
-      payment_method: paymentMethod,
-      transaction_id: generatedTxnId,
-      course: "Generative AI & LLMs"
-    };
-
     try {
-      const res = await fetch("https://student-sep-backend.onrender.com/api/register/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+      // 1. Ensure Razorpay Checkout script is loaded
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded || typeof window === "undefined" || !(window as any).Razorpay) {
+        setErrorMsg("Failed to load Razorpay Checkout SDK. Please check your internet connection.");
+        setIsProcessing(false);
+        return;
+      }
+
+      // 2. Create Razorpay order on backend
+      const orderRes = await createRegistrationOrder({
+        name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        plan: selectedPlan === "placement" ? "Placement Included" : "Without Placement",
+        payment_option: paymentOptStr,
+        amount: amountToPay,
       });
 
-      if (res.ok) {
-        const resData = await res.json();
-        setRegistrationId(resData.student_id || generatedRegId);
-        setTransactionId(resData.transaction_id || generatedTxnId);
-      } else {
-        setRegistrationId(generatedRegId);
-        setTransactionId(generatedTxnId);
-      }
-    } catch (err) {
-      console.warn("Could not reach Django API, continuing local fallback:", err);
-      setRegistrationId(generatedRegId);
-      setTransactionId(generatedTxnId);
-    } finally {
-      setTimeout(() => {
+      if (!orderRes?.success || !orderRes?.order_id) {
+        if (
+          orderRes?.field === "email" ||
+          orderRes?.error?.toLowerCase().includes("email") ||
+          orderRes?.error?.includes("already registered")
+        ) {
+          setEmailError("This email address is already registered.");
+          setCurrentStep(1);
+        } else {
+          setErrorMsg(orderRes?.error || "Could not create Razorpay payment order. Please ensure backend is running.");
+        }
         setIsProcessing(false);
-        setCurrentStep(4);
-      }, 800);
+        return;
+      }
+
+      const razorpayKey = orderRes.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_ToVcd6rowFmgFn";
+
+      // 3. Connect to Razorpay Checkout popup
+      const options: any = {
+        key: razorpayKey,
+        amount: orderRes.amount_paise || Math.round(amountToPay * 100),
+        currency: orderRes.currency || "INR",
+        name: "NIM Academy",
+        description: `Enrollment Fee: ${selectedPlan === "placement" ? "Placement Included" : "Without Placement"} (${paymentOptStr})`,
+        prefill: {
+          name: formData.fullName,
+          email: formData.email,
+          contact: formData.phone,
+        },
+        notes: {
+          plan: selectedPlan,
+          batch_timing: batchTiming,
+          payment_option: paymentOptStr,
+        },
+        theme: {
+          color: "#0066fe",
+        },
+        handler: async function (response: {
+          razorpay_payment_id: string;
+          razorpay_order_id?: string;
+          razorpay_signature?: string;
+        }) {
+          setIsProcessing(true);
+          try {
+            // 4. Send verified Razorpay tokens to backend
+            const verifyPayload = {
+              name: formData.fullName,
+              email: formData.email,
+              phone: formData.phone,
+              dob: formData.dob,
+              guardian_name: formData.guardianName,
+              guardian_phone: formData.guardianPhone,
+              address: formData.address,
+              timing_preference: batchTiming,
+              plan: selectedPlan === "placement" ? "Placement Included" : "Without Placement",
+              payment_option: paymentOptStr,
+              total_fee: totalCourseFee,
+              amount: amountToPay,
+              balance_due: balanceDue,
+              payment_method: "Razorpay Checkout",
+              razorpay_payment_id: response.razorpay_payment_id || `pay_test_${Date.now().toString().slice(-8)}`,
+              razorpay_order_id: response.razorpay_order_id || orderRes.order_id || "order_sandbox_verified",
+              razorpay_signature: response.razorpay_signature || "sandbox_simulated_sig",
+            };
+
+            const result = await submitVerifiedRegistration(verifyPayload);
+
+            // 5. Only mark PAID and advance to Step 4 after backend verifies signature & status
+            if (result?.success) {
+              const regId = result.student_id || registrationId;
+              const txnId = result.transaction_id || response.razorpay_payment_id;
+              const invNum = result.invoice_number || `INV-${regId}`;
+              const payDate = result.payment_date || new Date().toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric' });
+              const pdfB64 = result.invoice_pdf_base64 || "";
+
+              setRegistrationId(regId);
+              setTransactionId(txnId);
+              setInvoiceNumber(invNum);
+              setPaymentDate(payDate);
+              setInvoicePdfBase64(pdfB64);
+              setCurrentStep(4);
+
+              if (pdfB64) {
+                triggerInvoiceDownload({
+                  pdfBase64: pdfB64,
+                  studentId: regId,
+                  transactionId: txnId,
+                });
+              }
+            } else {
+              if (
+                result?.field === "email" ||
+                result?.error?.toLowerCase().includes("email") ||
+                result?.error?.includes("already registered")
+              ) {
+                setEmailError("This email address is already registered.");
+                setCurrentStep(1);
+              } else {
+                setErrorMsg(result?.error || "Payment verification failed on the server. Please contact admissions.");
+              }
+            }
+          } catch (err: any) {
+            setErrorMsg("Payment verification network error: " + (err?.message || "Please contact support."));
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setIsProcessing(false);
+            setErrorMsg("Payment was cancelled. Please complete payment to confirm your NIM Academy enrollment.");
+          },
+        },
+      };
+
+      // Only attach order_id if it's an authentic Razorpay order (Razorpay JS SDK errors on mock sandbox IDs)
+      if (orderRes?.order_id && !orderRes.order_id.startsWith("order_sandbox_") && !orderRes?.is_sandbox) {
+        options.order_id = orderRes.order_id;
+      }
+
+      try {
+        const rzpInstance = new (window as any).Razorpay(options);
+        rzpInstance.on("payment.failed", function (resp: any) {
+          setIsProcessing(false);
+          setErrorMsg(`Payment failed: ${resp.error?.description || "Transaction declined by gateway"}`);
+        });
+        rzpInstance.open();
+        setIsProcessing(false);
+      } catch (openErr: any) {
+        console.error("Razorpay popup open error:", openErr);
+        setErrorMsg("Failed to open Razorpay modal: " + (openErr?.message || "Please check browser popup settings."));
+        setIsProcessing(false);
+      }
+    } catch (err: any) {
+      console.error("Razorpay Checkout Error:", err);
+      setErrorMsg("Failed to open Razorpay checkout: " + (err?.message || "Unknown error"));
+      setIsProcessing(false);
     }
   };
 
@@ -537,21 +887,47 @@ export default function RegisterPage() {
 
                 {/* Email Address */}
                 <div>
-                  <label className={styles.fieldLabel}>
-                    Email Address <span className={styles.reqStar}>*</span>
-                  </label>
-                  <div className={styles.inputWrap}>
-                    <Mail className={styles.inputIcon} />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className={styles.fieldLabel} style={{ marginBottom: 0 }}>
+                      Email Address <span className={styles.reqStar}>*</span>
+                    </label>
+                    {emailError && (
+                      <span className="text-xs font-semibold text-red-600 animate-fadeIn">
+                        {emailError}
+                      </span>
+                    )}
+                  </div>
+                  <div
+                    className={styles.inputWrap}
+                    style={
+                      emailError
+                        ? { borderColor: "#ef4444", boxShadow: "0 0 0 1px #ef4444", backgroundColor: "#fef2f2" }
+                        : {}
+                    }
+                  >
+                    <Mail
+                      className={styles.inputIcon}
+                      style={emailError ? { color: "#ef4444" } : {}}
+                    />
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
-                      onChange={handleChange}
+                      onChange={handleEmailChange}
+                      onBlur={handleEmailBlur}
                       placeholder="Enter email address"
                       className={styles.textInput}
                       required
                     />
+                    {isCheckingEmail && (
+                      <span className="text-xs text-blue-600 font-medium pr-2">Checking...</span>
+                    )}
                   </div>
+                  {emailError && (
+                    <p className="text-xs text-red-600 font-medium mt-1">
+                      {emailError}
+                    </p>
+                  )}
                 </div>
 
                 {/* Phone Number */}
@@ -892,49 +1268,6 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1">
-                  Payment Method <span className="text-rose-500">*</span>
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("upi")}
-                    className={`p-1.5 rounded-lg border text-center flex flex-col items-center gap-0.5 ${paymentMethod === "upi"
-                        ? "border-[#0066fe] bg-blue-50/50 text-[#0066fe] font-bold"
-                        : "border-slate-200 text-slate-600 font-medium"
-                      }`}
-                  >
-                    <Wallet className="w-3.5 h-3.5" />
-                    <span className="text-[11px]">UPI / QR</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("card")}
-                    className={`p-1.5 rounded-lg border text-center flex flex-col items-center gap-0.5 ${paymentMethod === "card"
-                        ? "border-[#0066fe] bg-blue-50/50 text-[#0066fe] font-bold"
-                        : "border-slate-200 text-slate-600 font-medium"
-                      }`}
-                  >
-                    <CreditCard className="w-3.5 h-3.5" />
-                    <span className="text-[11px]">Debit / Card</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("netbanking")}
-                    className={`p-1.5 rounded-lg border text-center flex flex-col items-center gap-0.5 ${paymentMethod === "netbanking"
-                        ? "border-[#0066fe] bg-blue-50/50 text-[#0066fe] font-bold"
-                        : "border-slate-200 text-slate-600 font-medium"
-                      }`}
-                  >
-                    <Building className="w-3.5 h-3.5" />
-                    <span className="text-[11px]">Net Banking</span>
-                  </button>
-                </div>
-              </div>
-
               <div className="flex items-center gap-2 pt-0.5">
                 <input
                   type="checkbox"
@@ -947,6 +1280,13 @@ export default function RegisterPage() {
                 <label htmlFor="confirmPayment" className="text-xs text-slate-600 font-medium select-none cursor-pointer">
                   I confirm payment authorization for NIM Academy student enrollment.
                 </label>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-blue-50/70 border border-blue-200/80 flex items-center gap-2.5 text-xs">
+                <ShieldCheck className="w-4 h-4 text-[#0066fe] shrink-0" />
+                <div className="text-[11px] text-slate-700">
+                  <span className="font-bold text-[#0066fe]">Razorpay Test Gateway:</span> Instant popup checkout with Test UPI, Cards, NetBanking, and Wallets.
+                </div>
               </div>
 
               <div className={styles.btnGroup}>
@@ -968,10 +1308,10 @@ export default function RegisterPage() {
                   className={styles.submitBtnGroup}
                 >
                   {isProcessing ? (
-                    <span>Processing Payment...</span>
+                    <span>Opening Razorpay Checkout...</span>
                   ) : (
                     <>
-                      <span>Make Payment</span>
+                      <span>Pay with Razorpay &amp; Confirm</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </>
                   )}
@@ -1005,8 +1345,36 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="flex items-center justify-between pb-1 border-b border-slate-200">
-                  <span className="text-slate-500 font-medium">Batch Timing</span>
-                  <span className="font-bold text-[#0066fe]">{batchTiming} Batch</span>
+                  <span className="text-slate-500 font-medium">Registration ID</span>
+                  <span className="font-mono font-bold text-[#0066fe] bg-blue-500/10 px-2 py-0.5 rounded">
+                    {registrationId}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between pb-1 border-b border-slate-200">
+                  <span className="text-slate-500 font-medium">Course Name</span>
+                  <span className="font-bold text-slate-900">Generative AI &amp; LLMs</span>
+                </div>
+
+                <div className="flex items-center justify-between pb-1 border-b border-slate-200">
+                  <span className="text-slate-500 font-medium">Invoice Number</span>
+                  <span className="font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded text-[11px]">
+                    {invoiceNumber || `INV-${registrationId}`}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between pb-1 border-b border-slate-200">
+                  <span className="text-slate-500 font-medium">Payment Date</span>
+                  <span className="font-bold text-slate-900">
+                    {paymentDate || new Date().toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between pb-1 border-b border-slate-200">
+                  <span className="text-slate-500 font-medium">Razorpay Payment ID</span>
+                  <span className="font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded text-[11px]">
+                    {transactionId}
+                  </span>
                 </div>
 
                 <div className="flex items-center justify-between pb-1 border-b border-slate-200">
@@ -1017,10 +1385,8 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="flex items-center justify-between pb-1 border-b border-slate-200">
-                  <span className="text-slate-500 font-medium">Registration ID</span>
-                  <span className="font-mono font-bold text-[#0066fe] bg-blue-500/10 px-2 py-0.5 rounded">
-                    {registrationId}
-                  </span>
+                  <span className="text-slate-500 font-medium">Batch Timing</span>
+                  <span className="font-bold text-[#0066fe]">{batchTiming} Batch</span>
                 </div>
 
                 <div className="flex items-center justify-between pb-1 border-b border-slate-200">
@@ -1052,23 +1418,44 @@ export default function RegisterPage() {
                   <span className="text-slate-500 font-medium">Payment Status</span>
                   {paymentOption === "installment" ? (
                     <span className="inline-flex items-center gap-1 font-bold text-blue-600 bg-blue-500/10 px-2 py-0.5 rounded-full">
-                      <CheckCircle2 className="w-3 h-3" /> 1st Installment Paid
+                      <CheckCircle2 className="w-3 h-3" /> 1st Installment Paid (Razorpay Verified)
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 font-bold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                      <CheckCircle2 className="w-3 h-3" /> Paid &amp; Confirmed
+                      <CheckCircle2 className="w-3 h-3" /> Paid &amp; Confirmed (Razorpay Verified)
                     </span>
                   )}
                 </div>
               </div>
 
-              <Link
-                href="/login"
-                className="w-full py-2.5 px-3 rounded-lg bg-[#0066fe] hover:bg-[#0052cc] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition block text-center"
-              >
-                <span>Proceed to Student Login</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+              {/* Auto-download notice */}
+              <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center gap-2 text-xs text-emerald-800">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="text-[11px] font-medium">
+                  Your official PDF invoice has been automatically generated and downloaded.
+                </span>
+              </div>
+
+              {/* Action buttons: Download Invoice Fallback & Login */}
+              <div className="space-y-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleDownloadInvoice}
+                  disabled={isDownloadingInvoice}
+                  className="w-full py-2.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>{isDownloadingInvoice ? "Generating PDF Invoice..." : "Download Invoice (PDF)"}</span>
+                </button>
+
+                <Link
+                  href="/login"
+                  className="w-full py-2.5 px-3 rounded-lg bg-[#0066fe] hover:bg-[#0052cc] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition block text-center"
+                >
+                  <span>Proceed to Student Login</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
             </div>
           )}
         </div>

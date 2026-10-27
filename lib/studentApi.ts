@@ -1,3 +1,13 @@
+export function getBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") {
+      return process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+    }
+  }
+  return process.env.NEXT_PUBLIC_API_URL || "https://student-sep-backend.onrender.com";
+}
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://student-sep-backend.onrender.com";
 
 export function getSelectedChildId(): string {
@@ -49,7 +59,7 @@ export function getLoggedInStudentId(): string {
         const childId = getSelectedChildId();
         if (childId) return childId;
       }
-      return parsed.student_id || parsed.username || "";
+      return parsed.student_id || parsed.username || (parsed.id ? String(parsed.id) : "");
     }
   } catch (e) {
     console.error("Error reading stored student session:", e);
@@ -59,9 +69,10 @@ export function getLoggedInStudentId(): string {
 
 async function fetchFromApi(endpoint: string, studentId?: string) {
   const sid = studentId || getLoggedInStudentId();
+  const base = getBaseUrl();
   const url = sid
-    ? `${BASE_URL}/api/student/${endpoint}/data/${sid}/`
-    : `${BASE_URL}/api/student/${endpoint}/data/`;
+    ? `${base}/api/student/${endpoint}/data/${encodeURIComponent(sid)}/`
+    : `${base}/api/student/${endpoint}/data/`;
 
   try {
     const res = await fetch(url, { cache: "no-store" });
@@ -84,7 +95,8 @@ export const StudentApi = {
   getFees: (studentId?: string) => fetchFromApi("fees", studentId),
   completeTopic: async (topicId: number | string, completed: boolean = true, studentId?: string) => {
     const sid = studentId || getLoggedInStudentId();
-    const url = `${BASE_URL}/api/student/topic/complete/`;
+    const base = getBaseUrl();
+    const url = `${base}/api/student/topic/complete/`;
     try {
       const res = await fetch(url, {
         method: "POST",
@@ -100,9 +112,10 @@ export const StudentApi = {
   getNotifications: (studentId?: string) => fetchFromApi("notifications", studentId),
   markNotificationRead: async (notifId: number | string, studentId?: string) => {
     const sid = studentId || getLoggedInStudentId();
+    const base = getBaseUrl();
     const url = sid
-      ? `${BASE_URL}/api/student/notifications/mark-read/${notifId}/${sid}/`
-      : `${BASE_URL}/api/student/notifications/mark-read/${notifId}/`;
+      ? `${base}/api/student/notifications/mark-read/${notifId}/${encodeURIComponent(sid)}/`
+      : `${base}/api/student/notifications/mark-read/${notifId}/`;
     try {
       const res = await fetch(url, { method: "POST", cache: "no-store" });
       return await res.json();
@@ -112,9 +125,10 @@ export const StudentApi = {
   },
   markAllNotificationsRead: async (studentId?: string) => {
     const sid = studentId || getLoggedInStudentId();
+    const base = getBaseUrl();
     const url = sid
-      ? `${BASE_URL}/api/student/notifications/mark-all-read/${sid}/`
-      : `${BASE_URL}/api/student/notifications/mark-all-read/`;
+      ? `${base}/api/student/notifications/mark-all-read/${encodeURIComponent(sid)}/`
+      : `${base}/api/student/notifications/mark-all-read/`;
     try {
       const res = await fetch(url, { method: "POST", cache: "no-store" });
       return await res.json();
@@ -124,21 +138,76 @@ export const StudentApi = {
   },
   deleteNotification: async (notifId: number | string, studentId?: string) => {
     const sid = studentId || getLoggedInStudentId();
-    const url = sid
-      ? `${BASE_URL}/api/student/notifications/delete/${notifId}/${sid}/`
-      : `${BASE_URL}/api/student/notifications/delete/${notifId}/`;
-    try {
-      const res = await fetch(url, { method: "POST", cache: "no-store" });
-      return await res.json();
-    } catch (e) {
-      return { success: false };
+    const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+    const base = getBaseUrl();
+    const candidateUrls = isLocal
+      ? [
+          `http://127.0.0.1:8000/api/student/notifications/delete/${notifId}/${sid ? encodeURIComponent(sid) + '/' : ''}`,
+          `http://localhost:8000/api/student/notifications/delete/${notifId}/${sid ? encodeURIComponent(sid) + '/' : ''}`,
+          `${base}/api/student/notifications/delete/${notifId}/${sid ? encodeURIComponent(sid) + '/' : ''}`
+        ]
+      : [
+          `${base}/api/student/notifications/delete/${notifId}/${sid ? encodeURIComponent(sid) + '/' : ''}`,
+          `http://127.0.0.1:8000/api/student/notifications/delete/${notifId}/${sid ? encodeURIComponent(sid) + '/' : ''}`
+        ];
+    const uniqueUrls = Array.from(new Set(candidateUrls));
+
+    for (const url of uniqueUrls) {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          cache: "no-store",
+          headers: sid ? { "X-Student-Id": sid } : {}
+        });
+        if (res.ok) {
+          const data = await res.json().catch(() => null);
+          if (data && (data.status === "success" || data.success)) return data;
+        }
+      } catch (e) {
+        // try next endpoint
+      }
     }
+    return { status: "error", success: false, message: "Failed to delete notification" };
+  },
+  deleteRequest: async (requestId: number | string, studentId?: string) => {
+    const sid = studentId || getLoggedInStudentId();
+    const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+    const base = getBaseUrl();
+    const candidateUrls = isLocal
+      ? [
+          `http://127.0.0.1:8000/api/student/requests/delete/${requestId}/${sid ? encodeURIComponent(sid) + '/' : ''}`,
+          `http://localhost:8000/api/student/requests/delete/${requestId}/${sid ? encodeURIComponent(sid) + '/' : ''}`,
+          `${base}/api/student/requests/delete/${requestId}/${sid ? encodeURIComponent(sid) + '/' : ''}`
+        ]
+      : [
+          `${base}/api/student/requests/delete/${requestId}/${sid ? encodeURIComponent(sid) + '/' : ''}`,
+          `http://127.0.0.1:8000/api/student/requests/delete/${requestId}/${sid ? encodeURIComponent(sid) + '/' : ''}`
+        ];
+    const uniqueUrls = Array.from(new Set(candidateUrls));
+
+    for (const url of uniqueUrls) {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          cache: "no-store",
+          headers: sid ? { "X-Student-Id": sid } : {}
+        });
+        if (res.ok) {
+          const data = await res.json().catch(() => null);
+          if (data && (data.status === "success" || data.success)) return data;
+        }
+      } catch (e) {
+        // try next candidate URL
+      }
+    }
+    return { status: "error", success: false, message: "Failed to delete doubt" };
   },
   getRequests: async (studentId?: string) => {
     const sid = studentId || getLoggedInStudentId();
+    const base = getBaseUrl();
     const url = sid
-      ? `${BASE_URL}/api/student/requests/${sid}/`
-      : `${BASE_URL}/api/student/requests/`;
+      ? `${base}/api/student/requests/${encodeURIComponent(sid)}/`
+      : `${base}/api/student/requests/`;
     try {
       const res = await fetch(url, { cache: "no-store" });
       if (!res.ok) return { success: false, error: `HTTP ${res.status}` };
@@ -149,9 +218,10 @@ export const StudentApi = {
   },
   submitRequest: async (data: FormData | Record<string, any>, studentId?: string) => {
     const sid = studentId || getLoggedInStudentId();
+    const base = getBaseUrl();
     const url = sid
-      ? `${BASE_URL}/api/student/requests/${sid}/`
-      : `${BASE_URL}/api/student/requests/`;
+      ? `${base}/api/student/requests/${encodeURIComponent(sid)}/`
+      : `${base}/api/student/requests/`;
     try {
       let options: RequestInit = { method: "POST" };
       if (data instanceof FormData) {
@@ -168,9 +238,10 @@ export const StudentApi = {
   },
   saveCareerAsset: async (data: FormData | Record<string, any>, studentId?: string) => {
     const sid = studentId || getLoggedInStudentId();
+    const base = getBaseUrl();
     const url = sid
-      ? `${BASE_URL}/api/student/career/save-asset/${sid}/`
-      : `${BASE_URL}/api/student/career/save-asset/`;
+      ? `${base}/api/student/career/save-asset/${encodeURIComponent(sid)}/`
+      : `${base}/api/student/career/save-asset/`;
     try {
       let options: RequestInit = { method: "POST" };
       if (data instanceof FormData) {
@@ -187,9 +258,10 @@ export const StudentApi = {
   },
   toggleStar: async (notifId: number | string, studentId?: string) => {
     const sid = studentId || getLoggedInStudentId();
+    const base = getBaseUrl();
     const url = sid
-      ? `${BASE_URL}/api/student/notifications/toggle-star/${notifId}/${sid}/`
-      : `${BASE_URL}/api/student/notifications/toggle-star/${notifId}/`;
+      ? `${base}/api/student/notifications/toggle-star/${notifId}/${encodeURIComponent(sid)}/`
+      : `${base}/api/student/notifications/toggle-star/${notifId}/`;
     try {
       const res = await fetch(url, { method: "POST", cache: "no-store" });
       return await res.json();
@@ -199,9 +271,10 @@ export const StudentApi = {
   },
   replyToRequest: async (requestId: number | string, message: string, studentId?: string) => {
     const sid = studentId || getLoggedInStudentId();
+    const base = getBaseUrl();
     const url = sid
-      ? `${BASE_URL}/api/student/requests/${sid}/reply/${requestId}/`
-      : `${BASE_URL}/api/student/requests/${requestId}/reply/`;
+      ? `${base}/api/student/requests/${encodeURIComponent(sid)}/reply/${requestId}/`
+      : `${base}/api/student/requests/${requestId}/reply/`;
     try {
       const res = await fetch(url, {
         method: "POST",
@@ -216,13 +289,97 @@ export const StudentApi = {
   getParentChildren: async (parentId?: string) => {
     const pid = parentId || getLoggedInStudentId();
     if (!pid) return { success: false, children: [] };
+    const base = getBaseUrl();
     try {
-      const res = await fetch(`${BASE_URL}/api/parent/children/${pid}/`, { cache: "no-store" });
+      const res = await fetch(`${base}/api/parent/children/${encodeURIComponent(pid)}/`, { cache: "no-store" });
       if (!res.ok) return { success: false, children: [] };
       return await res.json();
     } catch (e: any) {
       return { success: false, children: [], error: e.message };
     }
+  },
+  createRazorpayOrder: async (amount?: number, paymentId?: string | number, studentId?: string) => {
+    const sid = studentId || getLoggedInStudentId();
+    const payload = JSON.stringify({ student_id: sid, amount, payment_id: paymentId });
+    const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+    const urls = isLocal
+      ? [
+          "http://127.0.0.1:8000/api/student/razorpay/create-order/",
+          "http://localhost:8000/api/student/razorpay/create-order/",
+          `${BASE_URL}/api/student/razorpay/create-order/`
+        ]
+      : [
+          `${BASE_URL}/api/student/razorpay/create-order/`,
+          "http://127.0.0.1:8000/api/student/razorpay/create-order/",
+          "http://localhost:8000/api/student/razorpay/create-order/"
+        ];
+    const uniqueUrls = Array.from(new Set(urls));
+
+    for (const url of uniqueUrls) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: payload,
+          cache: "no-store",
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        const data = await res.json().catch(() => null);
+        if (res.ok && data?.success) return data;
+        if (data?.error) return { success: false, error: data.error };
+      } catch (e) {
+        // try next endpoint URL
+      }
+    }
+    return { success: false, error: "Unable to reach Razorpay order endpoint" };
+  },
+  verifyRazorpayPayment: async (payload: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+    student_id?: string;
+    amount?: number;
+    payment_id?: string | number;
+  }) => {
+    const sid = payload.student_id || getLoggedInStudentId();
+    const bodyStr = JSON.stringify({ ...payload, student_id: sid });
+    const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+    const urls = isLocal
+      ? [
+          "http://127.0.0.1:8000/api/student/razorpay/verify-payment/",
+          "http://localhost:8000/api/student/razorpay/verify-payment/",
+          `${BASE_URL}/api/student/razorpay/verify-payment/`
+        ]
+      : [
+          `${BASE_URL}/api/student/razorpay/verify-payment/`,
+          "http://127.0.0.1:8000/api/student/razorpay/verify-payment/",
+          "http://localhost:8000/api/student/razorpay/verify-payment/"
+        ];
+    const uniqueUrls = Array.from(new Set(urls));
+
+    for (const url of uniqueUrls) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: bodyStr,
+          cache: "no-store",
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        const data = await res.json().catch(() => null);
+        if (res.ok && data?.success) return data;
+        if (data?.error) return { success: false, error: data.error };
+      } catch (e) {
+        // try next endpoint URL
+      }
+    }
+    return { success: false, error: "Unable to verify payment with server" };
   },
 };
 

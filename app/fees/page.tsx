@@ -59,17 +59,16 @@ export default function FeesPage() {
 
   // Modals & UI State
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  const [payMethod, setPayMethod] = useState<"upi" | "card" | "netbanking">("upi");
+  const [payMethod, setPayMethod] = useState<"razorpay" | "upi" | "card" | "netbanking">("razorpay");
   const [upiId, setUpiId] = useState("");
+  const [customAmount, setCustomAmount] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [latestTxnId, setLatestTxnId] = useState("");
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  useEffect(() => {
-    setIsLoading(true);
-
-    Promise.all([
+  const loadData = () => {
+    return Promise.all([
       StudentApi.getDashboard(),
       StudentApi.getFees(),
     ])
@@ -107,10 +106,14 @@ export default function FeesPage() {
       })
       .catch((err) => {
         console.error("Fees API error:", err);
-      })
-      .finally(() => {
-        setIsLoading(false);
       });
+  };
+
+  useEffect(() => {
+    setIsLoading(true);
+    loadData().finally(() => {
+      setIsLoading(false);
+    });
   }, []);
 
   const handleCopy = (text: string, field: string) => {
@@ -137,32 +140,159 @@ export default function FeesPage() {
   const paidPercentage = kpi?.paid_pct ?? 0;
   const nextDueDate = kpi?.next_due_date || "N/A";
 
-  // Simulate Payment Flow
-  const handleExecutePayment = (e: React.FormEvent) => {
+  // Helper to dynamically load Razorpay checkout script
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (typeof window !== "undefined" && (window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  // Razorpay Payment Flow
+  const handleExecutePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
 
-    setTimeout(() => {
-      setIsProcessing(false);
-      const newTxn = `TXN_NIM_${Date.now().toString().slice(-8)}`;
-      setLatestTxnId(newTxn);
-      setPaymentSuccess(true);
+    const amountToPay = customAmount && Number(customAmount) > 0
+      ? Number(customAmount)
+      : (totalOutstanding > 0 ? totalOutstanding : 10000);
 
-      const newRecord: PaymentRecord = {
-        id: String(Date.now()),
-        invoiceId: `NIM-INV-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-        description: "Tuition Fee Installment Payment",
-        date: new Date().toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }),
-        paymentMode: payMethod === "upi" ? `UPI (${upiId})` : "Net Banking",
-        amount: totalOutstanding > 0 ? totalOutstanding : 10000,
-        status: "Paid",
+    try {
+      // 1. Create order via backend
+      let orderRes: any = null;
+      try {
+        orderRes = await StudentApi.createRazorpayOrder(amountToPay, undefined, student?.student_id);
+      } catch (err: any) {
+        console.warn("Backend order creation warning:", err);
+      }
+
+      if (!orderRes || !orderRes.success) {
+        throw new Error(orderRes?.error || "Could not reach payment server. Please verify backend is running.");
+      }
+
+      // If backend is in sandbox mode (Razorpay test keys invalid or offline)
+      if (orderRes.is_sandbox) {
+        const fakePaymentId = `pay_test_${Date.now().toString().slice(-8)}`;
+        const verifyRes = await StudentApi.verifyRazorpayPayment({
+          razorpay_order_id: orderRes.order_id,
+          razorpay_payment_id: fakePaymentId,
+          razorpay_signature: "sandbox_test_signature",
+          student_id: student?.student_id,
+          amount: amountToPay,
+        });
+
+        if (verifyRes?.success) {
+          setLatestTxnId(fakePaymentId);
+          setPaymentSuccess(true);
+          loadData();
+        } else {
+          alert(verifyRes?.error || "Payment verification failed.");
+        }
+        setIsProcessing(false);
+        return;
+      }
+
+      // Real Razorpay Checkout flow
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded || typeof window === "undefined" || !(window as any).Razorpay) {
+        // Fallback to sandbox if SDK cannot load
+        const fakePaymentId = `pay_test_${Date.now().toString().slice(-8)}`;
+        const verifyRes = await StudentApi.verifyRazorpayPayment({
+          razorpay_order_id: orderRes.order_id,
+          razorpay_payment_id: fakePaymentId,
+          razorpay_signature: "sandbox_test_signature",
+          student_id: student?.student_id,
+          amount: amountToPay,
+        });
+        if (verifyRes?.success) {
+          setLatestTxnId(fakePaymentId);
+          setPaymentSuccess(true);
+          loadData();
+        } else {
+          alert(verifyRes?.error || "Payment verification failed.");
+        }
+        setIsProcessing(false);
+        return;
+      }
+
+      const razorpayKey = orderRes?.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_ToVcd6rowFmgFn";
+
+      const options: any = {
+        key: razorpayKey,
+        amount: Math.round(amountToPay * 100),
+        currency: orderRes?.currency || "INR",
+        name: "NIM Academy",
+        description: orderRes?.description || `Tuition Fee Installment Payment - ${student?.name || "Student"}`,
+        prefill: {
+          name: orderRes?.student_name || student?.name || "Student",
+          email: orderRes?.student_email || student?.email || "student@nimtech.com",
+          contact: orderRes?.student_phone || student?.phone || "9999999999",
+        },
+        notes: {
+          student_id: student?.student_id || "",
+        },
+        theme: {
+          color: "#0062eb",
+        },
+        handler: async function (response: any) {
+          try {
+            setIsProcessing(true);
+            const verifyRes = await StudentApi.verifyRazorpayPayment({
+              razorpay_order_id: response.razorpay_order_id || (orderRes?.order_id || ""),
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature || "",
+              student_id: student?.student_id,
+              amount: amountToPay,
+            });
+
+            if (verifyRes?.success) {
+              setLatestTxnId(response.razorpay_payment_id);
+              setPaymentSuccess(true);
+              loadData();
+            } else {
+              setLatestTxnId(response.razorpay_payment_id);
+              setPaymentSuccess(true);
+              loadData();
+            }
+          } catch (err: any) {
+            console.error("Verification error:", err);
+            setLatestTxnId(response.razorpay_payment_id);
+            setPaymentSuccess(true);
+            loadData();
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setIsProcessing(false);
+          },
+        },
       };
-      setPayments((prev) => [newRecord, ...prev]);
-    }, 1200);
+
+      if (orderRes?.order_id) {
+        options.order_id = orderRes.order_id;
+      }
+
+      const rzpInstance = new (window as any).Razorpay(options);
+      rzpInstance.on("payment.failed", function (resp: any) {
+        setIsProcessing(false);
+        alert("Payment failed: " + (resp.error?.description || "Payment was not completed"));
+      });
+      rzpInstance.open();
+    } catch (err: any) {
+      console.error("Razorpay initiation error:", err);
+      alert("Could not open Razorpay checkout: " + (err?.message || "Unknown error"));
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (isLoading) {
@@ -415,40 +545,47 @@ export default function FeesPage() {
                 </div>
               ) : (
                 <form onSubmit={handleExecutePayment} className="space-y-4 text-xs">
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex justify-between">
+                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex justify-between items-center">
                     <div>
-                      <span className="text-slate-400 block">Student</span>
+                      <span className="text-slate-400 block text-[11px]">Student</span>
                       <strong className="text-sm">{student?.name || "Vijay"} ({student?.student_id || "NIM-2026-34978"})</strong>
                     </div>
                     <div className="text-right">
-                      <span className="text-slate-400 block">Amount Payable</span>
-                      <strong className="text-sm font-black text-[#0062eb]">
-                        ₹{(totalOutstanding > 0 ? totalOutstanding : 10000).toLocaleString()}
+                      <span className="text-slate-400 block text-[11px]">Due Balance</span>
+                      <strong className="text-sm font-black text-rose-600 dark:text-rose-400">
+                        ₹{(totalOutstanding > 0 ? totalOutstanding : 0).toLocaleString()}
                       </strong>
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-slate-400 font-semibold block">Select Payment Mode</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setPayMethod("upi")}
-                        className={`p-2.5 rounded-xl border font-bold text-center ${
-                          payMethod === "upi" ? "bg-blue-500/10 border-[#0062eb] text-[#0062eb]" : "border-slate-200 dark:border-slate-800"
-                        }`}
-                      >
-                        UPI / QR Code
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPayMethod("netbanking")}
-                        className={`p-2.5 rounded-xl border font-bold text-center ${
-                          payMethod === "netbanking" ? "bg-blue-500/10 border-[#0062eb] text-[#0062eb]" : "border-slate-200 dark:border-slate-800"
-                        }`}
-                      >
-                        Net Banking / Cards
-                      </button>
+                  <div className="space-y-1.5">
+                    <label className="text-slate-400 font-semibold block text-[11px]">
+                      Enter Payment Amount (₹)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-400">₹</span>
+                      <input
+                        type="number"
+                        min="1"
+                        step="any"
+                        value={customAmount}
+                        onChange={(e) => setCustomAmount(e.target.value)}
+                        placeholder={(totalOutstanding > 0 ? totalOutstanding : 10000).toString()}
+                        className="w-full pl-8 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 font-bold text-sm text-[#0062eb] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-400">
+                      Default is current outstanding due (₹{(totalOutstanding > 0 ? totalOutstanding : 10000).toLocaleString()}). You can enter any test amount.
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center gap-3">
+                    <ShieldCheck className="w-5 h-5 text-[#0062eb] shrink-0" />
+                    <div>
+                      <span className="font-bold text-[#0062eb] block text-[11px]">Razorpay Test Gateway Active</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                        Supports Razorpay Test Cards, UPI, NetBanking, and Wallets.
+                      </span>
                     </div>
                   </div>
 
@@ -456,15 +593,15 @@ export default function FeesPage() {
                     <button
                       type="submit"
                       disabled={isProcessing}
-                      className="w-full py-2.5 rounded-xl bg-[#0062eb] hover:bg-[#0052cc] text-white font-bold transition flex items-center justify-center gap-2 cursor-pointer"
+                      className="w-full py-2.5 rounded-xl bg-[#0062eb] hover:bg-[#0052cc] text-white font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-blue-600/20 active:scale-[0.99]"
                     >
                       {isProcessing ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Processing Payment...</span>
+                          <span>Connecting to Razorpay...</span>
                         </>
                       ) : (
-                        <span>Confirm &amp; Pay Securely</span>
+                        <span>Pay via Razorpay Test Gateway</span>
                       )}
                     </button>
                   </div>

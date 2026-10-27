@@ -125,6 +125,14 @@ export default function NotificationsPage() {
   const [replyInputs, setReplyInputs] = useState<{ [reqId: number]: string }>({});
   const [submittingReplyId, setSubmittingReplyId] = useState<number | null>(null);
 
+  // Deletion Confirmation Modal State
+  const [deleteTarget, setDeleteTarget] = useState<{
+    type: "notification" | "doubt";
+    id: string;
+    title: string;
+  } | null>(null);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+
   // Real Data Fetch from Django API
   const loadNotifications = React.useCallback(() => {
     const studentId = getLoggedInStudentId();
@@ -136,7 +144,20 @@ export default function NotificationsPage() {
           setRequests(data.requests);
         }
         if ((data.status === "success" || data.success) && Array.isArray(data.notifications)) {
-          const mapped: NotificationItem[] = data.notifications.map((n: any): NotificationItem => {
+          // RBAC / Privacy filter: Enrollment and payment notifications must never be shown on student accounts
+          const safeNotifications = data.notifications.filter((n: any) => {
+            const rawCat = (n.category || '').toLowerCase();
+            const rawTitle = (n.title || '').toLowerCase();
+            const rawMsg = (n.message || '').toLowerCase();
+            const rawGroup = (n.target_group || '').toLowerCase();
+
+            if (rawGroup === 'admin') return false;
+            if (rawCat.includes('enroll') || rawTitle.includes('enroll') || rawMsg.includes('registered and paid')) return false;
+            if (rawCat.includes('payment') || rawTitle.includes('fee payment') || rawTitle.includes('payment successful') || rawTitle.includes('payment recorded')) return false;
+            return true;
+          });
+
+          const mapped: NotificationItem[] = safeNotifications.map((n: any): NotificationItem => {
             const rawCat = (n.category || '').toLowerCase();
             const rawTitle = (n.title || '').toLowerCase();
             const reminderType = n.reminder_type || '';
@@ -327,22 +348,74 @@ export default function NotificationsPage() {
     }
   };
 
-  const deleteNotification = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    // Set the deleting flag so the card's onClick guard skips opening the modal
+  const requestDeleteNotification = (id: string, title: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
     deletingRef.current = true;
-    setNotifications((prev) => prev.filter((item) => item.id !== id));
-    // If the deleted item was open in the modal, close the modal
-    setSelectedNotif((prev) => (prev && prev.id === id ? null : prev));
-    showToast("Notification deleted");
-    
-    // Call backend API to delete notification ONLY for this target student
-    await StudentApi.deleteNotification(id);
-    window.dispatchEvent(new Event("notificationsUpdated"));
-
-    // Reset the flag after the event bubble completes
+    setDeleteTarget({
+      type: "notification",
+      id,
+      title: title || "Notification"
+    });
     setTimeout(() => { deletingRef.current = false; }, 0);
+  };
+
+  const requestDeleteDoubt = (id: number | string, title: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    setDeleteTarget({
+      type: "doubt",
+      id: String(id),
+      title: title || "Doubt"
+    });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    const studentId = getLoggedInStudentId();
+
+    try {
+      if (deleteTarget.type === "notification") {
+        const id = deleteTarget.id;
+        // Immediately update local state & category metrics
+        setNotifications((prev) => prev.filter((item) => item.id !== id));
+        if (selectedNotif && selectedNotif.id === id) {
+          setSelectedNotif(null);
+        }
+
+        const res = await StudentApi.deleteNotification(id, studentId);
+        if (res && (res.status === "success" || res.success)) {
+          showToast("Notification deleted successfully");
+        } else {
+          showToast(res?.message || "Error deleting notification");
+          loadNotifications();
+        }
+      } else if (deleteTarget.type === "doubt") {
+        const reqId = Number(deleteTarget.id);
+        // Immediately update requests state
+        setRequests((prev) => prev.filter((r) => r.id !== reqId));
+
+        const res = await StudentApi.deleteRequest(reqId, studentId);
+        if (res && (res.status === "success" || res.success)) {
+          showToast("Doubt deleted successfully");
+        } else {
+          showToast(res?.message || "Error deleting doubt");
+          loadNotifications();
+        }
+      }
+      window.dispatchEvent(new Event("notificationsUpdated"));
+    } catch (err: any) {
+      showToast(err?.message || "Failed to delete item");
+      loadNotifications();
+    } finally {
+      setIsDeleting(false);
+      setDeleteTarget(null);
+    }
   };
 
   const markAllAsRead = async () => {
@@ -356,8 +429,9 @@ export default function NotificationsPage() {
     const readItems = notifications.filter((item) => item.isRead);
     setNotifications((prev) => prev.filter((item) => !item.isRead));
     showToast("Cleared read notifications");
+    const studentId = getLoggedInStudentId();
     for (const item of readItems) {
-      await StudentApi.deleteNotification(item.id);
+      await StudentApi.deleteNotification(item.id, studentId);
     }
     window.dispatchEvent(new Event("notificationsUpdated"));
   };
@@ -915,6 +989,14 @@ export default function NotificationsPage() {
                               To: {req.recipient_type} ({req.recipient_name})
                             </span>
                             <span>{req.created_at}</span>
+                            <button
+                              onClick={(e) => requestDeleteDoubt(req.id, req.subject, e)}
+                              title="Delete Doubt"
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition active:scale-95 flex items-center gap-1 font-semibold text-xs"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">Delete</span>
+                            </button>
                           </div>
                         </div>
 
@@ -1222,13 +1304,13 @@ export default function NotificationsPage() {
                                         <CheckCircle2 className="w-3.5 h-3.5" />
                                       </button>
 
-                                      {/* Delete — isolated with pointer-events and stopPropagation + deletingRef */}
+                                      {/* Delete — isolated with pointer-events and stopPropagation + confirmation modal */}
                                       <button
                                         onPointerDown={(e) => {
                                           e.stopPropagation();
                                           deletingRef.current = true;
                                         }}
-                                        onClick={(e) => deleteNotification(item.id, e)}
+                                        onClick={(e) => requestDeleteNotification(item.id, item.title, e)}
                                         title="Delete notification"
                                         className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 transition-all active:scale-95"
                                       >
@@ -1325,13 +1407,12 @@ export default function NotificationsPage() {
               <div className="flex items-center justify-between pt-2">
                 <button
                   onClick={() => {
-                    deleteNotification(selectedNotif.id, {} as React.MouseEvent);
-                    setSelectedNotif(null);
+                    requestDeleteNotification(selectedNotif.id, selectedNotif.title);
                   }}
                   className="text-xs text-red-500 hover:underline font-bold flex items-center gap-1"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span>Dismiss</span>
+                  <span>Delete</span>
                 </button>
 
                 <div className="flex items-center gap-2">
@@ -1827,6 +1908,67 @@ export default function NotificationsPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+        {/* =========================================================================
+            7. MODAL: DELETE CONFIRMATION POPUP
+            ========================================================================= */}
+        {deleteTarget && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+            <div
+              className={`w-full max-w-sm rounded-2xl p-5 border shadow-2xl space-y-4 animate-in zoom-in-95 ${
+                isDark
+                  ? "bg-[#0b1429] border-[#1e3363] text-white"
+                  : "bg-white border-[#dce8f8] text-[#0a1b39]"
+              }`}
+            >
+              <div className="flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-red-500/15 text-red-500 flex items-center justify-center shrink-0">
+                  <Trash2 className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-base font-bold">
+                    Delete {deleteTarget.type === "doubt" ? "Doubt & Conversation" : "Notification"}?
+                  </h4>
+                  <p className={`text-xs mt-1 font-medium leading-relaxed ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                    Are you sure you want to permanently delete &quot;<span className="font-semibold text-slate-800 dark:text-slate-200 truncate inline-block max-w-[180px] align-bottom">{deleteTarget.title}</span>&quot;? This cannot be undone.
+                  </p>
+                </div>
+              </div>
+
+              <div className={`flex items-center justify-end gap-2.5 pt-3 border-t ${isDark ? "border-slate-800" : "border-slate-100"}`}>
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={() => setDeleteTarget(null)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition border ${
+                    isDark
+                      ? "border-slate-700 hover:bg-slate-800 text-slate-300"
+                      : "border-slate-300 hover:bg-slate-100 text-slate-700"
+                  }`}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={confirmDelete}
+                  className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-red-600/20 disabled:opacity-50"
+                >
+                  {isDeleting ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Deleting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete Permanently</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         )}

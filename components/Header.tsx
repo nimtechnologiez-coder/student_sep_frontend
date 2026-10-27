@@ -92,9 +92,20 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
       StudentApi.getNotifications()
         .then((res: any) => {
           if (res.status === "success" || res.success) {
-            const list = res.notifications || [];
+            const rawList = res.notifications || [];
+            const list = rawList.filter((n: any) => {
+              const rawCat = (n.category || '').toLowerCase();
+              const rawTitle = (n.title || '').toLowerCase();
+              const rawMsg = (n.message || '').toLowerCase();
+              const rawGroup = (n.target_group || '').toLowerCase();
+
+              if (rawGroup === 'admin') return false;
+              if (rawCat.includes('enroll') || rawTitle.includes('enroll') || rawMsg.includes('registered and paid')) return false;
+              if (rawCat.includes('payment') || rawTitle.includes('fee payment') || rawTitle.includes('payment successful') || rawTitle.includes('payment recorded')) return false;
+              return true;
+            });
             setNotifications(list);
-            const unread = res.kpi?.unread ?? list.filter((n: any) => !n.is_read).length;
+            const unread = list.filter((n: any) => !n.is_read).length;
             setUnreadCount(unread);
           }
         })
